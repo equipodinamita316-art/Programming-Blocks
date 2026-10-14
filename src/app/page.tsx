@@ -1,0 +1,76 @@
+import Link from "next/link";
+import { Bloqui } from "@/components/Bloqui";
+
+export default function Home() {
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Hero Persuade */}
+      <section className="grid md:grid-cols-2 gap-6 items-center rounded-3xl border-4 border-[#1a1523] dark:border-white/20 bg-white dark:bg-white/5 p-6 md:p-10 block-shadow">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#FFC700] border-2 border-[#1a1523] px-3 py-1 text-xs font-extrabold">
+            🧱 SCRATCH + 🌐 WORDPRESS · PARA WEB
+          </div>
+          <h1 className="font-display text-4xl md:text-6xl font-extrabold leading-[1.02] mt-3">
+            Aprende HTML, CSS y JS <span className="bg-[#FF6B35] text-white px-2 rounded-xl">creando</span> lo que amas.
+          </h1>
+          <p className="mt-3 text-base md:text-lg opacity-80">
+            Divertido pero difícil: misiones, lab libre y retos boss. Con certificado verificable con QR. En móvil, tablet y escritorio.
+          </p>
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
+            <Link href="/dashboard" className="rounded-2xl bg-[#1a1523] text-white dark:bg-white dark:text-black font-extrabold px-6 py-3 text-center block-shadow">
+              🚀 Empezar gratis
+            </Link>
+            <Link href="/playground" className="rounded-2xl border-4 border-[#1a1523] dark:border-white font-extrabold px-6 py-3 text-center">
+              🧱 Probar bloques
+            </Link>
+          </div>
+          <div className="mt-3 text-sm opacity-70">Sin dominio por ahora · funciona en localhost:3000 · luego blockweb.com</div>
+        </div>
+        <div className="rounded-2xl border-4 border-[#1a1523] dark:border-white/20 overflow-hidden bg-[#FFF8EC] dark:bg-black">
+          <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-[#1a1523]/20 text-sm font-bold">
+            <Bloqui size={32} /> mini-demo: bloques → web real
+          </div>
+          <div className="p-4 grid gap-2 text-sm font-bold">
+            <div className="rounded-xl bg-[#FF6B35] text-white px-3 py-2 block-shadow-sm">🧱 crear_título [ Mi página gamer ]</div>
+            <div className="rounded-xl bg-[#2563EB] text-white px-3 py-2 block-shadow-sm">🎨 estilo [ fondo negro + texto naranja ]</div>
+            <div className="rounded-xl bg-[#FFC700] px-3 py-2 border-2 border-[#1a1523]">⚡ al_click [ celebrar 🎉 ]</div>
+            <div className="rounded-xl bg-white border-4 border-[#1a1523] p-3 text-center">
+              <div className="font-display text-2xl font-extrabold">Mi página gamer</div>
+              <div className="text-xs opacity-70">← vista previa viva estilo WordPress</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Rutas */}
+      <section className="grid md:grid-cols-3 gap-4">
+        {[
+          { t: "HTML 🧱", c: "#FF6B35", d: "Títulos, textos, imágenes, formularios. Construye tu tarjeta.", href: "/aprender/html/html-1" },
+          { t: "CSS 🎨", c: "#2563EB", d: "Colores, cajas, Flexbox y responsive. Diseña tu inventario.", href: "/aprender/css/css-1" },
+          { t: "JS ⚡", c: "#FFC700", d: "Variables, clicks y condicionales. Haz tu contador vivo.", href: "/aprender/js/js-1" },
+        ].map((r) => (
+          <Link key={r.t} href={r.href} className="rounded-3xl border-4 border-[#1a1523] dark:border-white/20 p-5 bg-white dark:bg-white/5 block-shadow">
+            <div className="font-display text-2xl font-extrabold" style={{ color: r.c }}>{r.t}</div>
+            <p className="mt-1 text-sm opacity-80">{r.d}</p>
+            <div className="mt-3 font-bold underline">Entrar →</div>
+          </Link>
+        ))}
+      </section>
+
+      {/* Cómo funciona */}
+      <section className="grid md:grid-cols-4 gap-3 text-sm">
+        {[
+          ["📖 Misión", "Historia corta + 1 concepto. 5 min."],
+          ["🎨 Lab Libre", "Crea lo que quieras con estrellas extra."],
+          ["👹 Boss", "Debugging y réplica ciega. Aquí sube la exigencia."],
+          ["🎓 Certificado", "Examen final + PDF con QR verificable."],
+        ].map(([t, d]) => (
+          <div key={t} className="rounded-2xl border-2 border-[#1a1523] dark:border-white/20 p-4 bg-white dark:bg-white/5">
+            <div className="font-extrabold">{t}</div>
+            <div className="opacity-70">{d}</div>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}

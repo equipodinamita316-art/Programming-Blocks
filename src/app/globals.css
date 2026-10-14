@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-html: #ff6b35;
+  --color-css: #2563eb;
+  --color-js: #ffc700;
+  --color-cream: #fff8ec;
+  --color-ink: #1a1523;
+  --font-display: var(--bw-display), "Baloo 2", system-ui, sans-serif;
+  --font-body: var(--bw-body), "Space Grotesk", system-ui, sans-serif;
+  --font-mono: var(--bw-mono), ui-monospace, monospace;
+}
+
+:root {
+  --background: #fff8ec;
+  --foreground: #1a1523;
+}
+
+.dark {
+  --background: #12101a;
+  --foreground: #fff8ec;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.block-shadow {
+  box-shadow: 4px 4px 0 0 #1a1523;
+}
+.dark .block-shadow {
+  box-shadow: 4px 4px 0 0 #fff8ec33;
+}
+.block-shadow-sm {
+  box-shadow: 2px 2px 0 0 #1a1523;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
