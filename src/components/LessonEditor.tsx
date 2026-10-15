@@ -161,7 +161,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
               {showSol && <pre className="mt-2 text-xs md:text-sm bg-black text-green-200 p-3 rounded-xl overflow-auto">{leccion.solucion}</pre>}
             </div>
           )}
-          <div className="sticky bottom-20 lg:bottom-6 mt-4 flex gap-2 rounded-2xl border-2 border-[#1a1523] dark:border-white/20 bg-[var(--background)] p-2">
+          <div className="mt-4 flex gap-2 rounded-2xl border-2 border-[#1a1523] dark:border-white/20 bg-[var(--background)] p-2">
             <button onClick={() => go(2)} className="rounded-xl border-2 px-4 py-3 text-sm md:text-base font-bold">← Lab</button>
             {quizPassed && <button onClick={() => go(4)} className="flex-1 rounded-xl bg-[#a855f7] text-white font-extrabold py-3 text-sm md:text-lg">Ir al Boss final 👹</button>}
           </div>
