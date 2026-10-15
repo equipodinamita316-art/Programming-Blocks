@@ -147,22 +147,23 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
 
       {/* PASO 3 QUIZ */}
       {paso === 3 && (
-        <section className="max-w-[680px] rounded-3xl border-4 border-[#1a1523] dark:border-white/20 bg-white dark:bg-white/5 p-4 block-shadow">
-          <h2 className="font-display font-extrabold">✅ Quiz (aleatorio, 100%)</h2>
+        <section className="w-full rounded-3xl border-4 border-[#1a1523] dark:border-white/20 bg-white dark:bg-white/5 p-4 md:p-8 block-shadow">
+          <h2 className="font-display text-2xl md:text-3xl font-extrabold">✅ Quiz (aleatorio, 100%)</h2>
+          <p className="text-sm md:text-base opacity-70 mt-1">Responde todo bien para desbloquear el Boss final 👹</p>
           {mounted ? (
             <QuizHard key={quizSeed} quiz={quizMixed} onPass={() => { setQuizPassed(true); unlock(4); }} />
           ) : (
             <p className="text-sm opacity-70 mt-2">⏳ Cargando quiz...</p>
           )}
           {quizPassed && (
-            <div className="mt-2 rounded-xl border-2 border-dashed p-2 text-sm">
+            <div className="mt-3 rounded-xl border-2 border-dashed p-3 text-sm md:text-base">
               <button onClick={() => setShowSol(!showSol)} className="font-bold underline">{showSol ? "Ocultar referencia" : "Ver referencia"}</button>
-              {showSol && <pre className="mt-2 text-xs bg-black text-green-200 p-2 rounded-xl overflow-auto">{leccion.solucion}</pre>}
+              {showSol && <pre className="mt-2 text-xs md:text-sm bg-black text-green-200 p-3 rounded-xl overflow-auto">{leccion.solucion}</pre>}
             </div>
           )}
-          <div className="flex gap-2 mt-3">
-            <button onClick={() => go(2)} className="rounded-xl border-2 px-3 py-2 text-sm font-bold">← Lab</button>
-            {quizPassed && <button onClick={() => go(4)} className="flex-1 rounded-xl bg-[#a855f7] text-white font-bold py-2 text-sm">Ir al Boss final 👹</button>}
+          <div className="sticky bottom-20 lg:bottom-6 mt-4 flex gap-2 rounded-2xl border-2 border-[#1a1523] dark:border-white/20 bg-[var(--background)] p-2">
+            <button onClick={() => go(2)} className="rounded-xl border-2 px-4 py-3 text-sm md:text-base font-bold">← Lab</button>
+            {quizPassed && <button onClick={() => go(4)} className="flex-1 rounded-xl bg-[#a855f7] text-white font-extrabold py-3 text-sm md:text-lg">Ir al Boss final 👹</button>}
           </div>
         </section>
       )}
@@ -239,18 +240,31 @@ function QuizHard({ quiz, onPass }: { quiz: Leccion["quiz"]; onPass: () => void 
   }, [lockUntil]);
   if (!quiz.length) return <p className="text-sm opacity-70">Sin quiz.</p>;
   const locked = now < lockUntil;
+  const answered = quiz.filter((_, i) => ans[i] !== undefined).length;
+  const pct = Math.round((answered / quiz.length) * 100);
   return (
-    <div className="flex flex-col gap-2 mt-2">
-      {quiz.map((q, i) => (
-        <div key={i} className="rounded-xl border p-2">
-          <p className="text-sm font-bold">{i + 1}. {q.q}</p>
-          <div className="grid gap-1 mt-1">
-            {q.opciones.map((op, j) => (
-              <button key={j} onClick={() => setAns({ ...ans, [i]: j })} className={`text-left text-sm rounded-lg border px-2 py-1 ${ans[i] === j ? "bg-[#FFC700]/40 border-[#1a1523]" : "border-black/10"}`}>{op}</button>
-            ))}
-          </div>
+    <div className="flex flex-col gap-3 mt-3">
+      <div>
+        <div className="flex justify-between text-xs md:text-sm font-bold mb-1">
+          <span>Respondidas {answered}/{quiz.length}</span>
+          <span>{pct}%</span>
         </div>
-      ))}
+        <div className="h-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+          <div className="h-full rounded-full bg-[#FFC700] transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        {quiz.map((q, i) => (
+          <div key={i} className="rounded-2xl border-2 border-[#1a1523]/20 dark:border-white/20 p-3 md:p-4">
+            <p className="text-base md:text-lg font-bold">{i + 1}. {q.q}</p>
+            <div className="grid gap-2 mt-2">
+              {q.opciones.map((op, j) => (
+                <button key={j} onClick={() => setAns({ ...ans, [i]: j })} className={`text-left text-sm md:text-base rounded-xl border-2 px-3 py-2 md:py-3 font-bold ${ans[i] === j ? "bg-[#FFC700]/40 border-[#1a1523] dark:border-white" : "border-black/10 dark:border-white/20 hover:border-black/30"}`}>{op}</button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
       <button
         disabled={locked}
         onClick={() => {
@@ -265,11 +279,11 @@ function QuizHard({ quiz, onPass }: { quiz: Leccion["quiz"]; onPass: () => void 
             alert(`Aún no 💪 (intento ${f}).`);
           }
         }}
-        className="rounded-xl bg-[#1a1523] text-white dark:bg-white dark:text-black font-bold py-2 text-sm disabled:opacity-50"
+        className="rounded-2xl bg-[#1a1523] text-white dark:bg-white dark:text-black font-extrabold py-3 md:py-4 text-base md:text-lg disabled:opacity-50"
       >
         {locked ? `Espera ${Math.max(1, Math.ceil((lockUntil - now) / 1000))}s...` : "Comprobar quiz"}
       </button>
-      {ok && <p className="text-green-600 text-sm font-bold">✅ Quiz superado</p>}
+      {ok && <p className="text-green-600 text-sm md:text-base font-bold">✅ Quiz superado — ya puedes ir al Boss 👹</p>}
     </div>
   );
 }
