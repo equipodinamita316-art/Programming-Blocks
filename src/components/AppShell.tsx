@@ -103,8 +103,12 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             <Link href="/examen/final" className="text-sm font-bold underline">Examen final</Link>
             <ThemeToggle />
           </div>
-          {user && (
+          {user ? (
             <button onClick={salir} className="rounded-xl border-2 px-2 py-1 text-xs font-bold opacity-70">Salir ⎋</button>
+          ) : (
+            !loading && (
+              <Link href="/login" className="rounded-xl bg-[#FF6B35] text-white px-2 py-1 text-xs font-extrabold text-center">Entrar 🔑</Link>
+            )
           )}
         </div>
       </aside>
@@ -117,8 +121,12 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         </Link>
         <div className="flex items-center gap-2 text-sm font-bold">
           <span>{xp} XP</span>
-          {user && (
+          {user ? (
             <button onClick={salir} className="rounded-lg border px-1 text-xs opacity-70" aria-label="Salir">⎋</button>
+          ) : (
+            !loading && (
+              <Link href="/login" className="rounded-lg bg-[#FF6B35] text-white px-2 py-0.5 text-xs font-extrabold">Entrar</Link>
+            )
           )}
           <ThemeToggle />
         </div>
