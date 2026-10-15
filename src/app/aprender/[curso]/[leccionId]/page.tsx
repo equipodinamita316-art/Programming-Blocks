@@ -1,5 +1,6 @@
 import { LECCIONES } from "@/data/cursos";
 import { LessonEditor } from "@/components/LessonEditor";
+import { LessonGate } from "@/components/LessonGate";
 import { notFound } from "next/navigation";
 
 export default async function LeccionPage({ params }: { params: Promise<{ curso: string; leccionId: string }> }) {
@@ -9,7 +10,9 @@ export default async function LeccionPage({ params }: { params: Promise<{ curso:
 
   return (
     <div className="flex flex-col gap-4">
-      <LessonEditor leccion={leccion} />
+      <LessonGate leccionId={leccion.id} curso={leccion.curso}>
+        <LessonEditor leccion={leccion} />
+      </LessonGate>
     </div>
   );
 }

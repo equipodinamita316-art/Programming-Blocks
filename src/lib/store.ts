@@ -125,13 +125,62 @@ export async function mergeLocalToCloud(): Promise<{ merged: number; already: bo
   return { merged, already: false };
 }
 
-// Elegibilidad examen: 80% lecciones verificadas + 1 proyecto Boss publicado.
+// Elegibilidad examen final: 100% lecciones + los 3 Boss publicados (uno por curso).
 export function getEligibility(): { done: number; total: number; pct: number; bossProjects: number; eligible: boolean } {
   const done = getDone();
   const total = LECCIONES.length;
   const pct = total === 0 ? 0 : Math.round((done.length / total) * 100);
-  const bossProjects = getProjects().filter((p) => /html-10|css-10|js-10/.test(p.slug)).length;
-  return { done: done.length, total, pct, bossProjects, eligible: pct >= 80 && bossProjects >= 1 };
+  const slugs = getProjects().map((p) => p.slug);
+  const bossProjects = ["html-10", "css-10", "js-10"].filter((b) => slugs.some((s) => s.includes(b))).length;
+  return { done: done.length, total, pct, bossProjects, eligible: done.length === total && bossProjects >= 3 };
+}
+
+// Orden del camino: cada curso exige el anterior al 100%.
+const COURSE_ORDER = ["html", "css", "js"] as const;
+
+// Progreso por curso para el candado del dashboard.
+export function getCourseProgress(): { slug: string; done: number; total: number; complete: boolean }[] {
+  const done = new Set(getDone());
+  return ["html", "css", "js"].map((slug) => {
+    const ls = LECCIONES.filter((l) => l.curso === slug);
+    const n = ls.filter((l) => done.has(l.id)).length;
+    return { slug, done: n, total: ls.length, complete: n === ls.length };
+  });
+}
+
+// ¿Curso desbloqueado? El primero siempre; los demás exigen el anterior completo.
+export function isCourseUnlocked(slug: string): boolean {
+  const i = COURSE_ORDER.indexOf(slug as (typeof COURSE_ORDER)[number]);
+  if (i <= 0) return true;
+  const done = new Set(getDone());
+  const prev = LECCIONES.filter((l) => l.curso === COURSE_ORDER[i - 1]);
+  return prev.every((l) => done.has(l.id));
+}
+
+// Primera lección pendiente del curso (o la primera si está completo, para repasar).
+export function nextPendingLesson(slug: string): string | null {
+  const ls = LECCIONES.filter((l) => l.curso === slug).sort((a, b) => a.orden - b.orden);
+  if (ls.length === 0) return null;
+  const done = new Set(getDone());
+  return (ls.find((l) => !done.has(l.id)) || ls[0]).id;
+}
+
+// ¿Lección desbloqueada? Curso abierto + todas las anteriores del curso hechas.
+export function isLessonUnlocked(id: string): boolean {
+  const l = LECCIONES.find((x) => x.id === id);
+  if (!l) return false;
+  if (!isCourseUnlocked(l.curso)) return false;
+  const done = new Set(getDone());
+  return LECCIONES.filter((x) => x.curso === l.curso && x.orden < l.orden).every((x) => done.has(x.id));
+}
+
+// Lección anterior pendiente (para la pantalla de candado).
+export function prevPendingLesson(id: string): string | null {
+  const l = LECCIONES.find((x) => x.id === id);
+  if (!l) return null;
+  const done = new Set(getDone());
+  const prev = LECCIONES.filter((x) => x.curso === l.curso && x.orden < l.orden && !done.has(x.id)).sort((a, b) => a.orden - b.orden);
+  return prev.length > 0 ? prev[0].id : null;
 }
 
 // Examen solo otorga certificado si hay elegibilidad (se verifica al corregir).
@@ -142,7 +191,7 @@ export function awardExam(noun: string): boolean {
   if (typeof window === "undefined") return false;
   if (localStorage.getItem("bw-exam-xp") === "1") return true;
   localStorage.setItem("bw-exam-xp", "1");
-  addXPInternal(200);
+  addXPInternal(500);
   window.dispatchEvent(new Event("bw-xp"));
   return true;
 }
