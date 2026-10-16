@@ -32,6 +32,7 @@ export function BlocklyReal({
   const divRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WorkspaceSvg | null>(null);
   const emitRef = useRef<(() => void) | null>(null);
+  const roRef = useRef<ResizeObserver | null>(null);
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState("");
   const [purged, setPurged] = useState<string[]>([]);
@@ -41,11 +42,12 @@ export function BlocklyReal({
   useEffect(() => {
     let disposed = false;
     let workspace: WorkspaceSvg | null = null;
+    const container = divRef.current;
 
     (async () => {
       try {
         const Blockly = await import("blockly");
-        if (disposed || !divRef.current) return;
+        if (disposed || !container) return;
 
         if (!Blockly.Blocks["bw_h"]) {
           Blockly.defineBlocksWithJsonArray(BLOCK_DEFS as Parameters<typeof Blockly.defineBlocksWithJsonArray>[0]);
@@ -54,8 +56,16 @@ export function BlocklyReal({
         const toolbox = curso ? getToolboxForCurso(curso) : (await import("@/lib/blockly/toolbox")).TOOLBOX;
         const allow = curso ? ALLOW[curso] : null;
 
+        // Anti-zombie: si quedó una inyección previa en el contenedor, eliminarla
+        // antes de inyectar (evita toolboxes duplicadas fuera de su recuadro).
+        try { wsRef.current?.dispose(); } catch {}
+        wsRef.current = null;
+        try {
+          container?.querySelectorAll(":scope > .injectionDiv").forEach((n) => n.remove());
+        } catch {}
+
         workspace = Blockly.inject(
-          divRef.current,
+          container,
           {
             toolbox: toolbox as unknown as Element,
             trashcan: true,
@@ -82,7 +92,7 @@ export function BlocklyReal({
         // Solo se oculta si su flyout está cerrado (no rompe el scroll abierto).
         const sweepStaleScrollbars = () => {
           try {
-            const root = divRef.current;
+            const root = container;
             const flyout = workspace?.getFlyout() as unknown as {
               isVisible?: () => boolean;
             } | null;
@@ -95,7 +105,7 @@ export function BlocklyReal({
 
         const unhideFlyoutScrollbars = () => {
           try {
-            divRef.current?.querySelectorAll(".blocklyFlyoutScrollbar").forEach((el) => {
+            container?.querySelectorAll(".blocklyFlyoutScrollbar").forEach((el) => {
               (el as HTMLElement).style.display = "";
             });
           } catch {}
@@ -154,6 +164,19 @@ export function BlocklyReal({
           emit();
         });
         emitRef.current = emit;
+
+        // Re-medir a Blockly cuando el contenedor cambie de tamaño (resize,
+        // tabs, drawer): recoloca toolbox, flyout y scrollbars dentro del recuadro.
+        try {
+          roRef.current?.disconnect();
+          const ro = new ResizeObserver(() => {
+            try {
+              if (!disposed && workspace) Blockly.svgResize(workspace);
+            } catch {}
+          });
+          if (container) ro.observe(container);
+          roRef.current = ro;
+        } catch {}
         emit();
         setReady(true);
       } catch (e: unknown) {
@@ -163,7 +186,13 @@ export function BlocklyReal({
 
     return () => {
       disposed = true;
+      try { roRef.current?.disconnect(); } catch {}
+      roRef.current = null;
       try { wsRef.current?.dispose(); } catch {}
+      wsRef.current = null;
+      try {
+        container?.querySelectorAll(":scope > .injectionDiv").forEach((n) => n.remove());
+      } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [curso, lessonId]);
@@ -205,7 +234,7 @@ export function BlocklyReal({
           🧹 Bloques no permitidos eliminados: {purged.join(", ")}
         </div>
       )}
-      <div ref={divRef} className="w-full h-[420px] md:h-[520px] rounded-2xl border-4 border-[#1a1523] dark:border-white/20 bg-white overflow-hidden" />
+      <div ref={divRef} className="relative w-full h-[420px] md:h-[520px] rounded-2xl border-4 border-[#1a1523] dark:border-white/20 bg-white overflow-hidden" />
     </div>
   );
 }
