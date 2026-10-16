@@ -90,9 +90,9 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
-      {/* Panel desplegable independiente: alto propio + scroll propio */}
+      {/* Panel fijo independiente: no se mueve con el scroll, scroll propio */}
       <aside
-        className={`hidden lg:flex shrink-0 flex-col gap-4 border-r-4 border-[#1a1523] overflow-hidden overflow-y-auto transition-all duration-200 lg:sticky lg:top-0 lg:h-screen ${
+        className={`hidden lg:flex fixed left-0 top-0 h-screen z-30 flex-col gap-4 border-r-4 border-[#1a1523] bg-[var(--background)] overflow-hidden overflow-y-auto transition-all duration-200 ${
           open ? "w-[260px] p-4 opacity-100" : "w-0 p-0 opacity-0 border-r-0"
         }`}
       >
@@ -136,14 +136,12 @@ function ShellInner({ children }: { children: React.ReactNode }) {
                   ? `👤 ${user.user_metadata?.nombre || user.email}`
                   : "👤 Invitado"}
             </div>
-            <div className="flex items-center justify-between">
-              <Link
-                href="/examen/final"
-                className="text-sm font-bold underline"
-              >
-                Examen final
-              </Link>
-            </div>
+            <Link
+              href="/examen/final"
+              className="text-sm font-bold underline w-fit"
+            >
+              Examen final
+            </Link>
             {user ? (
               <button
                 onClick={salir}
@@ -165,7 +163,9 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div
+        className={`flex min-w-0 flex-1 flex-col transition-all duration-200 ${open ? "lg:ml-[260px]" : ""}`}
+      >
         {/* Topbar mínima con botón hamburguesa */}
         <header className="hidden lg:flex sticky top-0 z-20 items-center gap-3 border-b-4 border-[#1a1523] bg-[var(--background)] px-4 py-2">
           <button
