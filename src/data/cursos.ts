@@ -675,22 +675,80 @@ export const LECCIONES: Leccion[] = [
   },
 ];
 
-export const EXAMEN_FINAL = [
-  { q: "Etiqueta para enlace", opciones: ["<a>", "<link>", "<href>", "<url>"], correcta: 0 },
-  { q: "Propiedad CSS para fondo", opciones: ["color", "background", "margin", "display"], correcta: 1 },
-  { q: "Para variable cambiable", opciones: ["let", "const", "static", "final"], correcta: 0 },
-  { q: "Cerrar h1", opciones: ["</h1>", "<h1>", "<h1/>", "/h1"], correcta: 0 },
-  { q: "display:flex hace", opciones: ["layout flexible", "texto rojo", "ocultar", "animar"], correcta: 0 },
-  { q: "Cambiar texto DOM", opciones: ["textContent", "href", "src", "alt"], correcta: 0 },
-  { q: "Evento click moderno", opciones: ["addEventListener", "onload css", "href", "style"], correcta: 0 },
-  { q: "Etiqueta semántica principal", opciones: ["<main>", "<div>", "<span>", "<b>"], correcta: 0 },
-  { q: "3 columnas Grid iguales", opciones: ["repeat(3,1fr)", "3px", "col:3", "flex:3"], correcta: 0 },
-  { q: "Evita recarga en form", opciones: ["preventDefault()", "alert", "style", "href"], correcta: 0 },
-  { q: "Guarda en navegador", opciones: ["localStorage", "let", "const", "css"], correcta: 0 },
-  { q: "Convierte fetch a objeto", opciones: ["r.json()", "r.css", "r.html", "r.raw"], correcta: 0 },
-  { q: "Compara sin asignar", opciones: ["===", "=", "->", "=>"], correcta: 0 },
-  { q: "Regla CSS válida", opciones: ["h1 { color:red; }", "h1(color:red)", "<h1>red</h1>", "css:h1 red"], correcta: 0 },
-  { q: "Variable CSS se usa", opciones: ["var(--x)", "$x", "@x", "#x"], correcta: 0 },
+export type ExamenPregunta = {
+  q: string;
+  opciones: string[];
+  correcta: number;
+  peso: number;
+  area: "html" | "css" | "js" | "mix";
+};
+
+// Banco del examen final: 60 preguntas. Las de peso 2 valen doble (nivel Boss).
+export const EXAMEN_BANCO: ExamenPregunta[] = [
+  // ---------- HTML (15) ----------
+  { q: "Etiqueta para enlace", opciones: ["<a>", "<link>", "<href>", "<url>"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Cómo se cierra <h1>?", opciones: ["</h1>", "<h1>", "<h1/>", "/h1"], correcta: 0, peso: 1, area: "html" },
+  { q: "Atributo de accesibilidad obligatorio en <img>", opciones: ["alt", "href", "title", "srcset"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Qué etiqueta crea un ítem de lista?", opciones: ["<li>", "<ul>", "<ol>", "<item>"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Dónde va el <title> de la página?", opciones: ["En <head>", "En <body>", "En <footer>", "Donde sea"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Qué hace <meta name=\"viewport\">?", opciones: ["Adapta la página al móvil", "Pone música", "Crea un video", "Cambia el título"], correcta: 0, peso: 1, area: "html" },
+  { q: "Etiqueta de celda de encabezado en tablas", opciones: ["<th>", "<td>", "<head>", "<header>"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Para qué sirve <label for=\"email\">?", opciones: ["Conectar el texto con el input (accesibilidad)", "Poner color", "Crear un botón", "Nada"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Qué crean <details> + <summary>?", opciones: ["Un desplegable sin JS", "Un video", "Una tabla", "Un formulario"], correcta: 0, peso: 1, area: "html" },
+  { q: "¿Qué etiqueta envuelve el contenido principal?", opciones: ["<main>", "<div>", "<span>", "<b>"], correcta: 0, peso: 2, area: "html" },
+  { q: "¿Qué atributo valida un email solo con HTML?", opciones: ["type=\"email\" + required", "type=\"text\" + required", "validate=\"true\"", "No se puede sin JS"], correcta: 0, peso: 2, area: "html" },
+  { q: "¿Qué hace <caption> en una tabla?", opciones: ["Describe la tabla para todos", "Pone color", "Crea filas", "Oculta columnas"], correcta: 0, peso: 2, area: "html" },
+  { q: "¿Cuál es el orden correcto?", opciones: ["<html><head></head><body></body></html>", "<head><html><body></body></html>", "<body><head></head><html></html>", "<html><body><head></head></html>"], correcta: 0, peso: 2, area: "html" },
+  { q: "Este código tiene un error: <ul><li>Manzana<li>Pera</ul>. ¿Cuál?", opciones: ["Faltan los </li> de cierre", "Sobra el <ul>", "Falta <ol>", "Ninguno, está bien"], correcta: 0, peso: 2, area: "html" },
+  { q: "¿Por qué <html lang=\"es\"> ayuda a Google?", opciones: ["Indica el idioma del contenido", "Traduce sola la página", "Acelera la carga", "Mejora los colores"], correcta: 0, peso: 2, area: "html" },
+  // ---------- CSS (15) ----------
+  { q: "Propiedad CSS para el fondo", opciones: ["background", "color", "margin", "display"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Qué hace display:flex?", opciones: ["Pone hijos en fila flexible", "Pone texto en negrita", "Oculta el elemento", "Crea una tabla"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Cómo se escribe una regla CSS válida?", opciones: ["h1 { color:red; }", "h1(color:red)", "<h1>red</h1>", "css:h1 red"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Cómo se usa una variable CSS?", opciones: ["var(--x)", "$x", "@x", "#x"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Qué es el padding?", opciones: ["Espacio interno de la caja", "Espacio externo", "El borde", "El color"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Selector de clase?", opciones: [".card", "#card", "card", "*card"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Selector de hover?", opciones: [":hover", ".hover", "#hover", "@hover"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Qué define el movimiento de una animación?", opciones: ["@keyframes", "@media", "@import", "@font"], correcta: 0, peso: 1, area: "css" },
+  { q: "¿Qué hace @media (max-width:768px)?", opciones: ["Aplica CSS solo en pantallas pequeñas", "Pone música", "Crea HTML", "Valida formularios"], correcta: 0, peso: 2, area: "css" },
+  { q: "3 columnas iguales con Grid", opciones: ["repeat(3,1fr)", "3px 3px 3px", "column:3", "flex:3"], correcta: 0, peso: 2, area: "css" },
+  { q: "¿Respecto a qué se posiciona un absolute?", opciones: ["Al ancestro relative más cercano", "Siempre al body", "Al viewport", "A nada"], correcta: 0, peso: 2, area: "css" },
+  { q: "¿Qué hace position:sticky?", opciones: ["Se pega al hacer scroll", "Desaparece", "Centra", "Anima"], correcta: 0, peso: 2, area: "css" },
+  { q: "¿Función de degradado lineal?", opciones: ["linear-gradient()", "shadow()", "gradient-text()", "bg-color()"], correcta: 0, peso: 2, area: "css" },
+  { q: "¿Para layout en 2 dimensiones?", opciones: ["Grid", "Bold", "Italic", "Float"], correcta: 0, peso: 1, area: "css" },
+  { q: "Esta regla no centra: .caja { display:block; margin:auto; width:50% }. ¿Por qué sí debería centrar?", opciones: ["Sí centra: bloque con ancho + márgenes auto", "Falta flex", "Falta text-align", "Nunca centra"], correcta: 0, peso: 2, area: "css" },
+  // ---------- JS (15) ----------
+  { q: "¿Declara una variable cambiable?", opciones: ["let", "const", "static", "final"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Cómo cambias el texto de un elemento?", opciones: ["el.textContent = ...", "el.href = ...", "el.style", "el.click"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Cómo escuchas clics (moderno)?", opciones: ["addEventListener", "href", "style", "css"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Qué hace if(p>=5)?", opciones: ["Ejecuta si p es 5 o más", "Siempre ejecuta", "Asigna 5 a p", "Compara texto"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Evita que el form recargue la página?", opciones: ["preventDefault()", "alert()", "style", "href"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Guarda datos en el navegador?", opciones: ["localStorage", "let", "const", "css"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Convierte la respuesta fetch a objeto?", opciones: ["r.json()", "r.css", "r.html", "r.raw"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Compara sin asignar?", opciones: ["===", "=", "->", "=>"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Cómo defines una función?", opciones: ["function f(){}", "func:f", "def f", "f=>func"], correcta: 0, peso: 1, area: "js" },
+  { q: "¿Selecciona el elemento con id=\"x\"?", opciones: ["querySelector('#x')", "querySelector('.x')", "getClass", "selectAll"], correcta: 0, peso: 2, area: "js" },
+  { q: "¿Qué imprime? let p=0; p++; p+=2; console.log(p)", opciones: ["3", "2", "0", "NaN"], correcta: 0, peso: 2, area: "js" },
+  { q: "¿Qué hace ['a','b'].map(x => x+'!')?", opciones: ["['a!','b!']", "['a','b']", "'a!b!'", "Error"], correcta: 0, peso: 2, area: "js" },
+  { q: "Hay un bug: if(puntos = 10){ ganar(); }. ¿Cuál?", opciones: ["= asigna, debe ser === para comparar", "Falta punto y coma", "Falta let", "Está perfecto"], correcta: 0, peso: 2, area: "js" },
+  { q: "¿Maneja errores de fetch?", opciones: ["try/catch", "if css", "style", "href"], correcta: 0, peso: 2, area: "js" },
+  { q: "¿Añade al final de un array?", opciones: ["push", "pop", "cut", "add"], correcta: 0, peso: 1, area: "js" },
+  // ---------- Mixtas / debugging (15, casi todas peso 2) ----------
+  { q: "¿Dónde va la lógica JS en la página?", opciones: ["<script>", "<style>", "<link>", "<meta>"], correcta: 0, peso: 1, area: "mix" },
+  { q: "¿Qué integra un mini-juego?", opciones: ["Estado + eventos + niveles + persistencia", "Solo HTML", "Solo CSS", "Nada"], correcta: 0, peso: 2, area: "mix" },
+  { q: "El contador no sube en pantalla aunque p++ corre. ¿Falta?", opciones: ["Actualizar el DOM (textContent)", "Más CSS", "Otro botón", "Recargar"], correcta: 0, peso: 2, area: "mix" },
+  { q: "El récord se pierde al recargar. ¿Solución?", opciones: ["Guardar/leer localStorage", "Más variables let", "Más CSS", "Otro if"], correcta: 0, peso: 2, area: "mix" },
+  { q: "fetch muestra [object Object]. ¿Por qué?", opciones: ["Falta await r.json()", "Falta CSS", "URL mala", "Falta HTML"], correcta: 0, peso: 2, area: "mix" },
+  { q: "El badge se fue a la esquina de la página. ¿Falta?", opciones: ["position:relative en la tarjeta padre", "Más padding", "Otro div", "Más JS"], correcta: 0, peso: 2, area: "mix" },
+  { q: "En móvil hay scroll horizontal. Causa típica:", opciones: ["Anchos fijos en px sin media query", "Mucho texto", "Muchos colores", "Poco JS"], correcta: 0, peso: 2, area: "mix" },
+  { q: "¿Qué imprime? console.log(typeof [])", opciones: ["object", "array", "list", "undefined"], correcta: 0, peso: 2, area: "mix" },
+  { q: "¿Para qué sirve console.log al depurar?", opciones: ["Ver valores mientras corre", "Poner estilos", "Crear HTML", "Validar forms"], correcta: 0, peso: 1, area: "mix" },
+  { q: "Dos botones con id=\"go\". ¿Problema?", opciones: ["IDs duplicados: getElementById falla", "Ninguno", "Solo estética", "Falta CSS"], correcta: 0, peso: 2, area: "mix" },
+  { q: "¿Qué valida un form solo con HTML?", opciones: ["type + required + label", "Solo CSS", "Solo divs", "Nada"], correcta: 0, peso: 2, area: "mix" },
+  { q: "¿Estructura mínima profesional?", opciones: ["header/nav/main/footer", "Solo divs", "Solo h1", "Solo p"], correcta: 0, peso: 2, area: "mix" },
+  { q: "¿Qué hace responsive a una galería Grid?", opciones: ["Media queries que cambian columnas", "Más colores", "Más JS", "Más HTML"], correcta: 0, peso: 2, area: "mix" },
+  { q: "¿Qué hace una variable CSS?", opciones: ["Reutilizar un valor en todo el tema", "Guardar JS", "Crear HTML", "Nada"], correcta: 0, peso: 1, area: "mix" },
+  { q: "Orden correcto para publicar:", opciones: ["Bloques → probar preview → publicar URL", "Publicar → probar → bloques", "Preview → borrar → publicar", "Publicar sin probar"], correcta: 0, peso: 1, area: "mix" },
 ];
 
 export const PLANTILLAS = [

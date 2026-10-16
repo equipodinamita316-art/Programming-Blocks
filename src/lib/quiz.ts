@@ -12,7 +12,7 @@ export function mulberry32(seed: number) {
   };
 }
 
-export function shuffleQuiz(quiz: QuizQ[], seed: number): QuizQ[] {
+export function shuffleQuiz<T extends QuizQ>(quiz: T[], seed: number): T[] {
   const rnd = mulberry32(seed);
   const qs = [...quiz];
   // Fisher-Yates preguntas
@@ -28,6 +28,6 @@ export function shuffleQuiz(quiz: QuizQ[], seed: number): QuizQ[] {
     }
     const opciones = idx.map((i) => q.opciones[i]);
     const correcta = idx.indexOf(q.correcta);
-    return { q: q.q, opciones, correcta };
+    return { ...q, opciones, correcta };
   });
 }
