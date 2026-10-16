@@ -77,9 +77,34 @@ export function BlocklyReal({
           return types;
         };
 
+        // Limpieza de scrollbars huérfanas del flyout: al cerrar el panel de
+        // categorías a veces queda pintado el handle (.blocklyFlyoutScrollbar).
+        // Solo se oculta si su flyout está cerrado (no rompe el scroll abierto).
+        const sweepStaleScrollbars = () => {
+          try {
+            const root = divRef.current;
+            const flyout = workspace?.getFlyout() as unknown as {
+              isVisible?: () => boolean;
+            } | null;
+            if (!root || !flyout || flyout.isVisible?.() !== false) return;
+            root.querySelectorAll(".blocklyFlyoutScrollbar").forEach((el) => {
+              (el as HTMLElement).style.display = "none";
+            });
+          } catch {}
+        };
+
+        const unhideFlyoutScrollbars = () => {
+          try {
+            divRef.current?.querySelectorAll(".blocklyFlyoutScrollbar").forEach((el) => {
+              (el as HTMLElement).style.display = "";
+            });
+          } catch {}
+        };
+
         const emit = () => {
           if (!workspace) return;
           purge();
+          sweepStaleScrollbars();
           const blocks = workspace.getAllBlocks(false);
           const types = blocks.map((b) => b.type);
           const { html, css, js } = generateFromBlocks(blocks);
@@ -118,7 +143,16 @@ export function BlocklyReal({
           }
         } catch {}
 
-        workspace.addChangeListener(() => emit());
+        workspace.addChangeListener((e) => {
+          // Al cerrar el panel de categorías (deselección), barrer la scrollbar
+          // huérfana; al abrirlo, restaurar su display por si se había ocultado.
+          if (e.type === Blockly.Events.TOOLBOX_ITEM_SELECT) {
+            const item = (e as unknown as { newItem?: string | null }).newItem;
+            if (item) unhideFlyoutScrollbars();
+            else sweepStaleScrollbars();
+          }
+          emit();
+        });
         emitRef.current = emit;
         emit();
         setReady(true);
