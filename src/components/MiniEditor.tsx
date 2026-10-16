@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { AssetPanel } from "./AssetPanel";
+import { FilesModal, useAssetCount } from "./FilesModal";
 import { PreviewModal } from "./PreviewModal";
 import type { Generated } from "./BlocklyReal";
 import type { Leccion } from "@/data/cursos";
@@ -35,9 +35,10 @@ export function MiniEditor({
   onPublish?: () => void;
   publishLabel?: string;
 }) {
-  const [explorer, setExplorer] = useState(true);
   const [preview, setPreview] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
   const [tab, setTab] = useState("index");
+  const fileCount = useAssetCount(lessonId);
 
   const tabs = [
     { id: "index", label: "📄 index", desc: "bloques 🧱", family: "html" as const },
@@ -55,11 +56,8 @@ export function MiniEditor({
         <span className="hidden md:inline text-xs font-bold rounded-full bg-black/5 dark:bg-white/10 px-2 py-0.5">{estado}</span>
       </div>
 
-      {/* Barra tabs estilo VS Code */}
+      {/* Barra tabs estilo VS Code + botón de archivos */}
       <div className="flex items-center gap-1 px-2 py-1 bg-[#2d2d3f] text-xs overflow-auto no-scrollbar">
-        <button onClick={() => setExplorer(!explorer)} className="rounded-lg px-2 py-1 font-bold hover:bg-white/10" title="Archivos">
-          {explorer ? "◀ ☰" : "☰"}
-        </button>
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -69,37 +67,31 @@ export function MiniEditor({
             {t.label}
           </button>
         ))}
+        {showFiles ? (
+          <button
+            onClick={() => setFilesOpen(true)}
+            className="rounded-lg px-2 py-1.5 font-bold whitespace-nowrap text-white/80 hover:bg-white/10"
+            title="Abrir mis archivos"
+          >
+            📁 ({fileCount})
+          </button>
+        ) : (
+          <span className="rounded-lg px-2 py-1.5 font-bold whitespace-nowrap text-white/40" title="Los archivos se desbloquean en el Lab">
+            🔒 📁
+          </span>
+        )}
         <span className="ml-auto text-[11px] text-white/50 hidden sm:inline">{gen.count} bloques</span>
       </div>
 
-      <div className="flex min-h-[420px] md:min-h-[520px]">
-        {/* Explorer: fijo desktop, drawer móvil */}
-        <aside className={`${explorer ? "flex" : "hidden"} w-[240px] shrink-0 flex-col gap-2 p-2 bg-[#252536] text-xs max-lg:absolute max-lg:z-30 max-lg:h-[420px] max-lg:rounded-r-2xl max-lg:border-r-4 max-lg:border-[#1a1523]`}>
-          <div className="font-extrabold text-white/80 px-1">📁 MI PÁGINA</div>
-          <div className="flex flex-col gap-1">
-            <div className="rounded-lg px-2 py-1.5 bg-white/10 font-bold">📄 index <span className="opacity-60">· 🧱</span></div>
-            {curso !== "html" && <div className="rounded-lg px-2 py-1.5 opacity-70">🎨 estilos <span className="opacity-60">· CSS</span></div>}
-            {curso === "js" && <div className="rounded-lg px-2 py-1.5 opacity-70">⚡ lógica <span className="opacity-60">· JS</span></div>}
-          </div>
-          {showFiles ? (
-            <AssetPanel lessonId={lessonId} compact />
-          ) : (
-            <p className="text-[11px] text-white/50 px-1">📁 Los archivos se desbloquean en el Lab 🎨</p>
-          )}
-          <button onClick={() => setExplorer(false)} className="lg:hidden mt-auto text-[11px] underline opacity-70">Cerrar ✕</button>
-        </aside>
-
-        {/* Editor grande */}
-        <div className="flex-1 min-w-0 p-2 bg-white dark:bg-black rounded-none">
-          {!explorer && (
-            <button onClick={() => setExplorer(true)} className="lg:hidden mb-2 rounded-lg border px-2 py-1 text-xs font-bold text-black dark:text-white">☰ Archivos</button>
-          )}
-          <p className="text-[11px] font-bold text-black/60 dark:text-white/60 mb-1">
-            {tab === "index" ? "📄 Editando estructura 🧱 (HTML + 📁)" : tab === "estilos" ? "🎨 Editando estilos (solo bloques 🎨)" : "⚡ Editando lógica (solo bloques ⚡)"}
-          </p>
-          <BlocklyReal curso={curso} lessonId={lessonId} displayFamily={activeFamily} onChange={onChange} />
-        </div>
+      {/* Editor a todo el ancho */}
+      <div className="p-2 bg-white dark:bg-black min-h-[420px] md:min-h-[520px]">
+        <p className="text-[11px] font-bold text-black/60 dark:text-white/60 mb-1">
+          {tab === "index" ? "📄 Editando estructura 🧱 (HTML + 📁)" : tab === "estilos" ? "🎨 Editando estilos (solo bloques 🎨)" : "⚡ Editando lógica (solo bloques ⚡)"}
+        </p>
+        <BlocklyReal curso={curso} lessonId={lessonId} displayFamily={activeFamily} onChange={onChange} />
       </div>
+
+      <FilesModal open={filesOpen} onClose={() => setFilesOpen(false)} lessonId={lessonId} />
 
       {/* FAB Probar siempre visible */}
       <button

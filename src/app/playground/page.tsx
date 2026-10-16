@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BLOCK_COUNT } from "@/lib/blockly/blocks";
-import { AssetPanel } from "@/components/AssetPanel";
+import { FilesModal, useAssetCount } from "@/components/FilesModal";
 import { PreviewModal } from "@/components/PreviewModal";
 import type { Generated } from "@/components/BlocklyReal";
 
@@ -27,7 +27,9 @@ export default function Playground() {
   const [code, setCode] = useState("");
   const [dirty, setDirty] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
   const [nombre, setNombre] = useState("Mi primera página");
+  const fileCount = useAssetCount("playground");
 
   const fullCode = `<!-- 🧱 HTML -->\n${gen.html}\n<!-- 🎨 CSS -->\n<style>\n${gen.css}</style>\n<!-- ⚡ JS -->\n<script>\n${gen.js}</script>`;
 
@@ -83,43 +85,42 @@ export default function Playground() {
         >
           📋 Copiar
         </button>
+        <button onClick={() => setFilesOpen(true)} className="rounded-xl border-2 px-3 py-2" title="Abrir mis archivos">
+          📁 ({fileCount})
+        </button>
         <button onClick={() => setPreview(true)} className="rounded-xl bg-[#FF6B35] text-white px-4 py-2">▶️ Probar</button>
         <button onClick={publish} className="rounded-xl bg-[#1a1523] text-white dark:bg-white dark:text-black px-4 py-2">🚀 Publicar</button>
       </div>
 
-      {/* Editor único a máximo espacio */}
+      {/* Editor único a máximo espacio (sin lateral) */}
       {modo === "bloques" ? (
-        <div className="grid gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <div className="order-2 lg:order-1">
-            <AssetPanel lessonId="playground" compact />
-            <p className="text-xs opacity-60 mt-2">Sube imágenes/videos y úsalos con el bloque 📁. El workspace se guarda solo.</p>
-          </div>
-          <div className="order-1 lg:order-2 min-w-0">
-            <BlocklyReal lessonId="playground" onChange={setGen} />
-          </div>
+        <div className="min-w-0">
+          <BlocklyReal lessonId="playground" onChange={setGen} />
+          <p className="text-xs opacity-60 mt-1">Abre 📁 para subir imágenes/videos y úsalos con el bloque 📁. El workspace se guarda solo.</p>
         </div>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <div className="order-2 lg:order-1">
-            <AssetPanel lessonId="playground" compact copyMode="url" />
-            <p className="text-xs opacity-60 mt-2">Con “Usar” copias la URL lista para tu <code>src</code>.</p>
-          </div>
-          <div className="order-1 lg:order-2 min-w-0 rounded-2xl overflow-hidden border-4 border-[#1a1523] dark:border-white/20">
-            <div className="px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">⌨️ index.html — editable (al volver a bloques se descarta)</div>
-            <textarea
-              value={code}
-              onChange={(e) => { setCode(e.target.value); setDirty(true); }}
-              spellCheck={false}
-              className="w-full h-[62vh] min-h-[380px] bg-black text-green-200 font-mono text-sm p-4 outline-none resize-y"
-              placeholder="Escribe tu HTML + <style> + <script>..."
-            />
-          </div>
+        <div className="min-w-0 rounded-2xl overflow-hidden border-4 border-[#1a1523] dark:border-white/20">
+          <div className="px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">⌨️ index.html — editable (al volver a bloques se descarta)</div>
+          <textarea
+            value={code}
+            onChange={(e) => { setCode(e.target.value); setDirty(true); }}
+            spellCheck={false}
+            className="w-full h-[62vh] min-h-[380px] bg-black text-green-200 font-mono text-sm p-4 outline-none resize-y"
+            placeholder="Escribe tu HTML + <style> + <script>..."
+          />
         </div>
       )}
 
       <p className="text-xs opacity-60">
         Un solo editor: bloques con drag & drop o código a mano. Lo que ves en Probar es lo que se publica. <Link href="/proyectos" className="underline">Ver plantillas →</Link>
       </p>
+
+      <FilesModal
+        open={filesOpen}
+        onClose={() => setFilesOpen(false)}
+        lessonId="playground"
+        copyMode={modo === "codigo" ? "url" : "id"}
+      />
 
       <PreviewModal
         open={preview}
