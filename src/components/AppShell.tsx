@@ -40,8 +40,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     };
   }, [path]);
 
-  // El panel se cierra al elegir una opción (ver onClick en los Links del panel)
-  const closePanel = () => setOpen(false);
+  // El panel se cierra manual (☰/✕) o con Esc; al navegar se queda abierto.
 
   // Cierre con Esc
   useEffect(() => {
@@ -91,9 +90,9 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
-      {/* Panel desplegable (empuja el contenido) */}
+      {/* Panel desplegable independiente: alto propio + scroll propio */}
       <aside
-        className={`hidden lg:flex shrink-0 flex-col gap-4 border-r-4 border-[#1a1523] overflow-hidden transition-all duration-200 ${
+        className={`hidden lg:flex shrink-0 flex-col gap-4 border-r-4 border-[#1a1523] overflow-hidden overflow-y-auto transition-all duration-200 lg:sticky lg:top-0 lg:h-screen ${
           open ? "w-[260px] p-4 opacity-100" : "w-0 p-0 opacity-0 border-r-0"
         }`}
       >
@@ -123,7 +122,6 @@ function ShellInner({ children }: { children: React.ReactNode }) {
               <Link
                 key={n.href}
                 href={n.href}
-                onClick={closePanel}
                 className={`rounded-xl border-2 px-3 py-2 font-bold whitespace-nowrap ${path.startsWith(n.href) ? "bg-[#1a1523] text-white border-[#1a1523]" : "border-[#1a1523] hover:bg-black/5"}`}
               >
                 {n.icon} {n.label}
