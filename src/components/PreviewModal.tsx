@@ -31,7 +31,9 @@ export function PreviewModal({
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 md:p-6"
+      // z por encima de todas las capas de Blockly (.blocklyToolbox z-70,
+      // dropdowns z-1000, editores z-99999, tooltips z-100000)
+      className="fixed inset-0 z-[100001] flex items-center justify-center bg-black/60 p-2 md:p-6"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
