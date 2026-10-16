@@ -8,32 +8,11 @@ import { getLevel, getXP } from "@/lib/store";
 import { useSession } from "@/lib/supabase/session";
 import { useRouter } from "next/navigation";
 
-function ThemeToggle() {
-  const [dark, setDark] = useState(
-    () => typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
-  );
-  return (
-    <button
-      onClick={() => {
-        const el = document.documentElement;
-        el.classList.toggle("dark");
-        const isDark = el.classList.contains("dark");
-        setDark(isDark);
-        try {
-          localStorage.setItem("bw-theme", isDark ? "dark" : "light");
-        } catch {}
-      }}
-      className="rounded-xl border-2 border-[#1a1523] dark:border-white px-2 py-1 text-sm font-bold"
-      aria-label="Cambiar tema"
-    >
-      {dark ? "☀️" : "🌙"}
-    </button>
-  );
-}
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div className="p-4 font-bold">Cargando BLOCKWEB...</div>}>
+    <Suspense
+      fallback={<div className="p-4 font-bold">Cargando BLOCKWEB...</div>}
+    >
       <ShellInner>{children}</ShellInner>
     </Suspense>
   );
@@ -72,7 +51,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open ]);
+  }, [open]);
 
   const nav = [
     { href: "/dashboard", label: "Aprender", icon: "🗺️" },
@@ -81,16 +60,17 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     { href: "/certificado", label: "Certificado", icon: "🎓" },
   ];
 
-  const focusMode = path.startsWith("/aprender/") || path.startsWith("/examen/");
+  const focusMode =
+    path.startsWith("/aprender/") || path.startsWith("/examen/");
 
   // --- Modo enfoque: tira mínima, única salida al dashboard ---
   if (focusMode) {
     return (
       <div className="flex min-h-screen flex-col">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b-4 border-[#1a1523] dark:border-white/20 bg-[var(--background)] px-3 py-2">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b-4 border-[#1a1523] bg-[var(--background)] px-3 py-2">
           <Link
             href="/dashboard"
-            className="rounded-xl border-2 border-[#1a1523] dark:border-white/30 px-3 py-1 text-sm font-extrabold hover:bg-black/5"
+            className="rounded-xl border-2 border-[#1a1523] px-3 py-1 text-sm font-extrabold hover:bg-black/5"
           >
             ← Salir del curso
           </Link>
@@ -100,10 +80,11 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           </span>
           <div className="ml-auto flex items-center gap-2 text-sm font-bold">
             <span>{xp} XP</span>
-            <ThemeToggle />
           </div>
         </header>
-        <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6">{children}</main>
+        <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6">
+          {children}
+        </main>
       </div>
     );
   }
@@ -112,7 +93,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col lg:flex-row">
       {/* Panel desplegable (empuja el contenido) */}
       <aside
-        className={`hidden lg:flex shrink-0 flex-col gap-4 border-r-4 border-[#1a1523] dark:border-white/20 overflow-hidden transition-all duration-200 ${
+        className={`hidden lg:flex shrink-0 flex-col gap-4 border-r-4 border-[#1a1523] overflow-hidden transition-all duration-200 ${
           open ? "w-[260px] p-4 opacity-100" : "w-0 p-0 opacity-0 border-r-0"
         }`}
       >
@@ -120,14 +101,21 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           <Link href="/" className="flex items-center gap-3 whitespace-nowrap">
             <Bloqui size={48} />
             <div>
-              <div className="font-display text-2xl font-extrabold leading-none">BLOCKWEB</div>
+              <div className="font-display text-2xl font-extrabold leading-none">
+                BLOCKWEB
+              </div>
               <div className="text-xs opacity-70">aprende creando</div>
             </div>
           </Link>
-          <div className="rounded-2xl border-2 border-[#1a1523] dark:border-white/30 p-3">
-            <div className="text-sm font-bold">{xp} XP · {getLevel(xp)}</div>
-            <div className="mt-2 h-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
-              <div className="h-full rounded-full bg-[#FF6B35]" style={{ width: `${Math.min(100, (xp % 300) / 3)}%` }} />
+          <div className="rounded-2xl border-2 border-[#1a1523] p-3">
+            <div className="text-sm font-bold">
+              {xp} XP · {getLevel(xp)}
+            </div>
+            <div className="mt-2 h-3 overflow-hidden rounded-full bg-black/10">
+              <div
+                className="h-full rounded-full bg-[#FF6B35]"
+                style={{ width: `${Math.min(100, (xp % 300) / 3)}%` }}
+              />
             </div>
           </div>
           <nav className="flex flex-col gap-2">
@@ -136,25 +124,43 @@ function ShellInner({ children }: { children: React.ReactNode }) {
                 key={n.href}
                 href={n.href}
                 onClick={closePanel}
-                className={`rounded-xl border-2 px-3 py-2 font-bold whitespace-nowrap ${path.startsWith(n.href) ? "bg-[#1a1523] text-white dark:bg-white dark:text-black border-[#1a1523]" : "border-[#1a1523] dark:border-white/30 hover:bg-black/5"}`}
+                className={`rounded-xl border-2 px-3 py-2 font-bold whitespace-nowrap ${path.startsWith(n.href) ? "bg-[#1a1523] text-white border-[#1a1523]" : "border-[#1a1523] hover:bg-black/5"}`}
               >
                 {n.icon} {n.label}
               </Link>
             ))}
           </nav>
           <div className="mt-auto flex flex-col gap-2">
-            <div className="rounded-xl border-2 border-[#1a1523] dark:border-white/30 px-2 py-1 text-xs font-bold truncate">
-              {loading ? "⏳..." : user ? `👤 ${user.user_metadata?.nombre || user.email}` : "👤 Invitado"}
+            <div className="rounded-xl border-2 border-[#1a1523] px-2 py-1 text-xs font-bold truncate">
+              {loading
+                ? "⏳..."
+                : user
+                  ? `👤 ${user.user_metadata?.nombre || user.email}`
+                  : "👤 Invitado"}
             </div>
             <div className="flex items-center justify-between">
-              <Link href="/examen/final" className="text-sm font-bold underline">Examen final</Link>
-              <ThemeToggle />
+              <Link
+                href="/examen/final"
+                className="text-sm font-bold underline"
+              >
+                Examen final
+              </Link>
             </div>
             {user ? (
-              <button onClick={salir} className="rounded-xl border-2 px-2 py-1 text-xs font-bold opacity-70">Salir ⎋</button>
+              <button
+                onClick={salir}
+                className="rounded-xl border-2 px-2 py-1 text-xs font-bold opacity-70"
+              >
+                Salir ⎋
+              </button>
             ) : (
               !loading && (
-                <Link href="/login" className="rounded-xl bg-[#FF6B35] text-white px-2 py-1 text-xs font-extrabold text-center">Entrar 🔑</Link>
+                <Link
+                  href="/login"
+                  className="rounded-xl bg-[#FF6B35] text-white px-2 py-1 text-xs font-extrabold text-center"
+                >
+                  Entrar 🔑
+                </Link>
               )
             )}
           </div>
@@ -163,50 +169,69 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar mínima con botón hamburguesa */}
-        <header className="hidden lg:flex sticky top-0 z-20 items-center gap-3 border-b-4 border-[#1a1523] dark:border-white/20 bg-[var(--background)] px-4 py-2">
+        <header className="hidden lg:flex sticky top-0 z-20 items-center gap-3 border-b-4 border-[#1a1523] bg-[var(--background)] px-4 py-2">
           <button
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? "Cerrar panel" : "Abrir panel"}
             aria-expanded={open}
-            className="rounded-xl border-2 border-[#1a1523] dark:border-white/30 px-3 py-1 text-lg font-extrabold hover:bg-black/5"
+            className="rounded-xl border-2 border-[#1a1523] px-3 py-1 text-lg font-extrabold hover:bg-black/5"
           >
             {open ? "✕" : "☰"}
           </button>
           <Link href="/" className="flex items-center gap-2">
             <Bloqui size={32} />
-            <span className="font-display text-xl font-extrabold">BLOCKWEB</span>
+            <span className="font-display text-xl font-extrabold">
+              BLOCKWEB
+            </span>
           </Link>
           <div className="ml-auto flex items-center gap-2 text-sm font-bold">
             <span>{xp} XP</span>
-            <ThemeToggle />
           </div>
         </header>
 
         {/* Topbar móvil/tablet (sin cambios) */}
-        <header className="lg:hidden sticky top-0 z-20 flex items-center justify-between border-b-4 border-[#1a1523] dark:border-white/20 bg-[var(--background)] px-4 py-2">
+        <header className="lg:hidden sticky top-0 z-20 flex items-center justify-between border-b-4 border-[#1a1523] bg-[var(--background)] px-4 py-2">
           <Link href="/" className="flex items-center gap-2">
             <Bloqui size={36} />
-            <span className="font-display text-xl font-extrabold">BLOCKWEB</span>
+            <span className="font-display text-xl font-extrabold">
+              BLOCKWEB
+            </span>
           </Link>
           <div className="flex items-center gap-2 text-sm font-bold">
             <span>{xp} XP</span>
             {user ? (
-              <button onClick={salir} className="rounded-lg border px-1 text-xs opacity-70" aria-label="Salir">⎋</button>
+              <button
+                onClick={salir}
+                className="rounded-lg border px-1 text-xs opacity-70"
+                aria-label="Salir"
+              >
+                ⎋
+              </button>
             ) : (
               !loading && (
-                <Link href="/login" className="rounded-lg bg-[#FF6B35] text-white px-2 py-0.5 text-xs font-extrabold">Entrar</Link>
+                <Link
+                  href="/login"
+                  className="rounded-lg bg-[#FF6B35] text-white px-2 py-0.5 text-xs font-extrabold"
+                >
+                  Entrar
+                </Link>
               )
             )}
-            <ThemeToggle />
           </div>
         </header>
 
-        <main className="flex-1 pb-24 lg:pb-8 w-full max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6">{children}</main>
+        <main className="flex-1 pb-24 lg:pb-8 w-full max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6">
+          {children}
+        </main>
 
         {/* Bottom bar móvil */}
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-20 grid grid-cols-4 border-t-4 border-[#1a1523] dark:border-white/20 bg-[var(--background)]">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-20 grid grid-cols-4 border-t-4 border-[#1a1523] bg-[var(--background)]">
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} className={`flex flex-col items-center py-2 text-xs font-bold ${path.startsWith(n.href) ? "bg-black/5 dark:bg-white/10" : ""}`}>
+            <Link
+              key={n.href}
+              href={n.href}
+              className={`flex flex-col items-center py-2 text-xs font-bold ${path.startsWith(n.href) ? "bg-black/5" : ""}`}
+            >
               <span className="text-xl">{n.icon}</span>
               {n.label}
             </Link>

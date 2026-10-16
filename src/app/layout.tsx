@@ -4,9 +4,21 @@ import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 import { SessionProvider } from "@/lib/supabase/session";
 
-const display = Baloo_2({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--bw-display" });
-const body = Space_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--bw-body" });
-const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "600"], variable: "--bw-mono" });
+const display = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--bw-display",
+});
+const body = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--bw-body",
+});
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--bw-mono",
+});
 
 export const metadata: Metadata = {
   title: "BLOCKWEB — Aprende HTML, CSS y JS creando",
@@ -21,14 +33,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{const t=localStorage.getItem('bw-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`,
-          }}
-        />
-      </head>
+    <html
+      lang="es"
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+    >
       <body className="min-h-full flex flex-col antialiased">
         <SessionProvider>
           <AppShell>{children}</AppShell>

@@ -40,21 +40,38 @@ export function PreviewModal({
       aria-label={`Vista previa ${title}`}
     >
       <div
-        className="w-full max-w-[1000px] h-[88vh] md:h-[85vh] flex flex-col rounded-2xl overflow-hidden border-4 border-[#1a1523] dark:border-white bg-white dark:bg-[#12101a]"
+        className="w-full max-w-[1000px] h-[88vh] md:h-[85vh] flex flex-col rounded-2xl overflow-hidden border-4 border-[#1a1523] bg-white"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-[#1a1523]/20">
-          <span>🔴</span><span>🟡</span><span>🟢</span>
-          <div className="flex-1 text-center text-xs md:text-sm font-mono font-bold truncate rounded-full bg-black/5 dark:bg-white/10 px-3 py-1">
-            blockweb.page/{title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30)}
+          <span>🔴</span>
+          <span>🟡</span>
+          <span>🟢</span>
+          <div className="flex-1 text-center text-xs md:text-sm font-mono font-bold truncate rounded-full bg-black/5 px-3 py-1">
+            blockweb.page/
+            {title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .slice(0, 30)}
           </div>
-          <span className="text-xs font-bold hidden sm:inline">{count} bloques</span>
+          <span className="text-xs font-bold hidden sm:inline">
+            {count} bloques
+          </span>
           {onPublish && (
-            <button onClick={onPublish} className="rounded-xl bg-[#a855f7] text-white text-xs md:text-sm font-bold px-3 py-1">
+            <button
+              onClick={onPublish}
+              className="rounded-xl bg-[#a855f7] text-white text-xs md:text-sm font-bold px-3 py-1"
+            >
               {publishLabel || "🌐 Publicar"}
             </button>
           )}
-          <button onClick={onClose} className="rounded-xl border-2 px-2 py-1 text-sm font-bold" aria-label="Cerrar vista previa">✕</button>
+          <button
+            onClick={onClose}
+            className="rounded-xl border-2 px-2 py-1 text-sm font-bold"
+            aria-label="Cerrar vista previa"
+          >
+            ✕
+          </button>
         </div>
         <ViewBody srcDoc={srcDoc} />
       </div>
@@ -67,12 +84,33 @@ function ViewBody({ srcDoc }: { srcDoc: string }) {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <div className="flex gap-2 p-2 text-xs font-bold">
-        <button onClick={() => setView("mobile")} className={`rounded-lg border px-2 py-1 ${view === "mobile" ? "bg-[#1a1523] text-white dark:bg-white dark:text-black" : ""}`}>📱 Móvil</button>
-        <button onClick={() => setView("desktop")} className={`rounded-lg border px-2 py-1 ${view === "desktop" ? "bg-[#1a1523] text-white dark:bg-white dark:text-black" : ""}`}>🖥️ Desktop</button>
+        <button
+          onClick={() => setView("mobile")}
+          className={`rounded-lg border px-2 py-1 ${view === "mobile" ? "bg-[#1a1523] text-white" : ""}`}
+        >
+          📱 Móvil
+        </button>
+        <button
+          onClick={() => setView("desktop")}
+          className={`rounded-lg border px-2 py-1 ${view === "desktop" ? "bg-[#1a1523] text-white" : ""}`}
+        >
+          🖥️ Desktop
+        </button>
       </div>
       <div className="flex-1 min-h-0 bg-white flex justify-center overflow-auto">
-        <div className={view === "mobile" ? "w-full max-w-[390px] border-x-4 border-dashed h-full" : "w-full h-full"}>
-          <iframe title="preview-grande" sandbox="allow-scripts" srcDoc={srcDoc} className="w-full h-full min-h-[50vh] bg-white" />
+        <div
+          className={
+            view === "mobile"
+              ? "w-full max-w-[390px] border-x-4 border-dashed h-full"
+              : "w-full h-full"
+          }
+        >
+          <iframe
+            title="preview-grande"
+            sandbox="allow-scripts"
+            srcDoc={srcDoc}
+            className="w-full h-full min-h-[50vh] bg-white"
+          />
         </div>
       </div>
     </div>

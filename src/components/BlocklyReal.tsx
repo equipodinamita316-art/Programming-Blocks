@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";import type { Block, WorkspaceSvg } from "blockly";
+import { useEffect, useRef, useState } from "react";
+import type { Block, WorkspaceSvg } from "blockly";
 import { BLOCK_DEFS } from "@/lib/blockly/blocks";
 import { generateFromBlocks, combineSrcDoc } from "@/lib/blockly/generators";
-import { ALLOW, getToolboxForCurso, getDisplayToolbox, type Family } from "@/lib/blockly/scope";
+import {
+  ALLOW,
+  getToolboxForCurso,
+  getDisplayToolbox,
+  type Family,
+} from "@/lib/blockly/scope";
 import type { CursoSlug } from "@/lib/store";
 
 export type Generated = {
@@ -50,38 +56,49 @@ export function BlocklyReal({
         if (disposed || !container) return;
 
         if (!Blockly.Blocks["bw_h"]) {
-          Blockly.defineBlocksWithJsonArray(BLOCK_DEFS as Parameters<typeof Blockly.defineBlocksWithJsonArray>[0]);
+          Blockly.defineBlocksWithJsonArray(
+            BLOCK_DEFS as Parameters<
+              typeof Blockly.defineBlocksWithJsonArray
+            >[0],
+          );
         }
 
-        const toolbox = curso ? getToolboxForCurso(curso) : (await import("@/lib/blockly/toolbox")).TOOLBOX;
+        const toolbox = curso
+          ? getToolboxForCurso(curso)
+          : (await import("@/lib/blockly/toolbox")).TOOLBOX;
         const allow = curso ? ALLOW[curso] : null;
 
         // Anti-zombie: si quedó una inyección previa en el contenedor, eliminarla
         // antes de inyectar (evita toolboxes duplicadas fuera de su recuadro).
-        try { wsRef.current?.dispose(); } catch {}
+        try {
+          wsRef.current?.dispose();
+        } catch {}
         wsRef.current = null;
         try {
-          container?.querySelectorAll(":scope > .injectionDiv").forEach((n) => n.remove());
+          container
+            ?.querySelectorAll(":scope > .injectionDiv")
+            .forEach((n) => n.remove());
         } catch {}
 
-        workspace = Blockly.inject(
-          container,
-          {
-            toolbox: toolbox as unknown as Element,
-            trashcan: true,
-            zoom: { controls: true, wheel: true, startScale: 0.9 },
-            scrollbars: true,
-            renderer: "zelos",
-          } as unknown as Parameters<typeof Blockly.inject>[1],
-        );
+        workspace = Blockly.inject(container, {
+          toolbox: toolbox as unknown as Element,
+          trashcan: true,
+          zoom: { controls: true, wheel: true, startScale: 0.9 },
+          scrollbars: true,
+          renderer: "zelos",
+        } as unknown as Parameters<typeof Blockly.inject>[1]);
         wsRef.current = workspace;
 
         const purge = (): string[] => {
           if (!allow || !workspace) return [];
-          const bad: Block[] = workspace.getAllBlocks(false).filter((b) => !allow.has(b.type));
+          const bad: Block[] = workspace
+            .getAllBlocks(false)
+            .filter((b) => !allow.has(b.type));
           const types = [...new Set(bad.map((b) => b.type))];
           bad.forEach((b) => {
-            try { b.dispose(); } catch {}
+            try {
+              b.dispose();
+            } catch {}
           });
           setPurged(types);
           return types;
@@ -105,9 +122,11 @@ export function BlocklyReal({
 
         const unhideFlyoutScrollbars = () => {
           try {
-            container?.querySelectorAll(".blocklyFlyoutScrollbar").forEach((el) => {
-              (el as HTMLElement).style.display = "";
-            });
+            container
+              ?.querySelectorAll(".blocklyFlyoutScrollbar")
+              .forEach((el) => {
+                (el as HTMLElement).style.display = "";
+              });
           } catch {}
         };
 
@@ -122,7 +141,9 @@ export function BlocklyReal({
           // (data: tras primeDataUrls; blob: solo como fallback transitorio)
           let htmlH = html;
           try {
-            const urls = ((globalThis as unknown as { __bw_urls?: Record<string, string> }).__bw_urls || {});
+            const urls =
+              (globalThis as unknown as { __bw_urls?: Record<string, string> })
+                .__bw_urls || {};
             const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             for (const [id, url] of Object.entries(urls)) {
               htmlH = htmlH.replace(
@@ -131,9 +152,20 @@ export function BlocklyReal({
               );
             }
           } catch {}
-          onChange({ html: htmlH, css, js, srcDoc: combineSrcDoc(htmlH, css, js), count: blocks.length, types, purged: [] });
+          onChange({
+            html: htmlH,
+            css,
+            js,
+            srcDoc: combineSrcDoc(htmlH, css, js),
+            count: blocks.length,
+            types,
+            purged: [],
+          });
           try {
-            localStorage.setItem(storageKey, JSON.stringify(Blockly.serialization.workspaces.save(workspace)));
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify(Blockly.serialization.workspaces.save(workspace)),
+            );
           } catch {}
         };
 
@@ -186,12 +218,18 @@ export function BlocklyReal({
 
     return () => {
       disposed = true;
-      try { roRef.current?.disconnect(); } catch {}
+      try {
+        roRef.current?.disconnect();
+      } catch {}
       roRef.current = null;
-      try { wsRef.current?.dispose(); } catch {}
+      try {
+        wsRef.current?.dispose();
+      } catch {}
       wsRef.current = null;
       try {
-        container?.querySelectorAll(":scope > .injectionDiv").forEach((n) => n.remove());
+        container
+          ?.querySelectorAll(":scope > .injectionDiv")
+          .forEach((n) => n.remove());
       } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,7 +246,9 @@ export function BlocklyReal({
   useEffect(() => {
     try {
       if (wsRef.current && curso) {
-        wsRef.current.updateToolbox(getDisplayToolbox(curso, displayFamily ?? null) as unknown as Element);
+        wsRef.current.updateToolbox(
+          getDisplayToolbox(curso, displayFamily ?? null) as unknown as Element,
+        );
       }
     } catch {}
   }, [displayFamily, curso]);
@@ -216,25 +256,41 @@ export function BlocklyReal({
   // Cuando llegan las data URLs de assets, re-emite para que previews y
   // publicados usen data: en vez de blob: (válidos en sandbox opaco)
   useEffect(() => {
-    const h = () => { emitRef.current?.(); };
+    const h = () => {
+      emitRef.current?.();
+    };
     window.addEventListener("bw-assets-ready", h);
     return () => window.removeEventListener("bw-assets-ready", h);
   }, []);
 
-  if (err) return <div className="p-4 rounded-2xl border-2 border-red-500 text-sm">❌ {err}</div>;
+  if (err)
+    return (
+      <div className="p-4 rounded-2xl border-2 border-red-500 text-sm">
+        ❌ {err}
+      </div>
+    );
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-xs font-bold opacity-70">
-        <span>{ready ? `🟢 Bloques ${curso ? curso.toUpperCase() + " " : ""}· drag & drop` : "⏳ Cargando Blockly..."}</span>
-        <button onClick={clear} className="ml-auto underline">Limpiar</button>
+        <span>
+          {ready
+            ? `🟢 Bloques ${curso ? curso.toUpperCase() + " " : ""}· drag & drop`
+            : "⏳ Cargando Blockly..."}
+        </span>
+        <button onClick={clear} className="ml-auto underline">
+          Limpiar
+        </button>
       </div>
       {purged.length > 0 && (
-        <div className="rounded-xl border-2 border-red-500 bg-red-50 dark:bg-red-950 p-2 text-xs font-bold">
+        <div className="rounded-xl border-2 border-red-500 bg-red-50 p-2 text-xs font-bold">
           🧹 Bloques no permitidos eliminados: {purged.join(", ")}
         </div>
       )}
-      <div ref={divRef} className="relative w-full h-[420px] md:h-[520px] rounded-2xl border-4 border-[#1a1523] dark:border-white/20 bg-white overflow-hidden" />
+      <div
+        ref={divRef}
+        className="relative w-full h-[420px] md:h-[520px] rounded-2xl border-4 border-[#1a1523] bg-white overflow-hidden"
+      />
     </div>
   );
 }

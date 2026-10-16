@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
   --color-html: #ff6b35;
   --color-css: #2563eb;
@@ -18,12 +16,8 @@
   --foreground: #1a1523;
 }
 
-.dark {
-  --background: #12101a;
-  --foreground: #fff8ec;
-}
-
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -40,12 +34,13 @@ body {
 .block-shadow {
   box-shadow: 4px 4px 0 0 #1a1523;
 }
-.dark .block-shadow {
-  box-shadow: 4px 4px 0 0 #fff8ec33;
-}
 .block-shadow-sm {
   box-shadow: 2px 2px 0 0 #1a1523;
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}

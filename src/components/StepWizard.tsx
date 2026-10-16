@@ -12,7 +12,15 @@ export const PASOS = [
   { i: 4, emoji: "👹", label: "Boss" },
 ] as const;
 
-export function StepWizard({ paso, max, onGo }: { paso: Paso; max: Paso; onGo: (p: Paso) => void }) {
+export function StepWizard({
+  paso,
+  max,
+  onGo,
+}: {
+  paso: Paso;
+  max: Paso;
+  onGo: (p: Paso) => void;
+}) {
   return (
     <div className="flex items-center gap-1 overflow-auto no-scrollbar">
       {PASOS.map((s) => {
@@ -24,7 +32,7 @@ export function StepWizard({ paso, max, onGo }: { paso: Paso; max: Paso; onGo: (
             key={s.i}
             disabled={locked}
             onClick={() => onGo(s.i as Paso)}
-            className={`shrink-0 flex items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-extrabold ${active ? "bg-[#1a1523] text-white dark:bg-white dark:text-black border-[#1a1523]" : locked ? "opacity-40 cursor-not-allowed" : done ? "border-green-500 text-green-700" : "border-[#1a1523] dark:border-white/30"}`}
+            className={`shrink-0 flex items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-extrabold ${active ? "bg-[#1a1523] text-white border-[#1a1523]" : locked ? "opacity-40 cursor-not-allowed" : done ? "border-green-500 text-green-700" : "border-[#1a1523]"}`}
           >
             {locked ? "🔒" : done ? "✅" : s.emoji} {s.label}
           </button>

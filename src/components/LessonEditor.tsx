@@ -3,11 +3,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { markDoneVerified, isDone } from "@/lib/store";
 import { Bloqui } from "./Bloqui";
-import { DIFICULTAD_META, getIntro, getLabDecision, getBossChecklist, type Leccion } from "@/data/cursos";
+import {
+  DIFICULTAD_META,
+  getIntro,
+  getLabDecision,
+  getBossChecklist,
+  type Leccion,
+} from "@/data/cursos";
 import { validateLesson, proofHash } from "@/lib/verification";
 import { shuffleQuiz } from "@/lib/quiz";
 import { ALLOW } from "@/lib/blockly/scope";
-import { StepWizard, loadStep, loadMaxStep, saveStep, saveMaxStep, type Paso } from "./StepWizard";
+import {
+  StepWizard,
+  loadStep,
+  loadMaxStep,
+  saveStep,
+  saveMaxStep,
+  type Paso,
+} from "./StepWizard";
 import { MiniEditor } from "./MiniEditor";
 import type { Generated } from "./BlocklyReal";
 
@@ -16,7 +29,15 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
   const [paso, setPaso] = useState<Paso>(0);
   const [max, setMax] = useState<Paso>(0);
   const [mounted, setMounted] = useState(false);
-  const [gen, setGen] = useState<Generated>({ html: "", css: "", js: "", srcDoc: "", count: 0, types: [], purged: [] });
+  const [gen, setGen] = useState<Generated>({
+    html: "",
+    css: "",
+    js: "",
+    srcDoc: "",
+    count: 0,
+    types: [],
+    purged: [],
+  });
   const [quizPassed, setQuizPassed] = useState(false);
   const [quizSeed, setQuizSeed] = useState(12345);
   const [hintIdx, setHintIdx] = useState(0);
@@ -32,7 +53,10 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
     setMounted(true);
   }, [leccion.id]);
 
-  const quizMixed = useMemo(() => shuffleQuiz(leccion.quiz, quizSeed), [leccion.quiz, quizSeed]);
+  const quizMixed = useMemo(
+    () => shuffleQuiz(leccion.quiz, quizSeed),
+    [leccion.quiz, quizSeed],
+  );
   const meta = DIFICULTAD_META[leccion.dificultad];
   const intro = getIntro(leccion);
 
@@ -55,24 +79,48 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
   const allowed = ALLOW[leccion.curso];
   const validTypes = gen.types.filter((t) => allowed.has(t));
   const forbidden = gen.types.filter((t) => !allowed.has(t));
-  const hasAsset = gen.types.some((t) => t === "bw_img_asset" || t === "bw_video_asset" || t === "bw_img" || t === "bw_video");
+  const hasAsset = gen.types.some(
+    (t) =>
+      t === "bw_img_asset" ||
+      t === "bw_video_asset" ||
+      t === "bw_img" ||
+      t === "bw_video",
+  );
 
-  const missionOk = validTypes.length >= 2 && forbidden.length === 0 && gen.html.replace(/\s/g, "").length > 10;
+  const missionOk =
+    validTypes.length >= 2 &&
+    forbidden.length === 0 &&
+    gen.html.replace(/\s/g, "").length > 10;
   const labOk = validTypes.length >= 3 && forbidden.length === 0;
 
-  const full = validateLesson(leccion, { blockTypes: gen.types, html: gen.html, css: gen.css, js: gen.js, quizPassed });
+  const full = validateLesson(leccion, {
+    blockTypes: gen.types,
+    html: gen.html,
+    css: gen.css,
+    js: gen.js,
+    quizPassed,
+  });
   const bossAssetOk = hasAsset;
   const bossOk = full.ok && bossAssetOk;
 
   const finish = async (publish: boolean) => {
     if (!bossOk) return;
     const proof = proofHash(leccion.id, gen.types, quizSeed, leccion.xp);
-    const ok = markDoneVerified(leccion.id, { blockTypes: gen.types, quizSeed, proof });
+    const ok = markDoneVerified(leccion.id, {
+      blockTypes: gen.types,
+      quizSeed,
+      proof,
+    });
     if (!ok) return;
     if (publish) {
       const slug = `${leccion.id}-${Math.random().toString(36).slice(2, 6)}`;
       const { publishProject } = await import("@/lib/projects");
-      const r = await publishProject({ slug, nombre: leccion.titulo, html: gen.srcDoc, bloques: gen.types });
+      const r = await publishProject({
+        slug,
+        nombre: leccion.titulo,
+        html: gen.srcDoc,
+        bloques: gen.types,
+      });
       setDone(true);
       alert(`${r.message} +${full.xp} XP · Ver en /p/${slug}`);
     } else {
@@ -85,85 +133,200 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       <div className="flex items-start gap-3">
         <Bloqui mood={done ? "wow" : bossOk ? "wow" : "think"} size={52} />
         <div className="flex-1">
-          <h1 className="font-display text-2xl md:text-3xl font-extrabold">{leccion.titulo}</h1>
-          <p className="text-sm opacity-70">Solo bloques 🧱 · <b style={{ color: meta.color }}>{meta.emoji} {meta.label} · +{leccion.xp} XP</b> · {leccion.curso.toUpperCase()}</p>
-          <div className="mt-2"><StepWizard paso={paso} max={done ? 4 : max} onGo={go} /></div>
+          <h1 className="font-display text-2xl md:text-3xl font-extrabold">
+            {leccion.titulo}
+          </h1>
+          <p className="text-sm opacity-70">
+            Solo bloques 🧱 ·{" "}
+            <b style={{ color: meta.color }}>
+              {meta.emoji} {meta.label} · +{leccion.xp} XP
+            </b>{" "}
+            · {leccion.curso.toUpperCase()}
+          </p>
+          <div className="mt-2">
+            <StepWizard paso={paso} max={done ? 4 : max} onGo={go} />
+          </div>
         </div>
-        {done && <span className="rounded-full bg-green-500 text-white text-xs font-bold px-3 py-1">✅ Verificada</span>}
+        {done && (
+          <span className="rounded-full bg-green-500 text-white text-xs font-bold px-3 py-1">
+            ✅ Verificada
+          </span>
+        )}
       </div>
 
       {/* PASO 0 APRENDE */}
       {paso === 0 && (
-        <section className="rounded-3xl border-4 border-[#1a1523] dark:border-white/20 bg-white dark:bg-white/5 p-5 block-shadow">
-          <h2 className="font-display text-xl font-extrabold">📖 Lo que verás en este curso</h2>
-          {intro.parrafos.map((p) => <p key={p} className="mt-2">{p}</p>)}
+        <section className="rounded-3xl border-4 border-[#1a1523] bg-white p-5 block-shadow">
+          <h2 className="font-display text-xl font-extrabold">
+            📖 Lo que verás en este curso
+          </h2>
+          {intro.parrafos.map((p) => (
+            <p key={p} className="mt-2">
+              {p}
+            </p>
+          ))}
           <div className="grid md:grid-cols-2 gap-3 mt-3">
             <div className="rounded-2xl border-2 overflow-hidden bg-[var(--background)]">
-              <div className="text-xs font-bold px-2 py-1 bg-black/5">🖼️ Ejemplo visual</div>
+              <div className="text-xs font-bold px-2 py-1 bg-black/5">
+                🖼️ Ejemplo visual
+              </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`https://placehold.co/600x220/1a1523/FFC700?text=${encodeURIComponent(leccion.titulo.slice(0, 24))}`} alt={`Ejemplo ${leccion.titulo}`} className="w-full" />
+              <img
+                src={`https://placehold.co/600x220/1a1523/FFC700?text=${encodeURIComponent(leccion.titulo.slice(0, 24))}`}
+                alt={`Ejemplo ${leccion.titulo}`}
+                className="w-full"
+              />
             </div>
             <div className="rounded-2xl border-2 p-3 bg-[var(--background)]">
               <div className="text-xs font-bold mb-1">📊 Diagrama</div>
               <Diagrama curso={leccion.curso} />
             </div>
           </div>
-          <ul className="mt-3 text-sm list-disc ml-5 opacity-80">{intro.tips.map((t) => <li key={t}>{t}</li>)}</ul>
-          <button onClick={() => unlock(1)} className="mt-4 rounded-2xl bg-[#1a1523] text-white dark:bg-white dark:text-black font-extrabold px-6 py-3">Entendido → ir a la Misión 🎯</button>
+          <ul className="mt-3 text-sm list-disc ml-5 opacity-80">
+            {intro.tips.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <button
+            onClick={() => unlock(1)}
+            className="mt-4 rounded-2xl bg-[#1a1523] text-white font-extrabold px-6 py-3"
+          >
+            Entendido → ir a la Misión 🎯
+          </button>
         </section>
       )}
 
       {/* PASO 1 MISION */}
       {paso === 1 && (
         <div className="flex flex-col gap-3">
-          <section className="rounded-2xl border-2 p-3 bg-white dark:bg-white/5">
+          <section className="rounded-2xl border-2 p-3 bg-white">
             <h2 className="font-display font-extrabold">🎯 Misión principal</h2>
             <p className="mt-1 text-sm">{leccion.mision}</p>
-            <p className="mt-1 text-xs rounded-xl bg-black/5 dark:bg-white/10 p-2">💡 {leccion.concepto}</p>
+            <p className="mt-1 text-xs rounded-xl bg-black/5 p-2">
+              💡 {leccion.concepto}
+            </p>
             <div className="flex gap-2 mt-2">
-              <button onClick={() => go(0)} className="rounded-xl border-2 px-3 py-2 text-sm font-bold">← Aprende</button>
-              <button onClick={() => unlock(2)} disabled={!missionOk} className={`flex-1 rounded-xl font-bold py-2 text-sm ${missionOk ? "bg-[#FF6B35] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}>Completar misión → Lab 🎨</button>
+              <button
+                onClick={() => go(0)}
+                className="rounded-xl border-2 px-3 py-2 text-sm font-bold"
+              >
+                ← Aprende
+              </button>
+              <button
+                onClick={() => unlock(2)}
+                disabled={!missionOk}
+                className={`flex-1 rounded-xl font-bold py-2 text-sm ${missionOk ? "bg-[#FF6B35] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
+              >
+                Completar misión → Lab 🎨
+              </button>
             </div>
           </section>
-          <MiniEditor lessonId={leccion.id} curso={leccion.curso} gen={gen} onChange={setGen} showFiles={false} previewTitle={leccion.id} instruccion={`🎯 Misión: ${leccion.mision}`} estado={missionOk ? "✅ Lista" : `🧱 ${validTypes.length}/2`} />
+          <MiniEditor
+            lessonId={leccion.id}
+            curso={leccion.curso}
+            gen={gen}
+            onChange={setGen}
+            showFiles={false}
+            previewTitle={leccion.id}
+            instruccion={`🎯 Misión: ${leccion.mision}`}
+            estado={missionOk ? "✅ Lista" : `🧱 ${validTypes.length}/2`}
+          />
         </div>
       )}
 
       {/* PASO 2 LAB */}
       {paso === 2 && (
         <div className="flex flex-col gap-3">
-          <section className="rounded-2xl border-2 border-[#2563EB] p-3 bg-white dark:bg-white/5">
-            <h2 className="font-display font-extrabold">🎨 Laboratorio libre — tú decides</h2>
+          <section className="rounded-2xl border-2 border-[#2563EB] p-3 bg-white">
+            <h2 className="font-display font-extrabold">
+              🎨 Laboratorio libre — tú decides
+            </h2>
             <p className="text-sm mt-1 font-bold">{getLabDecision(leccion)}</p>
-            <ul className="list-disc ml-5 mt-1 text-xs">{leccion.labLibre.map((l) => <li key={l}>{l}</li>)}</ul>
+            <ul className="list-disc ml-5 mt-1 text-xs">
+              {leccion.labLibre.map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ul>
             <div className="flex gap-2 mt-2">
-              <button onClick={() => go(1)} className="rounded-xl border-2 px-3 py-2 text-sm font-bold">← Misión</button>
-              <button onClick={() => unlock(3)} disabled={!labOk} className={`flex-1 rounded-xl font-bold py-2 text-sm ${labOk ? "bg-[#2563EB] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}>Ir al Quiz ✅</button>
+              <button
+                onClick={() => go(1)}
+                className="rounded-xl border-2 px-3 py-2 text-sm font-bold"
+              >
+                ← Misión
+              </button>
+              <button
+                onClick={() => unlock(3)}
+                disabled={!labOk}
+                className={`flex-1 rounded-xl font-bold py-2 text-sm ${labOk ? "bg-[#2563EB] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
+              >
+                Ir al Quiz ✅
+              </button>
             </div>
           </section>
-          <MiniEditor lessonId={leccion.id} curso={leccion.curso} gen={gen} onChange={setGen} showFiles previewTitle={leccion.id} instruccion="🎨 Lab: decide tu tema, sube archivos en 📁 y arma tu página" estado={labOk ? "✅ Listo" : `🧱 ${validTypes.length}/3`} />
+          <MiniEditor
+            lessonId={leccion.id}
+            curso={leccion.curso}
+            gen={gen}
+            onChange={setGen}
+            showFiles
+            previewTitle={leccion.id}
+            instruccion="🎨 Lab: decide tu tema, sube archivos en 📁 y arma tu página"
+            estado={labOk ? "✅ Listo" : `🧱 ${validTypes.length}/3`}
+          />
         </div>
       )}
 
       {/* PASO 3 QUIZ */}
       {paso === 3 && (
-        <section className="w-full rounded-3xl border-4 border-[#1a1523] dark:border-white/20 bg-white dark:bg-white/5 p-4 md:p-8 block-shadow">
-          <h2 className="font-display text-2xl md:text-3xl font-extrabold">✅ Quiz (aleatorio, 100%)</h2>
-          <p className="text-sm md:text-base opacity-70 mt-1">Responde todo bien para desbloquear el Boss final 👹</p>
+        <section className="w-full rounded-3xl border-4 border-[#1a1523] bg-white p-4 md:p-8 block-shadow">
+          <h2 className="font-display text-2xl md:text-3xl font-extrabold">
+            ✅ Quiz (aleatorio, 100%)
+          </h2>
+          <p className="text-sm md:text-base opacity-70 mt-1">
+            Responde todo bien para desbloquear el Boss final 👹
+          </p>
           {mounted ? (
-            <QuizHard key={quizSeed} quiz={quizMixed} onPass={() => { setQuizPassed(true); unlock(4); }} />
+            <QuizHard
+              key={quizSeed}
+              quiz={quizMixed}
+              onPass={() => {
+                setQuizPassed(true);
+                unlock(4);
+              }}
+            />
           ) : (
             <p className="text-sm opacity-70 mt-2">⏳ Cargando quiz...</p>
           )}
           {quizPassed && (
             <div className="mt-3 rounded-xl border-2 border-dashed p-3 text-sm md:text-base">
-              <button onClick={() => setShowSol(!showSol)} className="font-bold underline">{showSol ? "Ocultar referencia" : "Ver referencia"}</button>
-              {showSol && <pre className="mt-2 text-xs md:text-sm bg-black text-green-200 p-3 rounded-xl overflow-auto">{leccion.solucion}</pre>}
+              <button
+                onClick={() => setShowSol(!showSol)}
+                className="font-bold underline"
+              >
+                {showSol ? "Ocultar referencia" : "Ver referencia"}
+              </button>
+              {showSol && (
+                <pre className="mt-2 text-xs md:text-sm bg-black text-green-200 p-3 rounded-xl overflow-auto">
+                  {leccion.solucion}
+                </pre>
+              )}
             </div>
           )}
-          <div className="mt-4 flex gap-2 rounded-2xl border-2 border-[#1a1523] dark:border-white/20 bg-[var(--background)] p-2">
-            <button onClick={() => go(2)} className="rounded-xl border-2 px-4 py-3 text-sm md:text-base font-bold">← Lab</button>
-            {quizPassed && <button onClick={() => go(4)} className="flex-1 rounded-xl bg-[#a855f7] text-white font-extrabold py-3 text-sm md:text-lg">Ir al Boss final 👹</button>}
+          <div className="mt-4 flex gap-2 rounded-2xl border-2 border-[#1a1523] bg-[var(--background)] p-2">
+            <button
+              onClick={() => go(2)}
+              className="rounded-xl border-2 px-4 py-3 text-sm md:text-base font-bold"
+            >
+              ← Lab
+            </button>
+            {quizPassed && (
+              <button
+                onClick={() => go(4)}
+                className="flex-1 rounded-xl bg-[#a855f7] text-white font-extrabold py-3 text-sm md:text-lg"
+              >
+                Ir al Boss final 👹
+              </button>
+            )}
           </div>
         </section>
       )}
@@ -171,27 +334,79 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       {/* PASO 4 BOSS */}
       {paso === 4 && (
         <div className="flex flex-col gap-3">
-          <section className="rounded-2xl border-2 border-[#a855f7] p-3 bg-white dark:bg-white/5">
-            <h2 className="font-display font-extrabold">👹 Boss final — publica tu página 🌐</h2>
+          <section className="rounded-2xl border-2 border-[#a855f7] p-3 bg-white">
+            <h2 className="font-display font-extrabold">
+              👹 Boss final — publica tu página 🌐
+            </h2>
             <p className="text-sm mt-1">{leccion.boss}</p>
             <ul className="mt-1 text-xs list-disc ml-5">
-              {getBossChecklist(leccion).map((c) => <li key={c}>{c}</li>)}
+              {getBossChecklist(leccion).map((c) => (
+                <li key={c}>{c}</li>
+              ))}
             </ul>
             <div className="mt-1 text-xs">
-              {!quizPassed && <p className="font-bold text-red-600">🔒 Aprueba el Quiz primero.</p>}
-              {!hasAsset && <p className="font-bold">📁 Falta: sube 1 imagen/video y úsalo con bloque 📁.</p>}
-              {bossOk && <p className="font-bold text-green-600">✅ Boss verificable · +{full.xp} XP — usa ▶ Probar y luego Publicar</p>}
+              {!quizPassed && (
+                <p className="font-bold text-red-600">
+                  🔒 Aprueba el Quiz primero.
+                </p>
+              )}
+              {!hasAsset && (
+                <p className="font-bold">
+                  📁 Falta: sube 1 imagen/video y úsalo con bloque 📁.
+                </p>
+              )}
+              {bossOk && (
+                <p className="font-bold text-green-600">
+                  ✅ Boss verificable · +{full.xp} XP — usa ▶ Probar y luego
+                  Publicar
+                </p>
+              )}
             </div>
             <div className="flex gap-2 mt-2 flex-col sm:flex-row">
-              <button onClick={() => go(3)} className="rounded-xl border-2 px-3 py-2 text-sm font-bold">← Quiz</button>
-              <button onClick={() => finish(true)} disabled={!bossOk} className={`flex-1 rounded-xl font-bold py-2 text-sm ${bossOk ? "bg-[#a855f7] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}>🌐 Publicar y completar +{leccion.xp} XP</button>
+              <button
+                onClick={() => go(3)}
+                className="rounded-xl border-2 px-3 py-2 text-sm font-bold"
+              >
+                ← Quiz
+              </button>
+              <button
+                onClick={() => finish(true)}
+                disabled={!bossOk}
+                className={`flex-1 rounded-xl font-bold py-2 text-sm ${bossOk ? "bg-[#a855f7] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
+              >
+                🌐 Publicar y completar +{leccion.xp} XP
+              </button>
             </div>
             <div className="mt-1">
-              <button onClick={() => setHintIdx((i) => Math.min(i + 1, leccion.pistas.length))} className="text-xs font-bold underline">💡 Pista ({hintIdx}/{leccion.pistas.length})</button>
-              {hintIdx > 0 && <ul className="text-xs mt-1 list-disc ml-5">{leccion.pistas.slice(0, hintIdx).map((p) => <li key={p}>{p}</li>)}</ul>}
+              <button
+                onClick={() =>
+                  setHintIdx((i) => Math.min(i + 1, leccion.pistas.length))
+                }
+                className="text-xs font-bold underline"
+              >
+                💡 Pista ({hintIdx}/{leccion.pistas.length})
+              </button>
+              {hintIdx > 0 && (
+                <ul className="text-xs mt-1 list-disc ml-5">
+                  {leccion.pistas.slice(0, hintIdx).map((p) => (
+                    <li key={p}>{p}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </section>
-          <MiniEditor lessonId={leccion.id} curso={leccion.curso} gen={gen} onChange={setGen} showFiles previewTitle={leccion.id} instruccion="👹 Boss: usa bloques + 1 imagen/video 📁, prueba con ▶ y publica 🌐" estado={bossOk ? "✅ Verificable" : `🧱 ${gen.count}`} onPublish={() => finish(true)} publishLabel={`🌐 Publicar +${leccion.xp} XP`} />
+          <MiniEditor
+            lessonId={leccion.id}
+            curso={leccion.curso}
+            gen={gen}
+            onChange={setGen}
+            showFiles
+            previewTitle={leccion.id}
+            instruccion="👹 Boss: usa bloques + 1 imagen/video 📁, prueba con ▶ y publica 🌐"
+            estado={bossOk ? "✅ Verificable" : `🧱 ${gen.count}`}
+            onPublish={() => finish(true)}
+            publishLabel={`🌐 Publicar +${leccion.xp} XP`}
+          />
         </div>
       )}
     </div>
@@ -202,32 +417,119 @@ function Diagrama({ curso }: { curso: string }) {
   if (curso === "css")
     return (
       <svg viewBox="0 0 200 90" className="w-full h-24">
-        <rect x="10" y="10" width="180" height="70" rx="10" fill="none" stroke="currentColor" strokeWidth="3" />
-        <rect x="25" y="25" width="150" height="40" rx="8" fill="#2563EB" opacity="0.8" />
-        <text x="100" y="50" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">padding + border</text>
+        <rect
+          x="10"
+          y="10"
+          width="180"
+          height="70"
+          rx="10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+        />
+        <rect
+          x="25"
+          y="25"
+          width="150"
+          height="40"
+          rx="8"
+          fill="#2563EB"
+          opacity="0.8"
+        />
+        <text
+          x="100"
+          y="50"
+          textAnchor="middle"
+          fill="white"
+          fontSize="12"
+          fontWeight="bold"
+        >
+          padding + border
+        </text>
       </svg>
     );
   if (curso === "js")
     return (
       <svg viewBox="0 0 200 90" className="w-full h-24">
-        <rect x="10" y="30" width="70" height="30" rx="8" fill="#FFC700" stroke="black" strokeWidth="3" />
-        <text x="45" y="50" textAnchor="middle" fontSize="11" fontWeight="bold">click</text>
-        <line x1="80" y1="45" x2="110" y2="45" stroke="currentColor" strokeWidth="3" />
-        <rect x="110" y="30" width="80" height="30" rx="8" fill="none" stroke="currentColor" strokeWidth="3" />
-        <text x="150" y="50" textAnchor="middle" fontSize="11" fontWeight="bold">🎉 cambia</text>
+        <rect
+          x="10"
+          y="30"
+          width="70"
+          height="30"
+          rx="8"
+          fill="#FFC700"
+          stroke="black"
+          strokeWidth="3"
+        />
+        <text x="45" y="50" textAnchor="middle" fontSize="11" fontWeight="bold">
+          click
+        </text>
+        <line
+          x1="80"
+          y1="45"
+          x2="110"
+          y2="45"
+          stroke="currentColor"
+          strokeWidth="3"
+        />
+        <rect
+          x="110"
+          y="30"
+          width="80"
+          height="30"
+          rx="8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+        />
+        <text
+          x="150"
+          y="50"
+          textAnchor="middle"
+          fontSize="11"
+          fontWeight="bold"
+        >
+          🎉 cambia
+        </text>
       </svg>
     );
   return (
     <svg viewBox="0 0 200 90" className="w-full h-24">
       <rect x="10" y="10" width="60" height="30" rx="6" fill="#FF6B35" />
-      <text x="40" y="30" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">h1</text>
-      <rect x="10" y="48" width="120" height="24" rx="6" fill="none" stroke="currentColor" strokeWidth="3" />
-      <text x="70" y="65" textAnchor="middle" fontSize="11">p + img</text>
+      <text
+        x="40"
+        y="30"
+        textAnchor="middle"
+        fill="white"
+        fontSize="11"
+        fontWeight="bold"
+      >
+        h1
+      </text>
+      <rect
+        x="10"
+        y="48"
+        width="120"
+        height="24"
+        rx="6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      <text x="70" y="65" textAnchor="middle" fontSize="11">
+        p + img
+      </text>
     </svg>
   );
 }
 
-function QuizHard({ quiz, onPass }: { quiz: Leccion["quiz"]; onPass: () => void }) {
+function QuizHard({
+  quiz,
+  onPass,
+}: {
+  quiz: Leccion["quiz"];
+  onPass: () => void;
+}) {
   const [ans, setAns] = useState<Record<number, number>>({});
   const [ok, setOk] = useState(false);
   const [fails, setFails] = useState(0);
@@ -246,20 +548,36 @@ function QuizHard({ quiz, onPass }: { quiz: Leccion["quiz"]; onPass: () => void 
     <div className="flex flex-col gap-3 mt-3">
       <div>
         <div className="flex justify-between text-xs md:text-sm font-bold mb-1">
-          <span>Respondidas {answered}/{quiz.length}</span>
+          <span>
+            Respondidas {answered}/{quiz.length}
+          </span>
           <span>{pct}%</span>
         </div>
-        <div className="h-3 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
-          <div className="h-full rounded-full bg-[#FFC700] transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-3 overflow-hidden rounded-full bg-black/10">
+          <div
+            className="h-full rounded-full bg-[#FFC700] transition-all"
+            style={{ width: `${pct}%` }}
+          />
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         {quiz.map((q, i) => (
-          <div key={i} className="rounded-2xl border-2 border-[#1a1523]/20 dark:border-white/20 p-3 md:p-4">
-            <p className="text-base md:text-lg font-bold">{i + 1}. {q.q}</p>
+          <div
+            key={i}
+            className="rounded-2xl border-2 border-[#1a1523]/20 p-3 md:p-4"
+          >
+            <p className="text-base md:text-lg font-bold">
+              {i + 1}. {q.q}
+            </p>
             <div className="grid gap-2 mt-2">
               {q.opciones.map((op, j) => (
-                <button key={j} onClick={() => setAns({ ...ans, [i]: j })} className={`text-left text-sm md:text-base rounded-xl border-2 px-3 py-2 md:py-3 font-bold ${ans[i] === j ? "bg-[#FFC700]/40 border-[#1a1523] dark:border-white" : "border-black/10 dark:border-white/20 hover:border-black/30"}`}>{op}</button>
+                <button
+                  key={j}
+                  onClick={() => setAns({ ...ans, [i]: j })}
+                  className={`text-left text-sm md:text-base rounded-xl border-2 px-3 py-2 md:py-3 font-bold ${ans[i] === j ? "bg-[#FFC700]/40 border-[#1a1523]" : "border-black/10 hover:border-black/30"}`}
+                >
+                  {op}
+                </button>
               ))}
             </div>
           </div>
@@ -269,8 +587,10 @@ function QuizHard({ quiz, onPass }: { quiz: Leccion["quiz"]; onPass: () => void 
         disabled={locked}
         onClick={() => {
           const pass = quiz.every((q, i) => ans[i] === q.correcta);
-          if (pass) { setOk(true); onPass(); }
-          else {
+          if (pass) {
+            setOk(true);
+            onPass();
+          } else {
             const f = fails + 1;
             setFails(f);
             const until = Date.now() + Math.min(20000, f * 5000);
@@ -279,11 +599,17 @@ function QuizHard({ quiz, onPass }: { quiz: Leccion["quiz"]; onPass: () => void 
             alert(`Aún no 💪 (intento ${f}).`);
           }
         }}
-        className="rounded-2xl bg-[#1a1523] text-white dark:bg-white dark:text-black font-extrabold py-3 md:py-4 text-base md:text-lg disabled:opacity-50"
+        className="rounded-2xl bg-[#1a1523] text-white font-extrabold py-3 md:py-4 text-base md:text-lg disabled:opacity-50"
       >
-        {locked ? `Espera ${Math.max(1, Math.ceil((lockUntil - now) / 1000))}s...` : "Comprobar quiz"}
+        {locked
+          ? `Espera ${Math.max(1, Math.ceil((lockUntil - now) / 1000))}s...`
+          : "Comprobar quiz"}
       </button>
-      {ok && <p className="text-green-600 text-sm md:text-base font-bold">✅ Quiz superado — ya puedes ir al Boss 👹</p>}
+      {ok && (
+        <p className="text-green-600 text-sm md:text-base font-bold">
+          ✅ Quiz superado — ya puedes ir al Boss 👹
+        </p>
+      )}
     </div>
   );
 }

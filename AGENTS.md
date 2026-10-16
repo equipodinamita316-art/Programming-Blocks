@@ -34,6 +34,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000            # luego https://blockweb.co
 - ✅ 30 lecciones, wizard 5 pasos con candado, Blockly 42 bloques con alcance por curso (HTML solo-HTML, CSS HTML+CSS, JS todo), verificación fuerte con proof, quiz aleatorio, assets IndexedDB + bloques 📁, examen final con gate (80% + 1 Boss), certificado QR, publish Supabase con fallback local, Auth email+Google implementado (login obligatorio vía middleware).
 - ✅ Supabase: schema aplicado (6 tablas + `verify_cert`), bucket `assets` público creado, conexión verificada.
 - ✅ `npm run build` y `npm run lint` verdes (0 errores).
+- ✅ Diseño: SOLO modo claro (fondo crema). Sin toggle ni clases dark. Referencia visual: captura dashboard claro del usuario.
 - ⏳ **PENDIENTE — probar login Google end-to-end:** el provider Google ya quedó **activado y verificado por API** (Client ID + Secret en Supabase, redirect URI registrada). Falta: entrar a `/login` → Continuar con Google → verificar que cae en `/dashboard` y que se crea la fila en `profiles` (trigger `handle_new_user`).
 - ⏳ Tras eso: probar login Google end-to-end, luego flujo publicar→abrir en incógnito→certificar contra la nube.
 

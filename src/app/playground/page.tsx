@@ -8,12 +8,27 @@ import { FilesModal, useAssetCount } from "@/components/FilesModal";
 import { PreviewModal } from "@/components/PreviewModal";
 import type { Generated } from "@/components/BlocklyReal";
 
-const BlocklyReal = dynamic(() => import("@/components/BlocklyReal").then((m) => m.BlocklyReal), {
-  ssr: false,
-  loading: () => <div className="p-6 rounded-2xl border-4 font-bold">⏳ Cargando editor de bloques...</div>,
-});
+const BlocklyReal = dynamic(
+  () => import("@/components/BlocklyReal").then((m) => m.BlocklyReal),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-6 rounded-2xl border-4 font-bold">
+        ⏳ Cargando editor de bloques...
+      </div>
+    ),
+  },
+);
 
-const EMPTY_GEN: Generated = { html: "", css: "", js: "", srcDoc: "", count: 0, types: [], purged: [] };
+const EMPTY_GEN: Generated = {
+  html: "",
+  css: "",
+  js: "",
+  srcDoc: "",
+  count: 0,
+  types: [],
+  purged: [],
+};
 
 // Envuelve código escrito a mano en un documento válido (si no lo es ya).
 function wrapCode(code: string): string {
@@ -35,7 +50,13 @@ export default function Playground() {
 
   const goBloques = () => {
     if (modo === "bloques") return;
-    if (dirty && !window.confirm("Volver a bloques descartará lo que escribiste a mano. ¿Seguir?")) return;
+    if (
+      dirty &&
+      !window.confirm(
+        "Volver a bloques descartará lo que escribiste a mano. ¿Seguir?",
+      )
+    )
+      return;
     setDirty(false);
     setModo("bloques");
   };
@@ -51,7 +72,10 @@ export default function Playground() {
   const activeSrcDoc = modo === "bloques" ? gen.srcDoc : wrapCode(code);
 
   const publish = async () => {
-    const slug = `${nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}-${Math.random().toString(36).slice(2, 6)}`;
+    const slug = `${nombre
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .slice(0, 40)}-${Math.random().toString(36).slice(2, 6)}`;
     const { publishProject } = await import("@/lib/projects");
     const r = await publishProject({
       slug,
@@ -65,45 +89,93 @@ export default function Playground() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="font-display text-2xl md:text-3xl font-extrabold">🧱 Playground</h1>
-        <span className="text-xs font-bold rounded-full bg-green-500 text-white px-2 py-1">{BLOCK_COUNT} bloques</span>
+        <h1 className="font-display text-2xl md:text-3xl font-extrabold">
+          🧱 Playground
+        </h1>
+        <span className="text-xs font-bold rounded-full bg-green-500 text-white px-2 py-1">
+          {BLOCK_COUNT} bloques
+        </span>
         {modo === "codigo" && dirty && (
-          <span className="text-xs font-bold rounded-full bg-[#FFC700] px-2 py-1 border">✏️ Código manual — los bloques ya no coinciden</span>
+          <span className="text-xs font-bold rounded-full bg-[#FFC700] px-2 py-1 border">
+            ✏️ Código manual — los bloques ya no coinciden
+          </span>
         )}
       </div>
 
       {/* Barra única: proyecto + toggle + acciones */}
       <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
-        <input value={nombre} onChange={(e) => setNombre(e.target.value)} className="rounded-xl border-2 border-[#1a1523] dark:border-white/30 px-3 py-2 font-bold bg-white dark:bg-white/5 min-w-[180px] flex-1 sm:flex-none" placeholder="Nombre proyecto" />
-        <div className="flex rounded-xl overflow-hidden border-2 border-[#1a1523] dark:border-white/30">
-          <button onClick={goBloques} className={`px-4 py-2 ${modo === "bloques" ? "bg-[#1a1523] text-white dark:bg-white dark:text-black" : ""}`}>🧱 Bloques</button>
-          <button onClick={goCodigo} className={`px-4 py-2 ${modo === "codigo" ? "bg-[#1a1523] text-white dark:bg-white dark:text-black" : ""}`}>⌨️ Código</button>
+        <input
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          className="rounded-xl border-2 border-[#1a1523] px-3 py-2 font-bold bg-white min-w-[180px] flex-1 sm:flex-none"
+          placeholder="Nombre proyecto"
+        />
+        <div className="flex rounded-xl overflow-hidden border-2 border-[#1a1523]">
+          <button
+            onClick={goBloques}
+            className={`px-4 py-2 ${modo === "bloques" ? "bg-[#1a1523] text-white" : ""}`}
+          >
+            🧱 Bloques
+          </button>
+          <button
+            onClick={goCodigo}
+            className={`px-4 py-2 ${modo === "codigo" ? "bg-[#1a1523] text-white" : ""}`}
+          >
+            ⌨️ Código
+          </button>
         </div>
         <button
-          onClick={() => { navigator.clipboard?.writeText(modo === "bloques" ? fullCode : code); alert("Código copiado ✅"); }}
+          onClick={() => {
+            navigator.clipboard?.writeText(
+              modo === "bloques" ? fullCode : code,
+            );
+            alert("Código copiado ✅");
+          }}
           className="rounded-xl border-2 px-3 py-2"
         >
           📋 Copiar
         </button>
-        <button onClick={() => setFilesOpen(true)} className="rounded-xl border-2 px-3 py-2" title="Abrir mis archivos">
+        <button
+          onClick={() => setFilesOpen(true)}
+          className="rounded-xl border-2 px-3 py-2"
+          title="Abrir mis archivos"
+        >
           📁 ({fileCount})
         </button>
-        <button onClick={() => setPreview(true)} className="rounded-xl bg-[#FF6B35] text-white px-4 py-2">▶️ Probar</button>
-        <button onClick={publish} className="rounded-xl bg-[#1a1523] text-white dark:bg-white dark:text-black px-4 py-2">🚀 Publicar</button>
+        <button
+          onClick={() => setPreview(true)}
+          className="rounded-xl bg-[#FF6B35] text-white px-4 py-2"
+        >
+          ▶️ Probar
+        </button>
+        <button
+          onClick={publish}
+          className="rounded-xl bg-[#1a1523] text-white px-4 py-2"
+        >
+          🚀 Publicar
+        </button>
       </div>
 
       {/* Editor único a máximo espacio (sin lateral) */}
       {modo === "bloques" ? (
         <div className="min-w-0">
           <BlocklyReal lessonId="playground" onChange={setGen} />
-          <p className="text-xs opacity-60 mt-1">Abre 📁 para subir imágenes/videos y úsalos con el bloque 📁. El workspace se guarda solo.</p>
+          <p className="text-xs opacity-60 mt-1">
+            Abre 📁 para subir imágenes/videos y úsalos con el bloque 📁. El
+            workspace se guarda solo.
+          </p>
         </div>
       ) : (
-        <div className="min-w-0 rounded-2xl overflow-hidden border-4 border-[#1a1523] dark:border-white/20">
-          <div className="px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">⌨️ index.html — editable (al volver a bloques se descarta)</div>
+        <div className="min-w-0 rounded-2xl overflow-hidden border-4 border-[#1a1523]">
+          <div className="px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">
+            ⌨️ index.html — editable (al volver a bloques se descarta)
+          </div>
           <textarea
             value={code}
-            onChange={(e) => { setCode(e.target.value); setDirty(true); }}
+            onChange={(e) => {
+              setCode(e.target.value);
+              setDirty(true);
+            }}
             spellCheck={false}
             className="w-full h-[62vh] min-h-[380px] bg-black text-green-200 font-mono text-sm p-4 outline-none resize-y"
             placeholder="Escribe tu HTML + <style> + <script>..."
@@ -112,7 +184,11 @@ export default function Playground() {
       )}
 
       <p className="text-xs opacity-60">
-        Un solo editor: bloques con drag & drop o código a mano. Lo que ves en Probar es lo que se publica. <Link href="/proyectos" className="underline">Ver plantillas →</Link>
+        Un solo editor: bloques con drag & drop o código a mano. Lo que ves en
+        Probar es lo que se publica.{" "}
+        <Link href="/proyectos" className="underline">
+          Ver plantillas →
+        </Link>
       </p>
 
       <FilesModal
