@@ -3,6 +3,7 @@ import { Baloo_2, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 import { SessionProvider } from "@/lib/supabase/session";
+import { NoticeProvider } from "@/lib/notice";
 
 const display = Baloo_2({
   subsets: ["latin"],
@@ -39,7 +40,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col antialiased">
         <SessionProvider>
-          <AppShell>{children}</AppShell>
+          <NoticeProvider>
+            <AppShell>{children}</AppShell>
+          </NoticeProvider>
         </SessionProvider>
       </body>
     </html>

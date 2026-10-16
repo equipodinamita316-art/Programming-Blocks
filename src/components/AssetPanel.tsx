@@ -9,6 +9,7 @@ import {
   getAssetDataUrl,
   type Asset,
 } from "@/lib/assets";
+import { useNotice } from "@/lib/notice";
 
 type BwUrls = { __bw_urls?: Record<string, string> };
 
@@ -58,11 +59,14 @@ export function AssetPanel({
     };
   }, [lessonId]);
 
+  const { notify } = useNotice();
+
   const onFile = async (f: File | undefined) => {
     if (!f) return;
     setErr("");
     try {
       await saveAssetFile(lessonId, f);
+      notify("📁 Imagen guardada, úsala con el bloque 📁", "exito");
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "No se pudo subir");
     }
@@ -73,13 +77,11 @@ export function AssetPanel({
       // En modo código se pega data: (los blob: no cargan en el preview sandbox)
       const data = await getAssetDataUrl(id).catch(() => "");
       navigator.clipboard?.writeText(data || url);
-      alert(
-        "URL copiada: pégala en tu src. Si es muy larga, es normal (base64).",
-      );
+      notify("URL copiada: pégala en tu src 📋", "exito");
       return;
     }
     navigator.clipboard?.writeText(id);
-    alert(`ID copiado: ${id}\nPégalo en el bloque 📁 imagen/video mía`);
+    notify("ID copiado: pégalo en el bloque 📁", "exito");
   };
 
   return (

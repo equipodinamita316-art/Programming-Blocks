@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { markDoneVerified, isDone } from "@/lib/store";
+import { useNotice } from "@/lib/notice";
 import { Bloqui } from "./Bloqui";
 import {
   DIFICULTAD_META,
@@ -43,6 +44,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
   const [hintIdx, setHintIdx] = useState(0);
   const [done, setDone] = useState(false);
   const [showSol, setShowSol] = useState(false);
+  const { celebrate } = useNotice();
   useEffect(() => {
     // Client-only: paso, seed y progreso viven en localStorage; hidratar tras montar evita mismatch SSR.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -92,6 +94,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
     forbidden.length === 0 &&
     gen.html.replace(/\s/g, "").length > 10;
   const labOk = validTypes.length >= 3 && forbidden.length === 0;
+  const isBoss = leccion.dificultad === "Boss";
 
   const full = validateLesson(leccion, {
     blockTypes: gen.types,
@@ -122,9 +125,22 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
         bloques: gen.types,
       });
       setDone(true);
-      alert(`${r.message} +${full.xp} XP · Ver en /p/${slug}`);
+      celebrate({
+        title: isBoss ? "¡Boss vencido! 👹" : "¡Lección terminada! 🎉",
+        sub: r.message,
+        xp: full.xp,
+        actions: [
+          { label: "🌐 Ver mi página", href: `/p/${slug}`, primary: true },
+          { label: "🗺️ Salir al mapa", href: "/dashboard" },
+        ],
+      });
     } else {
       setDone(true);
+      celebrate({
+        title: "¡Lección terminada! 🎉",
+        xp: full.xp,
+        actions: [{ label: "🗺️ Salir al mapa", href: "/dashboard", primary: true }],
+      });
     }
   };
 
@@ -530,6 +546,7 @@ function QuizHard({
   quiz: Leccion["quiz"];
   onPass: () => void;
 }) {
+  const { notify } = useNotice();
   const [ans, setAns] = useState<Record<number, number>>({});
   const [ok, setOk] = useState(false);
   const [fails, setFails] = useState(0);
@@ -596,7 +613,7 @@ function QuizHard({
             const until = Date.now() + Math.min(20000, f * 5000);
             setLockUntil(until);
             setNow(Date.now());
-            alert(`Aún no 💪 (intento ${f}).`);
+            notify(`Aún no 💪 (intento ${f}) — repasa y reintenta`, "error");
           }
         }}
         className="rounded-2xl bg-[#1a1523] text-white font-extrabold py-3 md:py-4 text-base md:text-lg disabled:opacity-50"

@@ -2,10 +2,12 @@
 
 import { PLANTILLAS } from "@/data/cursos";
 import { getProjects, saveProject } from "@/lib/store";
+import { useNotice } from "@/lib/notice";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function Proyectos() {
+  const { notify } = useNotice();
   const [mine, setMine] = useState<{ slug: string; nombre: string }[]>(() =>
     getProjects(),
   );
@@ -52,7 +54,10 @@ export default function Proyectos() {
                       fecha: new Date().toISOString(),
                     });
                     setMine(getProjects());
-                    alert("Plantilla clonada a Mis proyectos ✅");
+                    notify("Plantilla clonada a Mis proyectos ✅", "exito", {
+                      label: "Ver",
+                      href: `/p/${slug}`,
+                    });
                   }}
                   className="flex-1 rounded-xl bg-[#1a1523] text-white font-bold py-1 text-sm"
                 >

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BLOCK_COUNT } from "@/lib/blockly/blocks";
 import { FilesModal, useAssetCount } from "@/components/FilesModal";
 import { PreviewModal } from "@/components/PreviewModal";
+import { useNotice } from "@/lib/notice";
 import type { Generated } from "@/components/BlocklyReal";
 
 const BlocklyReal = dynamic(
@@ -48,15 +49,18 @@ export default function Playground() {
 
   const fullCode = `<!-- 🧱 HTML -->\n${gen.html}\n<!-- 🎨 CSS -->\n<style>\n${gen.css}</style>\n<!-- ⚡ JS -->\n<script>\n${gen.js}</script>`;
 
-  const goBloques = () => {
+  const { notify, celebrate, askDanger } = useNotice();
+
+  const goBloques = async () => {
     if (modo === "bloques") return;
-    if (
-      dirty &&
-      !window.confirm(
-        "Volver a bloques descartará lo que escribiste a mano. ¿Seguir?",
-      )
-    )
-      return;
+    if (dirty) {
+      const ok = await askDanger({
+        title: "¿Descartar tu código?",
+        body: "Volver a bloques borrará lo que escribiste a mano.",
+        confirmLabel: "Sí, descartar",
+      });
+      if (!ok) return;
+    }
     setDirty(false);
     setModo("bloques");
   };
@@ -83,7 +87,11 @@ export default function Playground() {
       html: activeSrcDoc,
       bloques: modo === "bloques" ? gen.types : [],
     });
-    alert(`🚀 ${r.message} → /p/${slug}`);
+    celebrate({
+      title: "¡Publicado! 🚀",
+      sub: r.message,
+      actions: [{ label: "🌐 Ver mi página", href: `/p/${slug}`, primary: true }],
+    });
   };
 
   return (
@@ -129,7 +137,7 @@ export default function Playground() {
             navigator.clipboard?.writeText(
               modo === "bloques" ? fullCode : code,
             );
-            alert("Código copiado ✅");
+            notify("Código copiado ✅", "exito");
           }}
           className="rounded-xl border-2 px-3 py-2"
         >

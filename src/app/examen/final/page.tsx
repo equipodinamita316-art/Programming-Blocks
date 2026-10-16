@@ -13,6 +13,7 @@ import {
 } from "@/lib/store";
 import { publishProject } from "@/lib/projects";
 import { MiniEditor } from "@/components/MiniEditor";
+import { useNotice } from "@/lib/notice";
 import type { Generated } from "@/components/BlocklyReal";
 import {
   RETOS,
@@ -287,16 +288,18 @@ function RondaQuiz({
 }) {
   const [ans, setAns] = useState<Record<number, number>>({});
   const [started, setStarted] = useState(false);
+  const { notify } = useNotice();
   const corregir = () => {
     if (!nombre.trim()) {
-      alert("Escribe tu nombre arriba para el certificado");
+      notify("Escribe tu nombre arriba para el certificado ✏️", "error");
       return;
     }
     addAttempt();
     const s = quizScore(quiz, ans);
     if (s < 90) {
-      alert(
-        `Sacaste ${s}%. Necesitas 90%+. Repasa y reintenta 💪 (las preguntas rotan)`,
+      notify(
+        `Sacaste ${s}%. Necesitas 90%+. Repasa y reintenta 💪`,
+        "error",
       );
       return;
     }
@@ -437,6 +440,7 @@ function ValidadorBloques({
   setMissing: (m: string[]) => void;
   onPass: (s: number) => void;
 }) {
+  const { notify } = useNotice();
   const validar = (timeout = false) => {
     addAttempt();
     const r = checkReto(reto, gen);
@@ -447,7 +451,7 @@ function ValidadorBloques({
     );
     if (r.score >= 90) onPass(r.score);
     else if (!timeout)
-      alert(`Llevas ${r.score}%. Te falta:\n- ${r.missing.join("\n- ")}`);
+      notify(`Llevas ${r.score}%. Revisa lo que falta abajo 👇`, "error");
   };
   const { label, urgent } = useCountdown(true, F2_MIN, () => validar(true));
   return (
@@ -505,12 +509,13 @@ function RondaProyecto({
   });
   const [missing, setMissing] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const { notify, celebrate } = useNotice();
   const publicar = async () => {
     addAttempt();
     const r = checkProyecto(gen);
     setMissing(r.missing);
     if (r.score < 90) {
-      alert(`Tu sitio lleva ${r.score}%. Falta:\n- ${r.missing.join("\n- ")}`);
+      notify(`Tu sitio lleva ${r.score}%. Revisa lo que falta abajo 👇`, "error");
       return;
     }
     setBusy(true);
@@ -522,7 +527,11 @@ function RondaProyecto({
         html: gen.srcDoc,
         bloques: gen.types,
       });
-      alert(`🌐 ${res.message}`);
+      celebrate({
+        title: "¡Sitio publicado! 🌐",
+        sub: res.message,
+        actions: [{ label: "Ver mi sitio", href: `/p/${slug}`, primary: true }],
+      });
       onPass(r.score, slug);
     } finally {
       setBusy(false);
