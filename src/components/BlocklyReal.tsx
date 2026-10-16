@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { Block, WorkspaceSvg } from "blockly";
+import { useEffect, useRef, useState } from "react";import type { Block, WorkspaceSvg } from "blockly";
 import { BLOCK_DEFS } from "@/lib/blockly/blocks";
 import { generateFromBlocks, combineSrcDoc } from "@/lib/blockly/generators";
 import { ALLOW, getToolboxForCurso, getDisplayToolbox, type Family } from "@/lib/blockly/scope";
@@ -32,6 +31,7 @@ export function BlocklyReal({
 }) {
   const divRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WorkspaceSvg | null>(null);
+  const emitRef = useRef<(() => void) | null>(null);
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState("");
   const [purged, setPurged] = useState<string[]>([]);
@@ -83,13 +83,17 @@ export function BlocklyReal({
           const blocks = workspace.getAllBlocks(false);
           const types = blocks.map((b) => b.type);
           const { html, css, js } = generateFromBlocks(blocks);
-          // hidrata assets subidos (object URLs registradas en __bw_urls)
+          // hidrata assets: reemplaza CUALQUIER src del data-asset con la URL fresca
+          // (data: tras primeDataUrls; blob: solo como fallback transitorio)
           let htmlH = html;
           try {
             const urls = ((globalThis as unknown as { __bw_urls?: Record<string, string> }).__bw_urls || {});
             const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             for (const [id, url] of Object.entries(urls)) {
-              htmlH = htmlH.replace(new RegExp(`data-asset="${esc(id)}" src=""`, "g"), `data-asset="${id}" src="${url}"`);
+              htmlH = htmlH.replace(
+                new RegExp(`data-asset="${esc(id)}" src="[^"]*"`, "g"),
+                `data-asset="${id}" src="${url}"`,
+              );
             }
           } catch {}
           onChange({ html: htmlH, css, js, srcDoc: combineSrcDoc(htmlH, css, js), count: blocks.length, types, purged: [] });
@@ -115,6 +119,7 @@ export function BlocklyReal({
         } catch {}
 
         workspace.addChangeListener(() => emit());
+        emitRef.current = emit;
         emit();
         setReady(true);
       } catch (e: unknown) {
@@ -144,6 +149,14 @@ export function BlocklyReal({
       }
     } catch {}
   }, [displayFamily, curso]);
+
+  // Cuando llegan las data URLs de assets, re-emite para que previews y
+  // publicados usen data: en vez de blob: (válidos en sandbox opaco)
+  useEffect(() => {
+    const h = () => { emitRef.current?.(); };
+    window.addEventListener("bw-assets-ready", h);
+    return () => window.removeEventListener("bw-assets-ready", h);
+  }, []);
 
   if (err) return <div className="p-4 rounded-2xl border-2 border-red-500 text-sm">❌ {err}</div>;
 

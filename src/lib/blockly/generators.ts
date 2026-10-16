@@ -88,7 +88,8 @@ function sanitizeId(s: string): string {
   return String(s).replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 30) || "x";
 }
 
-// Resuelve assetId -> object URL registrada por lib/assets (sin romper SSR)
+// Resuelve assetId -> data URL (cargan en iframes sandbox opacos; los blob: están
+// prohibidos ahí). Sin romper SSR. Ver primeDataUrls() en lib/assets.
 function resolveAsset(id: string): string {
   try {
     const g = globalThis as unknown as { __bw_urls?: Record<string, string> };

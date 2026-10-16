@@ -7,6 +7,7 @@ export type Asset = { id: string; lessonId: string; name: string; kind: "image" 
 
 const DB = "bw-assets-db";
 const STORE = "assets";
+type BwUrls = { __bw_urls?: Record<string, string> };
 const memUrl = new Map<string, string>();
 const memBlob = new Map<string, Blob>();
 
@@ -132,4 +133,55 @@ export function cachedUrls(): Record<string, string> {
   const o: Record<string, string> = {};
   memUrl.forEach((v, k) => { o[k] = v; });
   return o;
+}
+
+// --- Data URLs: cargan en iframes sandbox opacos (los blob: están prohibidos ahí) ---
+const memData = new Map<string, string>();
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result || ""));
+    fr.onerror = () => rej(fr.error);
+    fr.readAsDataURL(blob);
+  });
+}
+
+// Lectura síncrona (para generadores): data URL si ya se convirtió, si no blob, si no "".
+export function peekAssetUrl(id: string): string {
+  return memData.get(id) || memUrl.get(id) || "";
+}
+
+export async function getAssetDataUrl(id: string): Promise<string> {
+  const hit = memData.get(id);
+  if (hit) return hit;
+  const blob = await getAssetBlob(id);
+  if (!blob) return "";
+  try {
+    const data = await blobToDataUrl(blob);
+    if (data) memData.set(id, data);
+    return data;
+  } catch {
+    return "";
+  }
+}
+
+// Convierte todos los assets conocidos a data URLs y publica el mapa global.
+// Llamar en background tras listar/subir; avisa con evento para re-emitir previews.
+export async function primeDataUrls(): Promise<Record<string, string>> {
+  let metas: Asset[] = [];
+  try {
+    metas = JSON.parse(localStorage.getItem("bw-assets-meta") || "[]");
+  } catch { metas = []; }
+  const urls: Record<string, string> = {};
+  await Promise.all(metas.map(async (m) => {
+    const data = await getAssetDataUrl(m.id);
+    if (data) urls[m.id] = data;
+    else if (memUrl.has(m.id)) urls[m.id] = memUrl.get(m.id)!;
+  }));
+  try {
+    (globalThis as unknown as BwUrls).__bw_urls = urls;
+    window.dispatchEvent(new Event("bw-assets-ready"));
+  } catch {}
+  return urls;
 }

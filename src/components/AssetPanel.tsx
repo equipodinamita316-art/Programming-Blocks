@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { listAssets, saveAssetFile, deleteAsset, type Asset } from "@/lib/assets";
+import { listAssets, saveAssetFile, deleteAsset, primeDataUrls, getAssetDataUrl, type Asset } from "@/lib/assets";
 
 type BwUrls = { __bw_urls?: Record<string, string> };
 
@@ -14,11 +14,13 @@ export function AssetPanel({ lessonId, compact, copyMode }: { lessonId: string; 
     let live = true;
     const apply = (all: { asset: Asset; url: string }[]) => {
       if (!live) return;
-      // muestra los de esta lección + globales
+      // muestra los de esta lección + globales (miniaturas con blob:, válido aquí)
       setItems(all.filter((x) => x.asset.lessonId === lessonId || x.asset.lessonId === "global"));
       const urls: Record<string, string> = {};
       all.forEach((x) => { urls[x.asset.id] = x.url; });
       (globalThis as unknown as BwUrls).__bw_urls = urls;
+      // en background: convierte a data: (válidos en iframes sandbox) y re-emite previews
+      void primeDataUrls();
     };
     listAssets().then(apply).catch(() => {});
     const h = () => { listAssets().then(apply).catch(() => {}); };
@@ -39,12 +41,16 @@ export function AssetPanel({ lessonId, compact, copyMode }: { lessonId: string; 
     }
   };
 
-  const copyAsset = (id: string, url: string) => {
-    const text = copyMode === "url" ? url : id;
-    navigator.clipboard?.writeText(text);
-    alert(copyMode === "url"
-      ? "URL copiada: pégala en src=\"...\" de tu código"
-      : `ID copiado: ${id}\nPégalo en el bloque 📁 imagen/video mía`);
+  const copyAsset = async (id: string, url: string) => {
+    if (copyMode === "url") {
+      // En modo código se pega data: (los blob: no cargan en el preview sandbox)
+      const data = await getAssetDataUrl(id).catch(() => "");
+      navigator.clipboard?.writeText(data || url);
+      alert("URL copiada: pégala en tu src. Si es muy larga, es normal (base64).");
+      return;
+    }
+    navigator.clipboard?.writeText(id);
+    alert(`ID copiado: ${id}\nPégalo en el bloque 📁 imagen/video mía`);
   };
 
   return (
