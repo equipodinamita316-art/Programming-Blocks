@@ -5,7 +5,7 @@ import { listAssets, saveAssetFile, deleteAsset, type Asset } from "@/lib/assets
 
 type BwUrls = { __bw_urls?: Record<string, string> };
 
-export function AssetPanel({ lessonId, compact }: { lessonId: string; compact?: boolean }) {
+export function AssetPanel({ lessonId, compact, copyMode }: { lessonId: string; compact?: boolean; copyMode?: "id" | "url" }) {
   const [items, setItems] = useState<{ asset: Asset; url: string }[]>([]);
   const [err, setErr] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -39,9 +39,12 @@ export function AssetPanel({ lessonId, compact }: { lessonId: string; compact?: 
     }
   };
 
-  const copyId = (id: string) => {
-    navigator.clipboard?.writeText(id);
-    alert(`ID copiado: ${id}\nPégalo en el bloque 📁 imagen/video mía`);
+  const copyAsset = (id: string, url: string) => {
+    const text = copyMode === "url" ? url : id;
+    navigator.clipboard?.writeText(text);
+    alert(copyMode === "url"
+      ? "URL copiada: pégala en src=\"...\" de tu código"
+      : `ID copiado: ${id}\nPégalo en el bloque 📁 imagen/video mía`);
   };
 
   return (
@@ -67,7 +70,7 @@ export function AssetPanel({ lessonId, compact }: { lessonId: string; compact?: 
               )}
               <div className="p-1 text-[11px] font-bold truncate">{asset.name}</div>
               <div className="flex gap-1 p-1">
-                <button onClick={() => copyId(asset.id)} className="flex-1 text-[11px] rounded-lg bg-black/5 dark:bg-white/10 py-1 font-bold">Usar</button>
+                <button onClick={() => copyAsset(asset.id, url)} className="flex-1 text-[11px] rounded-lg bg-black/5 dark:bg-white/10 py-1 font-bold">Usar</button>
                 <button onClick={() => deleteAsset(asset.id)} className="text-[11px] rounded-lg px-2 py-1 border">🗑️</button>
               </div>
             </div>
