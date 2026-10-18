@@ -48,7 +48,7 @@ export async function publishProject(input: {
         shared: !hasBlob,
         message: hasBlob
           ? "Publicado en la nube, pero alguna imagen solo vive en este navegador (súbela de nuevo)."
-          : "🌐 Publicado con URL compartible real.",
+          : "Publicado con URL compartible real.",
       };
     } catch (e) {
       console.warn("[BLOCKWEB] publish nube falló, fallback local:", e);
@@ -56,7 +56,7 @@ export async function publishProject(input: {
   }
 
   saveProject({ slug: input.slug, nombre: input.nombre, html, fecha: new Date().toISOString() });
-  return { slug: input.slug, shared: false, message: "💾 Guardado en este dispositivo. El link /p/... solo abre aquí hasta conectar Supabase." };
+  return { slug: input.slug, shared: false, message: "Guardado en este dispositivo. El link /p/... solo abre aquí hasta conectar Supabase." };
 }
 
 export async function fetchSharedProject(slug: string): Promise<string | null> {

@@ -1,16 +1,17 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Icon, type IconName } from "./Icon";
 
 export type Paso = 0 | 1 | 2 | 3 | 4;
 
-export const PASOS = [
-  { i: 0, emoji: "📖", label: "Aprende" },
-  { i: 1, emoji: "🎯", label: "Misión" },
-  { i: 2, emoji: "🎨", label: "Lab Libre" },
-  { i: 3, emoji: "✅", label: "Quiz" },
-  { i: 4, emoji: "👹", label: "Boss" },
-] as const;
+export const PASOS: { i: Paso; icon: IconName; label: string }[] = [
+  { i: 0, icon: "book", label: "Aprende" },
+  { i: 1, icon: "target", label: "Misión" },
+  { i: 2, icon: "palette", label: "Lab Libre" },
+  { i: 3, icon: "check", label: "Quiz" },
+  { i: 4, icon: "boss", label: "Boss" },
+];
 
 export function StepWizard({
   paso,
@@ -34,7 +35,8 @@ export function StepWizard({
             onClick={() => onGo(s.i as Paso)}
             className={`shrink-0 flex items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-extrabold ${active ? "bg-[#1a1523] text-white border-[#1a1523]" : locked ? "opacity-40 cursor-not-allowed" : done ? "border-green-500 text-green-700" : "border-[#1a1523]"}`}
           >
-            {locked ? "🔒" : done ? "✅" : s.emoji} {s.label}
+            <Icon name={locked ? "lock" : done ? "check" : s.icon} size={14} />
+            {s.label}
           </button>
         );
       })}

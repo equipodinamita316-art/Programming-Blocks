@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AssetPanel } from "./AssetPanel";
+import { Icon } from "./Icon";
 
 function countAssets(lessonId: string): number {
   try {
@@ -62,15 +63,16 @@ export function FilesModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 mb-2">
-          <h3 className="font-display font-extrabold text-lg">
-            📁 Mis archivos
+          <h3 className="flex items-center gap-2 font-display font-extrabold text-lg">
+            <Icon name="folder" size={18} />
+            Mis archivos
           </h3>
           <button
             onClick={onClose}
-            className="ml-auto rounded-xl border-2 px-2 py-1 text-sm font-bold"
+            className="ml-auto flex items-center rounded-xl border-2 px-2 py-1 font-bold"
             aria-label="Cerrar archivos"
           >
-            ✕
+            <Icon name="close" size={16} />
           </button>
         </div>
         <AssetPanel lessonId={lessonId} copyMode={copyMode} />

@@ -13,6 +13,7 @@ import {
 } from "@/lib/store";
 import { publishProject } from "@/lib/projects";
 import { MiniEditor } from "@/components/MiniEditor";
+import { Icon, type IconName } from "@/components/Icon";
 import { useNotice } from "@/lib/notice";
 import type { Generated } from "@/components/BlocklyReal";
 import {
@@ -76,6 +77,7 @@ export default function ExamenFinal() {
     qr: string;
     slug: string;
     medalla: string;
+    medallaColor: string;
   }>(null);
 
   useEffect(() => {
@@ -103,30 +105,44 @@ export default function ExamenFinal() {
   const reto = useMemo(() => RETOS[getAttempts() % RETOS.length], [mounted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!mounted)
-    return <p className="font-bold">⏳ Cargando batalla final...</p>;
+    return (
+      <p className="flex items-center gap-2 font-bold">
+        <Icon name="hourglass" size={16} />
+        Cargando batalla final...
+      </p>
+    );
 
   if (!elig.eligible) {
     return (
       <div className="max-w-[720px] mx-auto flex flex-col gap-4">
-        <h1 className="font-display text-3xl font-extrabold">
-          👹 Examen final BLOCKWEB
+        <h1 className="flex items-center gap-2 font-display text-3xl font-extrabold">
+          <Icon name="boss" size={28} />
+          Examen final BLOCKWEB
         </h1>
         <div className="rounded-2xl border-4 border-[#FF6B35] p-4 bg-white">
-          <p className="font-extrabold">🔒 Solo para quienes terminaron TODO</p>
-          <ul className="text-sm mt-2 list-disc ml-5">
+          <p className="flex items-center gap-1.5 font-extrabold">
+            <Icon name="lock" size={16} />
+            Solo para quienes terminaron TODO
+          </p>
+          <ul className="text-sm mt-2 ml-5 flex flex-col gap-1">
             {courses.map((c) => (
-              <li key={c.slug}>
-                {c.slug.toUpperCase()}: {c.done}/{c.total}{" "}
-                {c.complete ? "✅" : "🔒"}
+              <li key={c.slug} className="flex items-center gap-1.5">
+                {c.slug.toUpperCase()}: {c.done}/{c.total}
+                {c.complete ? (
+                  <Icon name="check" size={14} className="text-green-600" />
+                ) : (
+                  <Icon name="lock" size={13} />
+                )}
               </li>
             ))}
             <li>Boss publicados: {elig.bossProjects}/3 (uno por curso)</li>
           </ul>
           <Link
             href="/dashboard"
-            className="inline-block mt-2 underline font-bold text-sm"
+            className="mt-2 inline-flex items-center gap-1.5 underline font-bold text-sm"
           >
-            Volver al mapa →
+            Volver al mapa
+            <Icon name="arrowRight" size={15} />
           </Link>
         </div>
       </div>
@@ -136,12 +152,21 @@ export default function ExamenFinal() {
   if (res) {
     return (
       <div className="max-w-[640px] mx-auto rounded-3xl border-4 border-[#1a1523] bg-white p-6 text-center block-shadow">
-        <div className="text-5xl">{res.medalla}🎓</div>
+        <div className="flex items-center justify-center gap-2">
+          <Icon
+            name="medal"
+            size={48}
+            style={{ color: res.medallaColor }}
+          />
+          <Icon name="graduation" size={48} />
+        </div>
         <h1 className="font-display text-3xl font-extrabold mt-2">
           ¡Graduado Blockweb, {nombre}!
         </h1>
-        <p className="mt-1">
-          Nota final {res.nota}% · +500 XP · Medalla {res.medalla}
+        <p className="mt-1 flex items-center justify-center gap-1.5">
+          Nota final {res.nota}% ·
+          <Icon name="bolt" size={15} />
+          +500 XP · Medalla {res.medalla}
         </p>
         <div className="mt-4 rounded-2xl border-4 border-[#FFC700] p-4 bg-[#FFC700]/10">
           <div className="font-display font-extrabold">
@@ -162,23 +187,27 @@ export default function ExamenFinal() {
           </div>
           <Link
             href={`/p/${res.slug}`}
-            className="inline-block mt-2 underline font-bold text-sm"
+            className="mt-2 inline-flex items-center gap-1.5 underline font-bold text-sm"
           >
-            🌐 Ver mi proyecto final →
+            <Icon name="globe" size={15} />
+            Ver mi proyecto final
+            <Icon name="arrowRight" size={15} />
           </Link>
         </div>
         <div className="mt-4 flex gap-2 justify-center">
           <Link
             href={`/verify/${res.codigo}`}
-            className="rounded-xl bg-[#1a1523] text-white font-bold px-4 py-2"
+            className="flex items-center gap-1.5 rounded-xl bg-[#1a1523] text-white font-bold px-4 py-2"
           >
-            Verificar ✅
+            Verificar
+            <Icon name="check" size={16} />
           </Link>
           <button
             onClick={() => window.print()}
-            className="rounded-xl border-2 px-4 py-2 font-bold"
+            className="flex items-center gap-1.5 rounded-xl border-2 px-4 py-2 font-bold"
           >
-            🖨️ Imprimir / PDF
+            <Icon name="printer" size={16} />
+            Imprimir / PDF
           </button>
         </div>
       </div>
@@ -193,13 +222,22 @@ export default function ExamenFinal() {
     const url = `${location.origin}/verify/${codigo}`;
     const qr = await QRCode.toDataURL(url);
     saveCert({ codigo, nombre, nota, fecha: new Date().toISOString() });
-    setRes({ nota, codigo, qr, slug, medalla: medal(getAttempts()).label });
+    const m = medal(getAttempts());
+    setRes({
+      nota,
+      codigo,
+      qr,
+      slug,
+      medalla: m.label,
+      medallaColor: m.color,
+    });
   };
 
   return (
     <div className="max-w-[860px] mx-auto flex flex-col gap-4">
-      <h1 className="font-display text-3xl font-extrabold">
-        👹 Batalla final: 3 rondas
+      <h1 className="flex items-center gap-2 font-display text-3xl font-extrabold">
+        <Icon name="boss" size={28} />
+        Batalla final: 3 rondas
       </h1>
       <p className="text-sm opacity-70">
         Ronda 1 Quiz 90% + 20 min · Ronda 2 Bloques 90% + 15 min · Ronda 3
@@ -220,20 +258,32 @@ export default function ExamenFinal() {
         {([1, 2, 3] as const).map((f) => {
           const passed = f === 1 ? !!f1 : f === 2 ? !!f2 : !!f3;
           const locked = (f === 2 && !f1) || (f === 3 && !f2);
-          const label =
-            f === 1 ? "📝 Quiz" : f === 2 ? "🧱 Bloques" : "🌐 Proyecto";
+          const label = f === 1 ? "Quiz" : f === 2 ? "Bloques" : "Proyecto";
+          const fIcon: IconName = f === 1 ? "clipboardList" : f === 2 ? "blocks" : "globe";
+          const score = f === 1 ? f1!.score : f === 2 ? f2!.score : f3!.score;
           return (
             <button
               key={f}
               disabled={locked}
               onClick={() => setFase(f)}
-              className={`rounded-2xl border-4 px-2 py-2 font-extrabold text-sm ${fase === f ? "bg-[#1a1523] text-white" : locked ? "opacity-40" : ""}`}
+              className={`flex items-center justify-center gap-1.5 rounded-2xl border-4 px-2 py-2 font-extrabold text-sm ${fase === f ? "bg-[#1a1523] text-white" : locked ? "opacity-40" : ""}`}
             >
-              {passed
-                ? `✅ ${label} (${f === 1 ? f1!.score : f === 2 ? f2!.score : f3!.score}%)`
-                : locked
-                  ? `🔒 ${label}`
-                  : label}
+              {passed ? (
+                <>
+                  <Icon name="check" size={15} />
+                  {label} ({score}%)
+                </>
+              ) : locked ? (
+                <>
+                  <Icon name="lock" size={14} />
+                  {label}
+                </>
+              ) : (
+                <>
+                  <Icon name={fIcon} size={15} />
+                  {label}
+                </>
+              )}
             </button>
           );
         })}
@@ -291,14 +341,14 @@ function RondaQuiz({
   const { notify } = useNotice();
   const corregir = () => {
     if (!nombre.trim()) {
-      notify("Escribe tu nombre arriba para el certificado ✏️", "error");
+      notify("Escribe tu nombre arriba para el certificado", "error");
       return;
     }
     addAttempt();
     const s = quizScore(quiz, ans);
     if (s < 90) {
       notify(
-        `Sacaste ${s}%. Necesitas 90%+. Repasa y reintenta 💪`,
+        `Sacaste ${s}%. Necesitas 90%+. Repasa y reintenta`,
         "error",
       );
       return;
@@ -310,12 +360,15 @@ function RondaQuiz({
   if (!started) {
     return (
       <div className="rounded-3xl border-4 border-[#1a1523] p-5 text-center">
-        <p className="font-display text-xl font-extrabold">
-          📝 Ronda 1: Quiz infernal
+        <p className="flex items-center justify-center gap-2 font-display text-xl font-extrabold">
+          <Icon name="clipboardList" size={20} />
+          Ronda 1: Quiz infernal
         </p>
-        <p className="text-sm mt-1">
+        <p className="mt-1 flex flex-wrap items-center justify-center gap-1 text-sm">
           25 preguntas (7 HTML + 6 CSS + 6 JS + 6 mixtas) · las peso 2 valen
-          doble · 90% mínimo · ⏱️ {F1_MIN} min, al acabarse se califica solo.
+          doble · 90% mínimo ·
+          <Icon name="timer" size={14} />
+          {F1_MIN} min, al acabarse se califica solo.
         </p>
         {prev !== undefined && (
           <p className="text-sm font-bold text-green-600 mt-1">
@@ -324,9 +377,10 @@ function RondaQuiz({
         )}
         <button
           onClick={() => setStarted(true)}
-          className="mt-3 rounded-2xl bg-[#FF6B35] text-white font-extrabold px-6 py-3"
+          className="mx-auto mt-3 flex items-center gap-2 rounded-2xl bg-[#FF6B35] text-white font-extrabold px-6 py-3"
         >
-          ⚔️ Empezar ronda
+          <Icon name="swords" size={18} />
+          Empezar ronda
         </button>
       </div>
     );
@@ -334,9 +388,10 @@ function RondaQuiz({
   return (
     <div className="flex flex-col gap-3">
       <div
-        className={`sticky top-16 z-10 rounded-2xl border-4 px-4 py-2 font-extrabold text-center ${urgent ? "bg-red-500 text-white" : "bg-white"}`}
+        className={`sticky top-16 z-10 flex items-center justify-center gap-2 rounded-2xl border-4 px-4 py-2 font-extrabold text-center ${urgent ? "bg-red-500 text-white" : "bg-white"}`}
       >
-        ⏱️ {label} · Ronda 1
+        <Icon name="timer" size={16} />
+        {label} · Ronda 1
       </div>
       {quiz.map((q, i) => (
         <div
@@ -366,9 +421,10 @@ function RondaQuiz({
       ))}
       <button
         onClick={corregir}
-        className="rounded-2xl bg-[#FF6B35] text-white font-extrabold py-3 block-shadow-sm"
+        className="flex items-center justify-center gap-2 rounded-2xl bg-[#FF6B35] text-white font-extrabold py-3 block-shadow-sm"
       >
-        ⚔️ Entregar ronda 1
+        <Icon name="swords" size={18} />
+        Entregar ronda 1
       </button>
     </div>
   );
@@ -396,19 +452,23 @@ function RondaBloques({
   if (!started) {
     return (
       <div className="rounded-3xl border-4 border-[#2563EB] p-5 text-center">
-        <p className="font-display text-xl font-extrabold">
-          🧱 Ronda 2: {reto.titulo}
+        <p className="flex items-center justify-center gap-2 font-display text-xl font-extrabold">
+          <Icon name="blocks" size={20} />
+          Ronda 2: {reto.titulo}
         </p>
         <p className="text-sm mt-1">{reto.brief}</p>
-        <p className="text-sm mt-1 opacity-70">
-          ⏱️ {F2_MIN} min (al acabarse se califica lo construido) · 90%+ · tu
-          imagen debe ser SUBIDA en 📁, no URL.
+        <p className="mt-1 flex flex-wrap items-center justify-center gap-1 text-sm opacity-70">
+          <Icon name="timer" size={14} />
+          {F2_MIN} min (al acabarse se califica lo construido) · 90%+ · tu
+          imagen debe ser SUBIDA en
+          <Icon name="folder" size={13} />, no URL.
         </p>
         <button
           onClick={() => setStarted(true)}
-          className="mt-3 rounded-2xl bg-[#2563EB] text-white font-extrabold px-6 py-3"
+          className="mx-auto mt-3 flex items-center gap-2 rounded-2xl bg-[#2563EB] text-white font-extrabold px-6 py-3"
         >
-          ⚔️ Empezar ronda
+          <Icon name="swords" size={18} />
+          Empezar ronda
         </button>
       </div>
     );
@@ -446,22 +506,26 @@ function ValidadorBloques({
     const r = checkReto(reto, gen);
     setMissing(
       timeout && r.score < 90
-        ? [...r.missing, "⏱️ Se acabó el tiempo: se calificó lo construido."]
+        ? [...r.missing, "Se acabó el tiempo: se calificó lo construido."]
         : r.missing,
     );
     if (r.score >= 90) onPass(r.score);
     else if (!timeout)
-      notify(`Llevas ${r.score}%. Revisa lo que falta abajo 👇`, "error");
+      notify(`Llevas ${r.score}%. Revisa lo que falta abajo`, "error");
   };
   const { label, urgent } = useCountdown(true, F2_MIN, () => validar(true));
   return (
     <div className="flex flex-col gap-3">
       <div
-        className={`sticky top-16 z-10 rounded-2xl border-4 px-4 py-2 font-extrabold text-center ${urgent ? "bg-red-500 text-white" : "bg-white"}`}
+        className={`sticky top-16 z-10 flex items-center justify-center gap-2 rounded-2xl border-4 px-4 py-2 font-extrabold text-center ${urgent ? "bg-red-500 text-white" : "bg-white"}`}
       >
-        ⏱️ {label} · {reto.titulo}
+        <Icon name="timer" size={16} />
+        {label} · {reto.titulo}
       </div>
-      <p className="text-sm rounded-2xl border-2 p-3">🎯 {reto.brief}</p>
+      <p className="flex items-start gap-1.5 text-sm rounded-2xl border-2 p-3">
+        <Icon name="target" size={15} className="mt-0.5 shrink-0" />
+        <span>{reto.brief}</span>
+      </p>
       <MiniEditor
         lessonId="examen-f2"
         curso="js"
@@ -469,7 +533,12 @@ function ValidadorBloques({
         onChange={setGen}
         showFiles
         previewTitle="examen-f2"
-        instruccion={`🧱 Ronda 2: ${reto.titulo}`}
+        instruccion={
+          <>
+            <Icon name="blocks" size={14} />
+            Ronda 2: {reto.titulo}
+          </>
+        }
         estado={`${gen.count} bloques`}
       />
       {missing.length > 0 && (
@@ -481,9 +550,10 @@ function ValidadorBloques({
       )}
       <button
         onClick={() => validar(false)}
-        className="rounded-2xl bg-[#2563EB] text-white font-extrabold py-3"
+        className="flex items-center justify-center gap-2 rounded-2xl bg-[#2563EB] text-white font-extrabold py-3"
       >
-        ⚔️ Validar ronda 2 (90%+)
+        <Icon name="swords" size={18} />
+        Validar ronda 2 (90%+)
       </button>
     </div>
   );
@@ -515,7 +585,7 @@ function RondaProyecto({
     const r = checkProyecto(gen);
     setMissing(r.missing);
     if (r.score < 90) {
-      notify(`Tu sitio lleva ${r.score}%. Revisa lo que falta abajo 👇`, "error");
+      notify(`Tu sitio lleva ${r.score}%. Revisa lo que falta abajo`, "error");
       return;
     }
     setBusy(true);
@@ -528,7 +598,7 @@ function RondaProyecto({
         bloques: gen.types,
       });
       celebrate({
-        title: "¡Sitio publicado! 🌐",
+        title: "¡Sitio publicado!",
         sub: res.message,
         actions: [{ label: "Ver mi sitio", href: `/p/${slug}`, primary: true }],
       });
@@ -540,8 +610,9 @@ function RondaProyecto({
   return (
     <div className="flex flex-col gap-3">
       <div className="rounded-3xl border-4 border-[#a855f7] p-4">
-        <p className="font-display text-xl font-extrabold">
-          🌐 Ronda 3: tu primer sitio real
+        <p className="flex items-center gap-2 font-display text-xl font-extrabold">
+          <Icon name="globe" size={20} />
+          Ronda 3: tu primer sitio real
         </p>
         <p className="text-sm mt-1">
           Construye con bloques una página con header/nav, galería de 3+
@@ -560,7 +631,12 @@ function RondaProyecto({
         onChange={setGen}
         showFiles
         previewTitle="examen-final"
-        instruccion="🌐 Ronda 3: header/nav + 3 imágenes + responsive + JS con clic"
+        instruccion={
+          <>
+            <Icon name="globe" size={14} />
+            Ronda 3: header/nav + 3 imágenes + responsive + JS con clic
+          </>
+        }
         estado={`${gen.count} bloques`}
       />
       {missing.length > 0 && (
@@ -573,9 +649,19 @@ function RondaProyecto({
       <button
         onClick={publicar}
         disabled={busy}
-        className="rounded-2xl bg-[#a855f7] text-white font-extrabold py-3 disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded-2xl bg-[#a855f7] text-white font-extrabold py-3 disabled:opacity-50"
       >
-        {busy ? "⏳ Publicando..." : "🌐 Publicar mi sitio y graduarme"}
+        {busy ? (
+          <>
+            <Icon name="hourglass" size={16} />
+            Publicando...
+          </>
+        ) : (
+          <>
+            <Icon name="globe" size={16} />
+            Publicar mi sitio y graduarme
+          </>
+        )}
       </button>
     </div>
   );

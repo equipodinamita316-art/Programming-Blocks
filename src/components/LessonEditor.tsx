@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { markDoneVerified, isDone } from "@/lib/store";
 import { useNotice } from "@/lib/notice";
 import { Bloqui } from "./Bloqui";
+import { Icon } from "./Icon";
 import {
   DIFICULTAD_META,
   getIntro,
@@ -126,20 +127,20 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       });
       setDone(true);
       celebrate({
-        title: isBoss ? "¡Boss vencido! 👹" : "¡Lección terminada! 🎉",
+        title: isBoss ? "¡Boss vencido!" : "¡Lección terminada!",
         sub: r.message,
         xp: full.xp,
         actions: [
-          { label: "🌐 Ver mi página", href: `/p/${slug}`, primary: true },
-          { label: "🗺️ Salir al mapa", href: "/dashboard" },
+          { label: "Ver mi página", href: `/p/${slug}`, primary: true },
+          { label: "Salir al mapa", href: "/dashboard" },
         ],
       });
     } else {
       setDone(true);
       celebrate({
-        title: "¡Lección terminada! 🎉",
+        title: "¡Lección terminada!",
         xp: full.xp,
-        actions: [{ label: "🗺️ Salir al mapa", href: "/dashboard", primary: true }],
+        actions: [{ label: "Salir al mapa", href: "/dashboard", primary: true }],
       });
     }
   };
@@ -152,11 +153,15 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
           <h1 className="font-display text-2xl md:text-3xl font-extrabold">
             {leccion.titulo}
           </h1>
-          <p className="text-sm opacity-70">
-            Solo bloques 🧱 ·{" "}
-            <b style={{ color: meta.color }}>
-              {meta.emoji} {meta.label} · +{leccion.xp} XP
-            </b>{" "}
+          <p className="flex flex-wrap items-center gap-1.5 text-sm opacity-70">
+            <span className="flex items-center gap-1">
+              Solo bloques <Icon name="bricks" size={14} />
+            </span>
+            ·
+            <b className="flex items-center gap-1" style={{ color: meta.color }}>
+              <Icon name={meta.icon} size={14} />
+              {meta.label} · +{leccion.xp} XP
+            </b>
             · {leccion.curso.toUpperCase()}
           </p>
           <div className="mt-2">
@@ -164,8 +169,9 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
           </div>
         </div>
         {done && (
-          <span className="rounded-full bg-green-500 text-white text-xs font-bold px-3 py-1">
-            ✅ Verificada
+          <span className="flex items-center gap-1 rounded-full bg-green-500 text-white text-xs font-bold px-3 py-1">
+            <Icon name="check" size={13} />
+            Verificada
           </span>
         )}
       </div>
@@ -173,8 +179,9 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       {/* PASO 0 APRENDE */}
       {paso === 0 && (
         <section className="rounded-3xl border-4 border-[#1a1523] bg-white p-5 block-shadow">
-          <h2 className="font-display text-xl font-extrabold">
-            📖 Lo que verás en este curso
+          <h2 className="flex items-center gap-2 font-display text-xl font-extrabold">
+            <Icon name="book" size={20} />
+            Lo que verás en este curso
           </h2>
           {intro.parrafos.map((p) => (
             <p key={p} className="mt-2">
@@ -183,8 +190,9 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
           ))}
           <div className="grid md:grid-cols-2 gap-3 mt-3">
             <div className="rounded-2xl border-2 overflow-hidden bg-[var(--background)]">
-              <div className="text-xs font-bold px-2 py-1 bg-black/5">
-                🖼️ Ejemplo visual
+              <div className="flex items-center gap-1.5 text-xs font-bold px-2 py-1 bg-black/5">
+                <Icon name="image" size={13} />
+                Ejemplo visual
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -194,7 +202,10 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
               />
             </div>
             <div className="rounded-2xl border-2 p-3 bg-[var(--background)]">
-              <div className="text-xs font-bold mb-1">📊 Diagrama</div>
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-bold">
+                <Icon name="chart" size={13} />
+                Diagrama
+              </div>
               <Diagrama curso={leccion.curso} />
             </div>
           </div>
@@ -205,9 +216,10 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
           </ul>
           <button
             onClick={() => unlock(1)}
-            className="mt-4 rounded-2xl bg-[#1a1523] text-white font-extrabold px-6 py-3"
+            className="mt-4 flex items-center gap-2 rounded-2xl bg-[#1a1523] text-white font-extrabold px-6 py-3"
           >
-            Entendido → ir a la Misión 🎯
+            Entendido · ir a la Misión
+            <Icon name="target" size={18} />
           </button>
         </section>
       )}
@@ -216,24 +228,30 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       {paso === 1 && (
         <div className="flex flex-col gap-3">
           <section className="rounded-2xl border-2 p-3 bg-white">
-            <h2 className="font-display font-extrabold">🎯 Misión principal</h2>
+            <h2 className="flex items-center gap-2 font-display font-extrabold">
+              <Icon name="target" size={18} />
+              Misión principal
+            </h2>
             <p className="mt-1 text-sm">{leccion.mision}</p>
-            <p className="mt-1 text-xs rounded-xl bg-black/5 p-2">
-              💡 {leccion.concepto}
+            <p className="mt-1 flex items-start gap-1.5 text-xs rounded-xl bg-black/5 p-2">
+              <Icon name="lightbulb" size={14} className="mt-0.5 shrink-0" />
+              <span>{leccion.concepto}</span>
             </p>
             <div className="flex gap-2 mt-2">
               <button
                 onClick={() => go(0)}
-                className="rounded-xl border-2 px-3 py-2 text-sm font-bold"
+                className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2 text-sm font-bold"
               >
-                ← Aprende
+                <Icon name="arrowLeft" size={16} />
+                Aprende
               </button>
               <button
                 onClick={() => unlock(2)}
                 disabled={!missionOk}
-                className={`flex-1 rounded-xl font-bold py-2 text-sm ${missionOk ? "bg-[#FF6B35] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl font-bold py-2 text-sm ${missionOk ? "bg-[#FF6B35] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
               >
-                Completar misión → Lab 🎨
+                Completar misión · Lab
+                <Icon name="palette" size={16} />
               </button>
             </div>
           </section>
@@ -244,8 +262,19 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             onChange={setGen}
             showFiles={false}
             previewTitle={leccion.id}
-            instruccion={`🎯 Misión: ${leccion.mision}`}
-            estado={missionOk ? "✅ Lista" : `🧱 ${validTypes.length}/2`}
+            instruccion={<>Misión: {leccion.mision}</>}
+            estado={
+              missionOk ? (
+                <>
+                  <Icon name="check" size={13} className="inline -mt-0.5" /> Lista
+                </>
+              ) : (
+                <>
+                  <Icon name="bricks" size={13} className="inline -mt-0.5" />{" "}
+                  {validTypes.length}/2
+                </>
+              )
+            }
           />
         </div>
       )}
@@ -254,8 +283,9 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       {paso === 2 && (
         <div className="flex flex-col gap-3">
           <section className="rounded-2xl border-2 border-[#2563EB] p-3 bg-white">
-            <h2 className="font-display font-extrabold">
-              🎨 Laboratorio libre — tú decides
+            <h2 className="flex items-center gap-2 font-display font-extrabold">
+              <Icon name="palette" size={18} />
+              Laboratorio libre — tú decides
             </h2>
             <p className="text-sm mt-1 font-bold">{getLabDecision(leccion)}</p>
             <ul className="list-disc ml-5 mt-1 text-xs">
@@ -266,16 +296,18 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             <div className="flex gap-2 mt-2">
               <button
                 onClick={() => go(1)}
-                className="rounded-xl border-2 px-3 py-2 text-sm font-bold"
+                className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2 text-sm font-bold"
               >
-                ← Misión
+                <Icon name="arrowLeft" size={16} />
+                Misión
               </button>
               <button
                 onClick={() => unlock(3)}
                 disabled={!labOk}
-                className={`flex-1 rounded-xl font-bold py-2 text-sm ${labOk ? "bg-[#2563EB] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl font-bold py-2 text-sm ${labOk ? "bg-[#2563EB] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
               >
-                Ir al Quiz ✅
+                Ir al Quiz
+                <Icon name="check" size={16} />
               </button>
             </div>
           </section>
@@ -286,8 +318,19 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             onChange={setGen}
             showFiles
             previewTitle={leccion.id}
-            instruccion="🎨 Lab: decide tu tema, sube archivos en 📁 y arma tu página"
-            estado={labOk ? "✅ Listo" : `🧱 ${validTypes.length}/3`}
+            instruccion="Lab: decide tu tema, sube archivos y arma tu página"
+            estado={
+              labOk ? (
+                <>
+                  <Icon name="check" size={13} className="inline -mt-0.5" /> Listo
+                </>
+              ) : (
+                <>
+                  <Icon name="bricks" size={13} className="inline -mt-0.5" />{" "}
+                  {validTypes.length}/3
+                </>
+              )
+            }
           />
         </div>
       )}
@@ -295,11 +338,13 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       {/* PASO 3 QUIZ */}
       {paso === 3 && (
         <section className="w-full rounded-3xl border-4 border-[#1a1523] bg-white p-4 md:p-8 block-shadow">
-          <h2 className="font-display text-2xl md:text-3xl font-extrabold">
-            ✅ Quiz (aleatorio, 100%)
+          <h2 className="flex items-center gap-2 font-display text-2xl md:text-3xl font-extrabold">
+            <Icon name="check" size={26} />
+            Quiz (aleatorio, 100%)
           </h2>
-          <p className="text-sm md:text-base opacity-70 mt-1">
-            Responde todo bien para desbloquear el Boss final 👹
+          <p className="mt-1 flex items-center gap-1.5 text-sm md:text-base opacity-70">
+            Responde todo bien para desbloquear el Boss final
+            <Icon name="boss" size={16} />
           </p>
           {mounted ? (
             <QuizHard
@@ -311,7 +356,10 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
               }}
             />
           ) : (
-            <p className="text-sm opacity-70 mt-2">⏳ Cargando quiz...</p>
+            <p className="mt-2 flex items-center gap-1.5 text-sm opacity-70">
+              <Icon name="hourglass" size={14} />
+              Cargando quiz...
+            </p>
           )}
           {quizPassed && (
             <div className="mt-3 rounded-xl border-2 border-dashed p-3 text-sm md:text-base">
@@ -331,16 +379,18 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
           <div className="mt-4 flex gap-2 rounded-2xl border-2 border-[#1a1523] bg-[var(--background)] p-2">
             <button
               onClick={() => go(2)}
-              className="rounded-xl border-2 px-4 py-3 text-sm md:text-base font-bold"
+              className="flex items-center gap-1.5 rounded-xl border-2 px-4 py-3 text-sm md:text-base font-bold"
             >
-              ← Lab
+              <Icon name="arrowLeft" size={16} />
+              Lab
             </button>
             {quizPassed && (
               <button
                 onClick={() => go(4)}
-                className="flex-1 rounded-xl bg-[#a855f7] text-white font-extrabold py-3 text-sm md:text-lg"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#a855f7] text-white font-extrabold py-3 text-sm md:text-lg"
               >
-                Ir al Boss final 👹
+                Ir al Boss final
+                <Icon name="boss" size={18} />
               </button>
             )}
           </div>
@@ -351,8 +401,10 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
       {paso === 4 && (
         <div className="flex flex-col gap-3">
           <section className="rounded-2xl border-2 border-[#a855f7] p-3 bg-white">
-            <h2 className="font-display font-extrabold">
-              👹 Boss final — publica tu página 🌐
+            <h2 className="flex items-center gap-2 font-display font-extrabold">
+              <Icon name="boss" size={18} />
+              Boss final — publica tu página
+              <Icon name="globe" size={18} />
             </h2>
             <p className="text-sm mt-1">{leccion.boss}</p>
             <ul className="mt-1 text-xs list-disc ml-5">
@@ -362,35 +414,41 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             </ul>
             <div className="mt-1 text-xs">
               {!quizPassed && (
-                <p className="font-bold text-red-600">
-                  🔒 Aprueba el Quiz primero.
+                <p className="flex items-center gap-1.5 font-bold text-red-600">
+                  <Icon name="lock" size={14} />
+                  Aprueba el Quiz primero.
                 </p>
               )}
               {!hasAsset && (
-                <p className="font-bold">
-                  📁 Falta: sube 1 imagen/video y úsalo con bloque 📁.
+                <p className="flex items-center gap-1.5 font-bold">
+                  <Icon name="folder" size={14} />
+                  Falta: sube 1 imagen/video y úsalo con el bloque de archivos.
                 </p>
               )}
               {bossOk && (
-                <p className="font-bold text-green-600">
-                  ✅ Boss verificable · +{full.xp} XP — usa ▶ Probar y luego
-                  Publicar
+                <p className="flex items-center gap-1.5 font-bold text-green-600">
+                  <Icon name="check" size={14} />
+                  Boss verificable · +{full.xp} XP — usa
+                  <Icon name="play" size={13} />
+                  Probar y luego Publicar
                 </p>
               )}
             </div>
             <div className="flex gap-2 mt-2 flex-col sm:flex-row">
               <button
                 onClick={() => go(3)}
-                className="rounded-xl border-2 px-3 py-2 text-sm font-bold"
+                className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2 text-sm font-bold"
               >
-                ← Quiz
+                <Icon name="arrowLeft" size={16} />
+                Quiz
               </button>
               <button
                 onClick={() => finish(true)}
                 disabled={!bossOk}
-                className={`flex-1 rounded-xl font-bold py-2 text-sm ${bossOk ? "bg-[#a855f7] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl font-bold py-2 text-sm ${bossOk ? "bg-[#a855f7] text-white" : "bg-black/10 opacity-50 cursor-not-allowed"}`}
               >
-                🌐 Publicar y completar +{leccion.xp} XP
+                <Icon name="globe" size={16} />
+                Publicar y completar +{leccion.xp} XP
               </button>
             </div>
             <div className="mt-1">
@@ -398,9 +456,10 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
                 onClick={() =>
                   setHintIdx((i) => Math.min(i + 1, leccion.pistas.length))
                 }
-                className="text-xs font-bold underline"
+                className="flex items-center gap-1.5 text-xs font-bold underline"
               >
-                💡 Pista ({hintIdx}/{leccion.pistas.length})
+                <Icon name="lightbulb" size={14} />
+                Pista ({hintIdx}/{leccion.pistas.length})
               </button>
               {hintIdx > 0 && (
                 <ul className="text-xs mt-1 list-disc ml-5">
@@ -418,10 +477,24 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             onChange={setGen}
             showFiles
             previewTitle={leccion.id}
-            instruccion="👹 Boss: usa bloques + 1 imagen/video 📁, prueba con ▶ y publica 🌐"
-            estado={bossOk ? "✅ Verificable" : `🧱 ${gen.count}`}
+            instruccion="Boss: usa bloques + 1 imagen/video, prueba y publica"
+            estado={
+              <>
+                {bossOk ? (
+                  <>
+                    <Icon name="check" size={13} className="inline -mt-0.5" />{" "}
+                    Verificable
+                  </>
+                ) : (
+                  <>
+                    <Icon name="bricks" size={13} className="inline -mt-0.5" />{" "}
+                    {gen.count}
+                  </>
+                )}
+              </>
+            }
             onPublish={() => finish(true)}
-            publishLabel={`🌐 Publicar +${leccion.xp} XP`}
+            publishLabel={`Publicar +${leccion.xp} XP`}
           />
         </div>
       )}
@@ -505,7 +578,7 @@ function Diagrama({ curso }: { curso: string }) {
           fontSize="11"
           fontWeight="bold"
         >
-          🎉 cambia
+          cambia
         </text>
       </svg>
     );
@@ -613,7 +686,7 @@ function QuizHard({
             const until = Date.now() + Math.min(20000, f * 5000);
             setLockUntil(until);
             setNow(Date.now());
-            notify(`Aún no 💪 (intento ${f}) — repasa y reintenta`, "error");
+            notify(`Aún no (intento ${f}) — repasa y reintenta`, "error");
           }
         }}
         className="rounded-2xl bg-[#1a1523] text-white font-extrabold py-3 md:py-4 text-base md:text-lg disabled:opacity-50"
@@ -623,8 +696,10 @@ function QuizHard({
           : "Comprobar quiz"}
       </button>
       {ok && (
-        <p className="text-green-600 text-sm md:text-base font-bold">
-          ✅ Quiz superado — ya puedes ir al Boss 👹
+        <p className="flex items-center gap-1.5 text-green-600 text-sm md:text-base font-bold">
+          <Icon name="check" size={16} />
+          Quiz superado — ya puedes ir al Boss
+          <Icon name="boss" size={16} />
         </p>
       )}
     </div>

@@ -12,6 +12,7 @@ import {
 import { useSession } from "@/lib/supabase/session";
 import { useEffect, useState } from "react";
 import { Bloqui } from "@/components/Bloqui";
+import { Icon } from "@/components/Icon";
 
 const ORDER = ["html", "css", "js"] as const;
 
@@ -31,7 +32,7 @@ export default function Dashboard() {
       .then(({ merged, already }) => {
         if (merged > 0 && !already) {
           setDone(getDone());
-          setMergeMsg(`☁️ Avance fusionado a tu cuenta: ${merged} lecciones.`);
+          setMergeMsg(`Avance fusionado a tu cuenta: ${merged} lecciones.`);
         }
       })
       .catch(() => {});
@@ -62,14 +63,18 @@ export default function Dashboard() {
       <div className="flex items-center gap-3">
         <Bloqui mood={examOpen ? "wow" : "happy"} size={52} />
         <div>
-          <h1 className="font-display text-3xl font-extrabold">
-            Camino Blockweb 🗺️
+          <h1 className="flex items-center gap-2 font-display text-3xl font-extrabold">
+            Camino Blockweb
+            <Icon name="map" size={28} />
           </h1>
           <p className="text-sm opacity-70">
             30 niveles en orden · {done.length}/{LECCIONES.length} lecciones
           </p>
           {mergeMsg && (
-            <p className="text-xs font-bold text-green-700">{mergeMsg}</p>
+            <p className="flex items-center gap-1.5 text-xs font-bold text-green-700">
+              <Icon name="cloud" size={13} />
+              {mergeMsg}
+            </p>
           )}
         </div>
       </div>
@@ -98,10 +103,11 @@ export default function Dashboard() {
               {/* Bandera de zona */}
               {banner && (
                 <div
-                  className="z-10 my-3 rounded-2xl border-4 border-[#1a1523] px-5 py-1.5 font-display text-lg font-extrabold text-white block-shadow-sm"
+                  className="z-10 my-3 flex items-center gap-2 rounded-2xl border-4 border-[#1a1523] px-5 py-1.5 font-display text-lg font-extrabold text-white block-shadow-sm"
                   style={{ background: curso.color }}
                 >
-                  {curso.emoji} {curso.titulo}
+                  <Icon name={curso.icon} size={20} />
+                  {curso.titulo}
                 </div>
               )}
 
@@ -132,8 +138,16 @@ export default function Dashboard() {
                     unlocked && !d ? { background: curso.color } : undefined
                   }
                 >
-                  <span className="text-xl md:text-2xl">
-                    {!unlocked ? "🔒" : d ? "✅" : isBoss ? "👹" : l.orden}
+                  <span className="flex items-center justify-center text-xl md:text-2xl">
+                    {!unlocked ? (
+                      <Icon name="lock" size={22} />
+                    ) : d ? (
+                      <Icon name="check" size={24} />
+                    ) : isBoss ? (
+                      <Icon name="boss" size={28} />
+                    ) : (
+                      l.orden
+                    )}
                   </span>
                   <span className="text-[10px] md:text-[11px] leading-none">
                     Nv {i + 1}
@@ -141,8 +155,8 @@ export default function Dashboard() {
                 </button>
 
                 {!unlocked && (
-                  <p className="text-[11px] font-bold opacity-70 text-center">
-                    🔒{" "}
+                  <p className="flex items-center gap-1 text-[11px] font-bold opacity-70 text-center">
+                    <Icon name="lock" size={12} className="shrink-0" />
                     {(() => {
                       const prev = prevPendingLesson(l.id);
                       const pl = LECCIONES.find((x) => x.id === prev);
@@ -161,31 +175,47 @@ export default function Dashboard() {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1 text-xs font-bold">
                       <span
-                        className="rounded-full px-2 py-0.5 border"
+                        className="flex items-center gap-1 rounded-full px-2 py-0.5 border"
                         style={{ borderColor: meta.color, color: meta.color }}
                       >
-                        {meta.emoji} {meta.label}
+                        <Icon name={meta.icon} size={12} />
+                        {meta.label}
                       </span>
-                      <span className="rounded-full px-2 py-0.5 bg-black/5">
-                        ⚡ +{l.xp} XP
+                      <span className="flex items-center gap-1 rounded-full px-2 py-0.5 bg-black/5">
+                        <Icon name="bolt" size={12} />
+                        +{l.xp} XP
                       </span>
                       <span className="rounded-full px-2 py-0.5 bg-black/5">
                         Nivel {i + 1}/30
                       </span>
                     </div>
-                    <div className="mt-1 text-xs opacity-70">
-                      📖 Misión · 🎨 Lab · 👹 Boss · ✅ Quiz
+                    <div className="mt-1 flex items-center gap-1.5 text-xs opacity-70">
+                      <Icon name="book" size={12} /> Misión ·
+                      <Icon name="palette" size={12} /> Lab ·
+                      <Icon name="boss" size={12} /> Boss ·
+                      <Icon name="check" size={12} /> Quiz
                     </div>
                     <Link
                       href={`/aprender/${l.curso}/${l.id}`}
-                      className="mt-3 block rounded-2xl text-white text-center font-extrabold px-4 py-3"
+                      className="mt-3 flex items-center justify-center gap-1.5 rounded-2xl text-white text-center font-extrabold px-4 py-3"
                       style={{ background: curso.color }}
                     >
-                      {d
-                        ? "🔁 Repasar lección"
-                        : isCurrent
-                          ? "▶️ Empezar lección"
-                          : "▶️ Continuar lección"}
+                      {d ? (
+                        <>
+                          <Icon name="refresh" size={16} />
+                          Repasar lección
+                        </>
+                      ) : isCurrent ? (
+                        <>
+                          <Icon name="play" size={16} />
+                          Empezar lección
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="play" size={16} />
+                          Continuar lección
+                        </>
+                      )}
                     </Link>
                   </div>
                 )}
@@ -203,8 +233,8 @@ export default function Dashboard() {
                 : "bg-black/10 border-dashed border-[#1a1523]/40 opacity-70"
             }`}
           >
-            <span className="text-2xl md:text-3xl">
-              {examOpen ? "🏰" : "🔒"}
+            <span className="flex items-center justify-center text-2xl md:text-3xl">
+              {examOpen ? <Icon name="castle" size={30} /> : <Icon name="lock" size={26} />}
             </span>
             <span className="text-[10px] md:text-[11px] leading-none">
               Final
@@ -213,13 +243,15 @@ export default function Dashboard() {
           {examOpen ? (
             <Link
               href="/examen/final"
-              className="z-10 rounded-2xl bg-[#FF6B35] text-white font-extrabold px-6 py-3 block-shadow-sm"
+              className="z-10 flex items-center gap-2 rounded-2xl bg-[#FF6B35] text-white font-extrabold px-6 py-3 block-shadow-sm"
             >
-              👹 Examen final
+              <Icon name="boss" size={18} />
+              Examen final
             </Link>
           ) : (
-            <p className="text-xs font-bold opacity-70">
-              🔒 Completa las 30 lecciones para el examen
+            <p className="flex items-center gap-1.5 text-xs font-bold opacity-70">
+              <Icon name="lock" size={13} />
+              Completa las 30 lecciones para el examen
             </p>
           )}
         </div>

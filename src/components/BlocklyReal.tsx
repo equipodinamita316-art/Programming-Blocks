@@ -11,6 +11,7 @@ import {
   type Family,
 } from "@/lib/blockly/scope";
 import type { CursoSlug } from "@/lib/store";
+import { Icon } from "./Icon";
 
 export type Generated = {
   html: string;
@@ -265,26 +266,36 @@ export function BlocklyReal({
 
   if (err)
     return (
-      <div className="p-4 rounded-2xl border-2 border-red-500 text-sm">
-        ❌ {err}
+      <div className="flex items-center gap-2 p-4 rounded-2xl border-2 border-red-500 text-sm">
+        <Icon name="xCircle" size={16} />
+        {err}
       </div>
     );
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-xs font-bold opacity-70">
-        <span>
-          {ready
-            ? `🟢 Bloques ${curso ? curso.toUpperCase() + " " : ""}· drag & drop`
-            : "⏳ Cargando Blockly..."}
+        <span className="flex items-center gap-1.5">
+          {ready ? (
+            <>
+              <Icon name="circle" size={11} className="fill-green-500 text-green-500" />
+              Bloques {curso ? curso.toUpperCase() + " " : ""}· drag &amp; drop
+            </>
+          ) : (
+            <>
+              <Icon name="hourglass" size={14} />
+              Cargando Blockly...
+            </>
+          )}
         </span>
         <button onClick={clear} className="ml-auto underline">
           Limpiar
         </button>
       </div>
       {purged.length > 0 && (
-        <div className="rounded-xl border-2 border-red-500 bg-red-50 p-2 text-xs font-bold">
-          🧹 Bloques no permitidos eliminados: {purged.join(", ")}
+        <div className="flex items-center gap-1.5 rounded-xl border-2 border-red-500 bg-red-50 p-2 text-xs font-bold">
+          <Icon name="brush" size={14} />
+          Bloques no permitidos eliminados: {purged.join(", ")}
         </div>
       )}
       <div

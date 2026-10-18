@@ -25,7 +25,7 @@ function openDb(): Promise<IDBDatabase> {
 }
 
 export async function saveAssetFile(lessonId: string, file: File): Promise<{ asset: Asset; url: string }> {
-  if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) throw new Error("Solo imágenes o videos 📁");
+  if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) throw new Error("Solo imágenes o videos");
   if (file.size > 5 * 1024 * 1024) throw new Error("Máximo 5MB por archivo");
   const kind = file.type.startsWith("image/") ? "image" : "video";
   const asset: Asset = { id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, lessonId, name: file.name.slice(0, 60), kind, mime: file.type, size: file.size, createdAt: Date.now() };

@@ -10,6 +10,7 @@ import {
   type Asset,
 } from "@/lib/assets";
 import { useNotice } from "@/lib/notice";
+import { Icon } from "./Icon";
 
 type BwUrls = { __bw_urls?: Record<string, string> };
 
@@ -66,7 +67,7 @@ export function AssetPanel({
     setErr("");
     try {
       await saveAssetFile(lessonId, f);
-      notify("📁 Imagen guardada, úsala con el bloque 📁", "exito");
+      notify("Imagen guardada, úsala con el bloque de archivos", "exito");
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "No se pudo subir");
     }
@@ -77,11 +78,11 @@ export function AssetPanel({
       // En modo código se pega data: (los blob: no cargan en el preview sandbox)
       const data = await getAssetDataUrl(id).catch(() => "");
       navigator.clipboard?.writeText(data || url);
-      notify("URL copiada: pégala en tu src 📋", "exito");
+      notify("URL copiada: pégala en tu src", "exito");
       return;
     }
     navigator.clipboard?.writeText(id);
-    notify("ID copiado: pégalo en el bloque 📁", "exito");
+    notify("ID copiado: pégalo en el bloque de archivos", "exito");
   };
 
   return (
@@ -90,15 +91,17 @@ export function AssetPanel({
     >
       <div className="flex items-center gap-2">
         <h3
-          className={`font-display font-extrabold ${compact ? "text-sm" : ""}`}
+          className={`flex items-center gap-1.5 font-display font-extrabold ${compact ? "text-sm" : ""}`}
         >
-          📂 Mis archivos ({items.length})
+          <Icon name="folder" size={16} />
+          Mis archivos ({items.length})
         </h3>
         <button
           onClick={() => fileRef.current?.click()}
-          className="ml-auto rounded-lg bg-[#2563EB] text-white text-xs font-bold px-2 py-1"
+          className="ml-auto flex items-center gap-1.5 rounded-lg bg-[#2563EB] text-white text-xs font-bold px-2 py-1"
         >
-          + Subir 🖼️
+          <Icon name="image" size={13} />
+          Subir
         </button>
       </div>
       {!compact && (
@@ -116,7 +119,8 @@ export function AssetPanel({
       {err && <p className="text-red-600 text-xs font-bold mt-1">{err}</p>}
       {items.length === 0 ? (
         <p className="text-xs opacity-60 mt-2">
-          Vacío. Sube tu primera imagen o video y úsalo con el bloque 📁.
+          Vacío. Sube tu primera imagen o video y úsalo con el bloque de
+          archivos.
         </p>
       ) : (
         <div
@@ -150,9 +154,10 @@ export function AssetPanel({
                 </button>
                 <button
                   onClick={() => deleteAsset(asset.id)}
-                  className="text-[11px] rounded-lg px-2 py-1 border"
+                  className="flex items-center text-[11px] rounded-lg px-2 py-1 border"
+                  aria-label="Borrar archivo"
                 >
-                  🗑️
+                  <Icon name="trash" size={13} />
                 </button>
               </div>
             </div>

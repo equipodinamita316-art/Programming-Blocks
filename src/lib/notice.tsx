@@ -11,6 +11,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { Bloqui } from "@/components/Bloqui";
+import { Icon } from "@/components/Icon";
 
 export type ToastKind = "info" | "exito" | "error";
 export type ToastAction = { label: string; href: string };
@@ -123,7 +124,7 @@ function NoticeHost({ toasts, celeb, danger, dismissToast, closeCeleb, closeDang
                 {t.action.label}
               </Link>
             )}
-            <button onClick={() => dismissToast(t.id)} aria-label="Cerrar aviso" className="font-extrabold opacity-60">✕</button>
+            <button onClick={() => dismissToast(t.id)} aria-label="Cerrar aviso" className="flex items-center font-extrabold opacity-60"><Icon name="close" size={15} /></button>
           </div>
         ))}
       </div>
@@ -133,10 +134,15 @@ function NoticeHost({ toasts, celeb, danger, dismissToast, closeCeleb, closeDang
         <div className="fixed inset-0 z-[100003] flex items-center justify-center bg-black/60 p-4" onClick={closeCeleb} role="alertdialog" aria-modal="true" aria-label={celeb.title}>
           <div className="w-full max-w-[440px] rounded-3xl border-4 border-[#1a1523] bg-[#fff8ec] p-6 text-center block-shadow" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-center"><Bloqui mood="wow" size={72} /></div>
-            <h2 className="font-display text-2xl font-extrabold mt-2">🎉 {celeb.title}</h2>
+            <h2 className="flex items-center justify-center gap-2 font-display text-2xl font-extrabold mt-2">
+              <Icon name="party" size={24} />
+              {celeb.title}
+            </h2>
             {celeb.sub && <p className="text-sm mt-1 opacity-80">{celeb.sub}</p>}
             {celeb.xp !== undefined && (
-              <span className="inline-block mt-2 rounded-full bg-[#FFC700] border-2 border-[#1a1523] px-3 py-1 text-sm font-extrabold">⚡ +{celeb.xp} XP</span>
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#FFC700] border-2 border-[#1a1523] px-3 py-1 text-sm font-extrabold">
+                <Icon name="bolt" size={15} />+{celeb.xp} XP
+              </span>
             )}
             <div className="mt-4 flex flex-col gap-2">
               {celeb.actions.map((a) =>
@@ -159,7 +165,9 @@ function NoticeHost({ toasts, celeb, danger, dismissToast, closeCeleb, closeDang
       {danger && (
         <div className="fixed inset-0 z-[100003] flex items-center justify-center bg-black/60 p-4" onClick={() => closeDanger(false)} role="alertdialog" aria-modal="true" aria-label={danger.title}>
           <div className="w-full max-w-[400px] rounded-3xl border-4 border-red-600 bg-[#fff8ec] p-6 text-center block-shadow" onClick={(e) => e.stopPropagation()}>
-            <div className="text-5xl">⚠️</div>
+            <div className="flex justify-center text-red-600">
+              <Icon name="warning" size={48} />
+            </div>
             <h2 className="font-display text-2xl font-extrabold mt-2 text-red-700">{danger.title}</h2>
             {danger.body && <p className="text-sm mt-1 opacity-80">{danger.body}</p>}
             <div className="mt-4 grid grid-cols-2 gap-2">

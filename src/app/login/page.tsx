@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { Bloqui } from "@/components/Bloqui";
+import { Icon } from "@/components/Icon";
 import { createClient } from "@/lib/supabase/client";
 import { appUrl } from "@/lib/supabase/session";
 
@@ -16,13 +17,15 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [msg, setMsg] = useState("");
+  const [msgKind, setMsgKind] = useState<"error" | "ok">("error");
   const [busy, setBusy] = useState(false);
 
   const go = () => router.replace(next);
 
   const submitEmail = async () => {
     if (!email.includes("@") || pass.length < 6) {
-      setMsg("❌ Email válido + contraseña de 6+ caracteres.");
+      setMsgKind("error");
+      setMsg("Email válido + contraseña de 6+ caracteres.");
       return;
     }
     setBusy(true);
@@ -39,8 +42,9 @@ function LoginForm() {
           },
         });
         if (error) throw error;
+        setMsgKind("ok");
         setMsg(
-          "✅ Revisa tu correo para confirmar (o entra si ya quedó activa la sesión).",
+          "Revisa tu correo para confirmar (o entra si ya quedó activa la sesión).",
         );
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -51,7 +55,8 @@ function LoginForm() {
       }
       go();
     } catch (e: unknown) {
-      setMsg("❌ " + (e instanceof Error ? e.message : "No se pudo entrar"));
+      setMsgKind("error");
+      setMsg(e instanceof Error ? e.message : "No se pudo entrar");
     } finally {
       setBusy(false);
     }
@@ -70,8 +75,9 @@ function LoginForm() {
       if (error) throw error;
     } catch (e: unknown) {
       setBusy(false);
+      setMsgKind("error");
       setMsg(
-        "❌ Google aún no está activado en Supabase. Usa email mientras tanto. " +
+        "Google aún no está activado en Supabase. Usa email mientras tanto. " +
           (e instanceof Error ? e.message : ""),
       );
     }
@@ -85,17 +91,19 @@ function LoginForm() {
           <h1 className="font-display text-3xl font-extrabold">
             Entra a BLOCKWEB
           </h1>
-          <p className="text-sm opacity-70">
-            Login obligatorio para guardar tu avance en la nube 🌐
+          <p className="flex items-center gap-1.5 text-sm opacity-70">
+            Login obligatorio para guardar tu avance en la nube
+            <Icon name="cloud" size={15} />
           </p>
         </div>
       </div>
       <button
         onClick={google}
         disabled={busy}
-        className="mt-4 w-full rounded-2xl border-4 border-[#1a1523] font-extrabold py-3 disabled:opacity-50"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-4 border-[#1a1523] font-extrabold py-3 disabled:opacity-50"
       >
-        🔵 Continuar con Google
+        <Icon name="globe" size={18} />
+        Continuar con Google
       </button>
       <div className="my-3 text-center text-xs font-bold opacity-60">
         — o con email —
@@ -105,9 +113,10 @@ function LoginForm() {
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`rounded-xl border-2 py-2 text-sm font-bold capitalize ${mode === m ? "bg-[#1a1523] text-white" : ""}`}
+            className={`flex items-center justify-center gap-1.5 rounded-xl border-2 py-2 text-sm font-bold ${mode === m ? "bg-[#1a1523] text-white" : ""}`}
           >
-            {m === "login" ? "🔑 Entrar" : "📝 Registrarme"}
+            <Icon name={m === "login" ? "key" : "pencil"} size={15} />
+            {m === "login" ? "Entrar" : "Registrarme"}
           </button>
         ))}
       </div>
@@ -136,11 +145,32 @@ function LoginForm() {
       <button
         onClick={submitEmail}
         disabled={busy}
-        className="w-full rounded-2xl bg-[#FF6B35] text-white font-extrabold py-3 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#FF6B35] text-white font-extrabold py-3 disabled:opacity-50"
       >
-        {busy ? "⏳..." : mode === "login" ? "Entrar 🚀" : "Crear cuenta 🎉"}
+        {busy ? (
+          <Icon name="hourglass" size={18} />
+        ) : mode === "login" ? (
+          <>
+            Entrar
+            <Icon name="rocket" size={16} />
+          </>
+        ) : (
+          <>
+            Crear cuenta
+            <Icon name="party" size={16} />
+          </>
+        )}
       </button>
-      {msg && <p className="mt-2 text-sm font-bold">{msg}</p>}
+      {msg && (
+        <p className="mt-2 flex items-start gap-1.5 text-sm font-bold">
+          <Icon
+            name={msgKind === "error" ? "warning" : "checkCircle"}
+            size={15}
+            className="mt-0.5 shrink-0"
+          />
+          <span>{msg}</span>
+        </p>
+      )}
       <p className="mt-3 text-[11px] opacity-60">
         Al entrar, tu XP y lecciones de este navegador se fusionan a tu cuenta
         una sola vez.
@@ -151,7 +181,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<p className="font-bold">⏳ Cargando login...</p>}>
+    <Suspense
+      fallback={
+        <p className="flex items-center gap-2 font-bold">
+          <Icon name="hourglass" size={16} />
+          Cargando login...
+        </p>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

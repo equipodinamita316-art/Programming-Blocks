@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 
 export default async function ExamenCurso({
   params,
@@ -17,9 +18,10 @@ export default async function ExamenCurso({
       </p>
       <Link
         href="/examen/final"
-        className="rounded-2xl bg-[#1a1523] text-white font-bold py-3"
+        className="flex items-center justify-center gap-1.5 rounded-2xl bg-[#1a1523] text-white font-bold py-3"
       >
-        Ir al examen final →
+        Ir al examen final
+        <Icon name="arrowRight" size={16} />
       </Link>
       <Link href="/dashboard" className="underline text-sm">
         Volver al mapa

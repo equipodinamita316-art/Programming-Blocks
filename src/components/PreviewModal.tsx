@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Icon } from "./Icon";
 
 export function PreviewModal({
   open,
@@ -17,7 +18,7 @@ export function PreviewModal({
   title: string;
   count: number;
   onPublish?: () => void;
-  publishLabel?: string;
+  publishLabel?: ReactNode;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -44,9 +45,9 @@ export function PreviewModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-[#1a1523]/20">
-          <span>🔴</span>
-          <span>🟡</span>
-          <span>🟢</span>
+          <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+          <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+          <span className="h-3 w-3 rounded-full bg-[#28c840]" />
           <div className="flex-1 text-center text-xs md:text-sm font-mono font-bold truncate rounded-full bg-black/5 px-3 py-1">
             blockweb.page/
             {title
@@ -60,17 +61,18 @@ export function PreviewModal({
           {onPublish && (
             <button
               onClick={onPublish}
-              className="rounded-xl bg-[#a855f7] text-white text-xs md:text-sm font-bold px-3 py-1"
+              className="flex items-center gap-1.5 rounded-xl bg-[#a855f7] text-white text-xs md:text-sm font-bold px-3 py-1"
             >
-              {publishLabel || "🌐 Publicar"}
+              <Icon name="globe" size={14} />
+              {publishLabel || "Publicar"}
             </button>
           )}
           <button
             onClick={onClose}
-            className="rounded-xl border-2 px-2 py-1 text-sm font-bold"
+            className="flex items-center rounded-xl border-2 px-2 py-1 font-bold"
             aria-label="Cerrar vista previa"
           >
-            ✕
+            <Icon name="close" size={16} />
           </button>
         </div>
         <ViewBody srcDoc={srcDoc} />
@@ -86,15 +88,17 @@ function ViewBody({ srcDoc }: { srcDoc: string }) {
       <div className="flex gap-2 p-2 text-xs font-bold">
         <button
           onClick={() => setView("mobile")}
-          className={`rounded-lg border px-2 py-1 ${view === "mobile" ? "bg-[#1a1523] text-white" : ""}`}
+          className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 ${view === "mobile" ? "bg-[#1a1523] text-white" : ""}`}
         >
-          📱 Móvil
+          <Icon name="smartphone" size={14} />
+          Móvil
         </button>
         <button
           onClick={() => setView("desktop")}
-          className={`rounded-lg border px-2 py-1 ${view === "desktop" ? "bg-[#1a1523] text-white" : ""}`}
+          className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 ${view === "desktop" ? "bg-[#1a1523] text-white" : ""}`}
         >
-          🖥️ Desktop
+          <Icon name="monitor" size={14} />
+          Desktop
         </button>
       </div>
       <div className="flex-1 min-h-0 bg-white flex justify-center overflow-auto">

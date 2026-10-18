@@ -1,5 +1,6 @@
 import { PLANTILLAS } from "@/data/cursos";
 import { LocalView } from "./LocalView";
+import { Icon } from "@/components/Icon";
 
 export default async function PublicPage({
   params,
@@ -20,8 +21,9 @@ export default async function PublicPage({
   // Proyecto local no accesible en server, mostramos mensaje + intento client
   return (
     <div className="flex flex-col gap-3">
-      <div className="text-sm">
-        🌐 Página pública <b>/p/{slug}</b> · {title}
+      <div className="flex items-center gap-1.5 text-sm">
+        <Icon name="globe" size={15} />
+        Página pública <b>/p/{slug}</b> · {title}
       </div>
       {html ? (
         <div className="rounded-3xl overflow-hidden border-4 border-[#1a1523] bg-white">

@@ -54,10 +54,10 @@ export function addAttempt(): number {
   return n;
 }
 
-export function medal(attempts: number): { emoji: string; label: string } {
-  if (attempts <= 2) return { emoji: "🥇", label: "Oro" };
-  if (attempts <= 4) return { emoji: "🥈", label: "Plata" };
-  return { emoji: "🥉", label: "Bronce" };
+export function medal(attempts: number): { color: string; label: string } {
+  if (attempts <= 2) return { color: "#FFC700", label: "Oro" };
+  if (attempts <= 4) return { color: "#B7B7C2", label: "Plata" };
+  return { color: "#CD7F32", label: "Bronce" };
 }
 
 // ---------- Fase 2: retos de bloques ----------
@@ -76,7 +76,7 @@ export const RETOS: Reto[] = [
   {
     id: "reto-tarjeta",
     titulo: "Tarjeta gamer que celebra",
-    brief: "Título + párrafo + botón con id + imagen TUYA subida en 📁 + fondo con color o degradado. Al hacer clic, el botón celebra 🎉.",
+    brief: "Título + párrafo + botón con id + imagen TUYA subida en Archivos + fondo con color o degradado. Al hacer clic, el botón celebra.",
     requiredTypes: ["bw_h", "bw_button", "bw_img_asset", "bw_js_click"],
     minBlocks: 5,
     needCss: true,
@@ -117,23 +117,23 @@ export function checkReto(reto: Reto, gen: { types: string[]; html: string; css:
   else missing.push(`Te faltan bloques: ${gen.types.length}/${reto.minBlocks}`);
   const hasCss = gen.css.replace(/\s/g, "").length > 5;
   if (!reto.needCss || hasCss) ok++;
-  else missing.push("Falta estilo CSS: agrega un bloque 🎨");
+  else missing.push("Falta estilo CSS: agrega un bloque de CSS");
   const hasJs = gen.js.replace(/\s/g, "").length > 5;
   if (!reto.needJs || hasJs) ok++;
-  else missing.push("Falta lógica JS: agrega un bloque ⚡");
+  else missing.push("Falta lógica JS: agrega un bloque de JS");
   const hasAsset = gen.types.some((t) => t === "bw_img_asset" || t === "bw_video_asset") && /<img|<video/i.test(gen.html);
   if (!reto.needAsset || hasAsset) ok++;
-  else missing.push("Falta tu imagen: súbela en 📁 y úsala con el bloque 📁");
+  else missing.push("Falta tu imagen: súbela en Mis archivos y úsala con el bloque de archivos");
   return { score: Math.round((ok / total) * 100), missing };
 }
 
 function nombreBloque(t: string): string {
   const map: Record<string, string> = {
-    bw_h: "🧱 título", bw_p: "🧱 párrafo", bw_button: "🧱 botón",
-    bw_img_asset: "📁 imagen mía", bw_video_asset: "📁 video mío",
-    bw_js_click: "⚡ al clic", bw_js_text: "⚡ cambiar texto",
-    bw_js_counter: "⚡ contador", bw_counter_html: "🧱 marcador",
-    bw_css_grid3: "🎨 rejilla", bw_css_card: "🎨 tarjeta",
+    bw_h: "título (HTML)", bw_p: "párrafo (HTML)", bw_button: "botón (HTML)",
+    bw_img_asset: "imagen mía", bw_video_asset: "video mío",
+    bw_js_click: "al clic (JS)", bw_js_text: "cambiar texto (JS)",
+    bw_js_counter: "contador (JS)", bw_counter_html: "marcador (HTML)",
+    bw_css_grid3: "rejilla (CSS)", bw_css_card: "tarjeta (CSS)",
   };
   return map[t] || t;
 }
@@ -142,8 +142,8 @@ function nombreBloque(t: string): string {
 export function checkProyecto(gen: { types: string[]; html: string; css: string; js: string }): { score: number; missing: string[] } {
   const missing: string[] = [];
   const checks: [boolean, string][] = [
-    [gen.types.includes("bw_sem") && /<(header|nav|main|section|article|footer)[\s>]/i.test(gen.html), "Estructura semántica: usa el bloque 🧱 sección (header/nav/main...)"],
-    [/@media|bw_css_responsive/.test(gen.css) || gen.types.includes("bw_css_responsive"), "Responsive: agrega el bloque 🎨 responsive"],
+    [gen.types.includes("bw_sem") && /<(header|nav|main|section|article|footer)[\s>]/i.test(gen.html), "Estructura semántica: usa el bloque de sección (header/nav/main...)"],
+    [/@media|bw_css_responsive/.test(gen.css) || gen.types.includes("bw_css_responsive"), "Responsive: agrega el bloque responsive (CSS)"],
     [(gen.html.match(/<img|<video/gi) || []).length >= 3, `Galería: lleva ${(gen.html.match(/<img|<video/gi) || []).length}/3 imágenes o videos`],
     [gen.types.some((t) => FUNCTIONAL_JS.has(t)) && gen.js.replace(/\s/g, "").length > 5, "Interacción JS real que use tus elementos"],
     [!/(^|[^a-zA-Z])alert\s*\(/.test(gen.js.replace(/setTimeout\([^)]*\)/g, "")), "Sin alert al cargar la página"],

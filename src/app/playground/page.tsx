@@ -7,6 +7,7 @@ import { BLOCK_COUNT } from "@/lib/blockly/blocks";
 import { FilesModal, useAssetCount } from "@/components/FilesModal";
 import { PreviewModal } from "@/components/PreviewModal";
 import { useNotice } from "@/lib/notice";
+import { Icon } from "@/components/Icon";
 import type { Generated } from "@/components/BlocklyReal";
 
 const BlocklyReal = dynamic(
@@ -14,8 +15,9 @@ const BlocklyReal = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="p-6 rounded-2xl border-4 font-bold">
-        ⏳ Cargando editor de bloques...
+      <div className="flex items-center gap-2 p-6 rounded-2xl border-4 font-bold">
+        <Icon name="hourglass" size={18} />
+        Cargando editor de bloques...
       </div>
     ),
   },
@@ -34,7 +36,7 @@ const EMPTY_GEN: Generated = {
 // Envuelve código escrito a mano en un documento válido (si no lo es ya).
 function wrapCode(code: string): string {
   if (/<html[\s>]/i.test(code)) return code;
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;padding:16px;}</style></head><body>${code || "<p style='opacity:.6'>Escribe tu código ⌨️</p>"}</body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;padding:16px;}</style></head><body>${code || "<p style='opacity:.6'>Escribe tu código</p>"}</body></html>`;
 }
 
 export default function Playground() {
@@ -47,7 +49,7 @@ export default function Playground() {
   const [nombre, setNombre] = useState("Mi primera página");
   const fileCount = useAssetCount("playground");
 
-  const fullCode = `<!-- 🧱 HTML -->\n${gen.html}\n<!-- 🎨 CSS -->\n<style>\n${gen.css}</style>\n<!-- ⚡ JS -->\n<script>\n${gen.js}</script>`;
+  const fullCode = `<!-- HTML -->\n${gen.html}\n<!-- CSS -->\n<style>\n${gen.css}</style>\n<!-- JS -->\n<script>\n${gen.js}</script>`;
 
   const { notify, celebrate, askDanger } = useNotice();
 
@@ -88,24 +90,26 @@ export default function Playground() {
       bloques: modo === "bloques" ? gen.types : [],
     });
     celebrate({
-      title: "¡Publicado! 🚀",
+      title: "¡Publicado!",
       sub: r.message,
-      actions: [{ label: "🌐 Ver mi página", href: `/p/${slug}`, primary: true }],
+      actions: [{ label: "Ver mi página", href: `/p/${slug}`, primary: true }],
     });
   };
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="font-display text-2xl md:text-3xl font-extrabold">
-          🧱 Playground
+        <h1 className="flex items-center gap-2 font-display text-2xl md:text-3xl font-extrabold">
+          <Icon name="blocks" size={26} />
+          Playground
         </h1>
         <span className="text-xs font-bold rounded-full bg-green-500 text-white px-2 py-1">
           {BLOCK_COUNT} bloques
         </span>
         {modo === "codigo" && dirty && (
-          <span className="text-xs font-bold rounded-full bg-[#FFC700] px-2 py-1 border">
-            ✏️ Código manual — los bloques ya no coinciden
+          <span className="flex items-center gap-1.5 text-xs font-bold rounded-full bg-[#FFC700] px-2 py-1 border">
+            <Icon name="pencil" size={13} />
+            Código manual — los bloques ya no coinciden
           </span>
         )}
       </div>
@@ -121,15 +125,17 @@ export default function Playground() {
         <div className="flex rounded-xl overflow-hidden border-2 border-[#1a1523]">
           <button
             onClick={goBloques}
-            className={`px-4 py-2 ${modo === "bloques" ? "bg-[#1a1523] text-white" : ""}`}
+            className={`flex items-center gap-1.5 px-4 py-2 ${modo === "bloques" ? "bg-[#1a1523] text-white" : ""}`}
           >
-            🧱 Bloques
+            <Icon name="blocks" size={16} />
+            Bloques
           </button>
           <button
             onClick={goCodigo}
-            className={`px-4 py-2 ${modo === "codigo" ? "bg-[#1a1523] text-white" : ""}`}
+            className={`flex items-center gap-1.5 px-4 py-2 ${modo === "codigo" ? "bg-[#1a1523] text-white" : ""}`}
           >
-            ⌨️ Código
+            <Icon name="keyboard" size={16} />
+            Código
           </button>
         </div>
         <button
@@ -137,30 +143,34 @@ export default function Playground() {
             navigator.clipboard?.writeText(
               modo === "bloques" ? fullCode : code,
             );
-            notify("Código copiado ✅", "exito");
+            notify("Código copiado", "exito");
           }}
-          className="rounded-xl border-2 px-3 py-2"
+          className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2"
         >
-          📋 Copiar
+          <Icon name="clipboard" size={15} />
+          Copiar
         </button>
         <button
           onClick={() => setFilesOpen(true)}
-          className="rounded-xl border-2 px-3 py-2"
+          className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2"
           title="Abrir mis archivos"
         >
-          📁 ({fileCount})
+          <Icon name="folder" size={15} />
+          ({fileCount})
         </button>
         <button
           onClick={() => setPreview(true)}
-          className="rounded-xl bg-[#FF6B35] text-white px-4 py-2"
+          className="flex items-center gap-1.5 rounded-xl bg-[#FF6B35] text-white px-4 py-2"
         >
-          ▶️ Probar
+          <Icon name="play" size={15} />
+          Probar
         </button>
         <button
           onClick={publish}
-          className="rounded-xl bg-[#1a1523] text-white px-4 py-2"
+          className="flex items-center gap-1.5 rounded-xl bg-[#1a1523] text-white px-4 py-2"
         >
-          🚀 Publicar
+          <Icon name="rocket" size={15} />
+          Publicar
         </button>
       </div>
 
@@ -168,15 +178,17 @@ export default function Playground() {
       {modo === "bloques" ? (
         <div className="min-w-0">
           <BlocklyReal lessonId="playground" onChange={setGen} />
-          <p className="text-xs opacity-60 mt-1">
-            Abre 📁 para subir imágenes/videos y úsalos con el bloque 📁. El
-            workspace se guarda solo.
+          <p className="mt-1 flex items-center gap-1.5 text-xs opacity-60">
+            <Icon name="folder" size={13} />
+            Abre Archivos para subir imágenes/videos y úsalos con el bloque de
+            archivos. El workspace se guarda solo.
           </p>
         </div>
       ) : (
         <div className="min-w-0 rounded-2xl overflow-hidden border-4 border-[#1a1523]">
-          <div className="px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">
-            ⌨️ index.html — editable (al volver a bloques se descarta)
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">
+            <Icon name="keyboard" size={13} />
+            index.html — editable (al volver a bloques se descarta)
           </div>
           <textarea
             value={code}
@@ -194,8 +206,9 @@ export default function Playground() {
       <p className="text-xs opacity-60">
         Un solo editor: bloques con drag & drop o código a mano. Lo que ves en
         Probar es lo que se publica.{" "}
-        <Link href="/proyectos" className="underline">
-          Ver plantillas →
+        <Link href="/proyectos" className="inline-flex items-center gap-1 underline">
+          Ver plantillas
+          <Icon name="arrowRight" size={13} />
         </Link>
       </p>
 
@@ -213,7 +226,7 @@ export default function Playground() {
         title={nombre}
         count={modo === "bloques" ? gen.count : code.length}
         onPublish={publish}
-        publishLabel="🚀 Publicar"
+        publishLabel="Publicar"
       />
     </div>
   );

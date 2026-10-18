@@ -5,6 +5,7 @@ import { getProjects, saveProject } from "@/lib/store";
 import { useNotice } from "@/lib/notice";
 import Link from "next/link";
 import { useState } from "react";
+import { Icon } from "@/components/Icon";
 
 export default function Proyectos() {
   const { notify } = useNotice();
@@ -14,8 +15,9 @@ export default function Proyectos() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="font-display text-3xl font-extrabold">
-        🎨 Plantillas estilo WordPress
+      <h1 className="flex items-center gap-2 font-display text-3xl font-extrabold">
+        <Icon name="palette" size={28} />
+        Plantillas estilo WordPress
       </h1>
       <p className="text-sm opacity-70">
         Elige una, personalízala en el Playground y publícala.
@@ -54,7 +56,7 @@ export default function Proyectos() {
                       fecha: new Date().toISOString(),
                     });
                     setMine(getProjects());
-                    notify("Plantilla clonada a Mis proyectos ✅", "exito", {
+                    notify("Plantilla clonada a Mis proyectos", "exito", {
                       label: "Ver",
                       href: `/p/${slug}`,
                     });
@@ -72,8 +74,9 @@ export default function Proyectos() {
         Mis proyectos publicados ({mine.length})
       </h2>
       {mine.length === 0 ? (
-        <p className="text-sm opacity-70">
-          Aún no publicas. Ve al Playground 🧱
+        <p className="flex items-center gap-1.5 text-sm opacity-70">
+          Aún no publicas. Ve al Playground
+          <Icon name="blocks" size={15} />
         </p>
       ) : (
         <div className="grid md:grid-cols-3 gap-2">
@@ -81,9 +84,10 @@ export default function Proyectos() {
             <Link
               key={m.slug}
               href={`/p/${m.slug}`}
-              className="rounded-xl border-2 p-3 font-bold text-sm underline"
+              className="flex items-center gap-1.5 rounded-xl border-2 p-3 font-bold text-sm underline"
             >
-              🌐 {m.nombre} → /p/{m.slug}
+              <Icon name="globe" size={15} />
+              {m.nombre} · /p/{m.slug}
             </Link>
           ))}
         </div>

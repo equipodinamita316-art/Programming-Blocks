@@ -4,6 +4,7 @@ import { findCert } from "@/lib/store";
 import { verifyCertRemote } from "@/lib/projects";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
+import { Icon } from "@/components/Icon";
 
 export default function VerifyPage({
   params,
@@ -41,15 +42,30 @@ export default function VerifyPage({
 
   return (
     <div className="max-w-[560px] mx-auto rounded-3xl border-4 border-[#1a1523] bg-white p-6 text-center block-shadow">
-      <div className="text-4xl">{cert ? "✅" : checked ? "❌" : "⏳"}</div>
+      <div className="flex justify-center">
+        {cert ? (
+          <Icon name="checkCircle" size={48} className="text-green-600" />
+        ) : checked ? (
+          <Icon name="xCircle" size={48} className="text-red-600" />
+        ) : (
+          <Icon name="hourglass" size={48} className="opacity-60" />
+        )}
+      </div>
       <h1 className="font-display text-2xl font-extrabold mt-2">
         Verificación {code}
       </h1>
       {cert ? (
         <>
-          <p className="mt-2">
-            Certificado <b>válido</b>{" "}
-            {remote ? "en la nube ✅" : "(demo local)"}.
+          <p className="mt-2 flex items-center justify-center gap-1.5">
+            Certificado <b>válido</b>
+            {remote ? (
+              <>
+                en la nube
+                <Icon name="cloud" size={15} />
+              </>
+            ) : (
+              "(demo local)"
+            )}
           </p>
           <div className="mt-3 rounded-2xl bg-black/5 p-3 text-sm">
             <div>
@@ -84,8 +100,12 @@ export default function VerifyPage({
       ) : (
         <p className="mt-2 opacity-70">Verificando en la nube...</p>
       )}
-      <Link href="/" className="inline-block mt-4 underline font-bold">
-        ← Volver a BLOCKWEB
+      <Link
+        href="/"
+        className="mt-4 inline-flex items-center gap-1.5 underline font-bold"
+      >
+        <Icon name="arrowLeft" size={16} />
+        Volver a BLOCKWEB
       </Link>
     </div>
   );

@@ -3,7 +3,7 @@ export const TOOLBOX = {
   contents: [
     {
       kind: "category",
-      name: "🧱 HTML (12)",
+      name: "HTML",
       colour: "16",
       contents: [
         { kind: "block", type: "bw_h" },
@@ -25,7 +25,7 @@ export const TOOLBOX = {
     },
     {
       kind: "category",
-      name: "🎨 CSS (14)",
+      name: "CSS",
       colour: "210",
       contents: [
         { kind: "block", type: "bw_css_color" },
@@ -46,7 +46,7 @@ export const TOOLBOX = {
     },
     {
       kind: "category",
-      name: "⚡ JS (14)",
+      name: "JS",
       colour: "50",
       contents: [
         { kind: "block", type: "bw_js_var" },

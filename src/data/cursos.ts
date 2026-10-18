@@ -1,3 +1,5 @@
+import type { IconName } from "@/components/Icon";
+
 export type Dificultad = "Facil" | "Media" | "Dificil" | "Boss";
 
 export type Leccion = {
@@ -53,11 +55,11 @@ export const XP_POR_DIFICULTAD: Record<Dificultad, number> = {
   Boss: 200,
 };
 
-export const DIFICULTAD_META: Record<Dificultad, { emoji: string; color: string; label: string }> = {
-  Facil: { emoji: "🟢", color: "#22c55e", label: "Fácil" },
-  Media: { emoji: "🟡", color: "#eab308", label: "Media" },
-  Dificil: { emoji: "🔴", color: "#ef4444", label: "Difícil" },
-  Boss: { emoji: "👹", color: "#a855f7", label: "Boss" },
+export const DIFICULTAD_META: Record<Dificultad, { icon: IconName; color: string; label: string }> = {
+  Facil: { icon: "circle", color: "#22c55e", label: "Fácil" },
+  Media: { icon: "circle", color: "#eab308", label: "Media" },
+  Dificil: { icon: "circle", color: "#ef4444", label: "Difícil" },
+  Boss: { icon: "boss", color: "#a855f7", label: "Boss" },
 };
 
 export const CURSOS = [
@@ -66,21 +68,21 @@ export const CURSOS = [
     titulo: "HTML",
     color: "#FF6B35",
     descripcion: "Estructura tu primera página como bloques.",
-    emoji: "🧱",
+    icon: "html",
   },
   {
     slug: "css",
     titulo: "CSS",
     color: "#2563EB",
     descripcion: "Colores, cajas y layouts que enamoran.",
-    emoji: "🎨",
+    icon: "css",
   },
   {
     slug: "js",
     titulo: "JavaScript",
     color: "#FFC700",
     descripcion: "Dale vida y lógica a tus creaciones.",
-    emoji: "⚡",
+    icon: "js",
   },
 ] as const;
 

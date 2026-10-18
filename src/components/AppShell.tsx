@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Bloqui } from "./Bloqui";
+import { Icon, type IconName } from "./Icon";
 import { getLevel, getXP } from "@/lib/store";
 import { useSession } from "@/lib/supabase/session";
 import { useRouter } from "next/navigation";
@@ -52,11 +53,11 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const nav = [
-    { href: "/dashboard", label: "Aprender", icon: "🗺️" },
-    { href: "/playground", label: "Crear", icon: "🧱" },
-    { href: "/proyectos", label: "Plantillas", icon: "🎨" },
-    { href: "/certificado", label: "Certificado", icon: "🎓" },
+  const nav: { href: string; label: string; icon: IconName }[] = [
+    { href: "/dashboard", label: "Aprender", icon: "map" },
+    { href: "/playground", label: "Crear", icon: "blocks" },
+    { href: "/proyectos", label: "Plantillas", icon: "palette" },
+    { href: "/certificado", label: "Certificado", icon: "graduation" },
   ];
 
   const focusMode =
@@ -69,9 +70,10 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b-4 border-[#1a1523] bg-[var(--background)] px-3 py-2">
           <Link
             href="/dashboard"
-            className="rounded-xl border-2 border-[#1a1523] px-3 py-1 text-sm font-extrabold hover:bg-black/5"
+            className="flex items-center gap-1.5 rounded-xl border-2 border-[#1a1523] px-3 py-1 text-sm font-extrabold hover:bg-black/5"
           >
-            ← Salir del curso
+            <Icon name="arrowLeft" size={16} />
+            Salir del curso
           </Link>
           <span className="flex items-center gap-2 font-display text-lg font-extrabold">
             <Bloqui size={28} />
@@ -122,19 +124,28 @@ function ShellInner({ children }: { children: React.ReactNode }) {
               <Link
                 key={n.href}
                 href={n.href}
-                className={`rounded-xl border-2 px-3 py-2 font-bold whitespace-nowrap ${path.startsWith(n.href) ? "bg-[#1a1523] text-white border-[#1a1523]" : "border-[#1a1523] hover:bg-black/5"}`}
+                className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2 font-bold whitespace-nowrap ${path.startsWith(n.href) ? "bg-[#1a1523] text-white border-[#1a1523]" : "border-[#1a1523] hover:bg-black/5"}`}
               >
-                {n.icon} {n.label}
+                <Icon name={n.icon} size={18} />
+                {n.label}
               </Link>
             ))}
           </nav>
           <div className="mt-auto flex flex-col gap-2">
-            <div className="rounded-xl border-2 border-[#1a1523] px-2 py-1 text-xs font-bold truncate">
-              {loading
-                ? "⏳..."
-                : user
-                  ? `👤 ${user.user_metadata?.nombre || user.email}`
-                  : "👤 Invitado"}
+            <div className="flex items-center gap-2 rounded-xl border-2 border-[#1a1523] px-2 py-1 text-xs font-bold">
+              {loading ? (
+                <>
+                  <Icon name="hourglass" size={14} />
+                  <span className="truncate">...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name="user" size={14} className="shrink-0" />
+                  <span className="truncate">
+                    {user ? user.user_metadata?.nombre || user.email : "Invitado"}
+                  </span>
+                </>
+              )}
             </div>
             <Link
               href="/examen/final"
@@ -145,17 +156,19 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             {user ? (
               <button
                 onClick={salir}
-                className="rounded-xl border-2 px-2 py-1 text-xs font-bold opacity-70"
+                className="flex items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-1 text-xs font-bold opacity-70"
               >
-                Salir ⎋
+                Salir
+                <Icon name="logout" size={14} />
               </button>
             ) : (
               !loading && (
                 <Link
                   href="/login"
-                  className="rounded-xl bg-[#FF6B35] text-white px-2 py-1 text-xs font-extrabold text-center"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-[#FF6B35] text-white px-2 py-1 text-xs font-extrabold text-center"
                 >
-                  Entrar 🔑
+                  Entrar
+                  <Icon name="key" size={14} />
                 </Link>
               )
             )}
@@ -172,9 +185,9 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? "Cerrar panel" : "Abrir panel"}
             aria-expanded={open}
-            className="rounded-xl border-2 border-[#1a1523] px-3 py-1 text-lg font-extrabold hover:bg-black/5"
+            className="flex items-center rounded-xl border-2 border-[#1a1523] px-2.5 py-1.5 font-extrabold hover:bg-black/5"
           >
-            {open ? "✕" : "☰"}
+            <Icon name={open ? "close" : "menu"} size={20} />
           </button>
           <Link href="/" className="flex items-center gap-2">
             <Bloqui size={32} />
@@ -200,10 +213,10 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             {user ? (
               <button
                 onClick={salir}
-                className="rounded-lg border px-1 text-xs opacity-70"
+                className="rounded-lg border px-1.5 py-1 opacity-70"
                 aria-label="Salir"
               >
-                ⎋
+                <Icon name="logout" size={15} />
               </button>
             ) : (
               !loading && (
@@ -230,7 +243,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
               href={n.href}
               className={`flex flex-col items-center py-2 text-xs font-bold ${path.startsWith(n.href) ? "bg-black/5" : ""}`}
             >
-              <span className="text-xl">{n.icon}</span>
+              <Icon name={n.icon} size={22} />
               {n.label}
             </Link>
           ))}
