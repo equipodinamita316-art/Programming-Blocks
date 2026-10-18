@@ -32,6 +32,8 @@ export function MiniEditor({
   previewTitle,
   onPublish,
   publishLabel,
+  starterXml,
+  storageSuffix,
 }: {
   lessonId: string;
   curso: Leccion["curso"];
@@ -43,6 +45,8 @@ export function MiniEditor({
   previewTitle: string;
   onPublish?: () => void;
   publishLabel?: ReactNode;
+  starterXml?: string;
+  storageSuffix?: string;
 }) {
   const [preview, setPreview] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
@@ -171,6 +175,8 @@ export function MiniEditor({
           <BlocklyReal
             curso={curso}
             lessonId={lessonId}
+            starterXml={starterXml}
+            storageSuffix={storageSuffix}
             displayFamily={activeFamily}
             onChange={onChange}
           />

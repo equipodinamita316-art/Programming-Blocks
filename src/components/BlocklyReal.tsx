@@ -27,12 +27,14 @@ export function BlocklyReal({
   curso,
   lessonId,
   starterXml,
+  storageSuffix,
   displayFamily,
   onChange,
 }: {
   curso?: CursoSlug;
   lessonId?: string;
   starterXml?: string;
+  storageSuffix?: string;
   displayFamily?: Family | null;
   onChange: (g: Generated) => void;
 }) {
@@ -44,7 +46,9 @@ export function BlocklyReal({
   const [err, setErr] = useState("");
   const [purged, setPurged] = useState<string[]>([]);
 
-  const storageKey = lessonId ? `bw-blockly-${lessonId}` : "bw-blockly";
+  const storageKey = lessonId
+    ? `bw-blockly-${lessonId}${storageSuffix ? `-${storageSuffix}` : ""}`
+    : "bw-blockly";
 
   useEffect(() => {
     let disposed = false;
@@ -234,7 +238,7 @@ export function BlocklyReal({
       } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [curso, lessonId]);
+  }, [curso, lessonId, starterXml, storageSuffix]);
 
   const clear = () => {
     try {

@@ -13,6 +13,7 @@ import {
   type Leccion,
 } from "@/data/cursos";
 import { validateLesson, proofHash, type CheckResult } from "@/lib/verification";
+import { starterXmlFromCode, starterXmlForBoss } from "@/lib/blockly/starter";
 import { shuffleQuiz } from "@/lib/quiz";
 import { ALLOW } from "@/lib/blockly/scope";
 import {
@@ -62,6 +63,15 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
   );
   const meta = DIFICULTAD_META[leccion.dificultad];
   const intro = getIntro(leccion);
+  // Proyecto inicial en bloques (codigoInicial) y proyecto roto del Boss.
+  const starterMision = useMemo(
+    () => starterXmlFromCode(leccion.codigoInicial),
+    [leccion.codigoInicial],
+  );
+  const starterBoss = useMemo(
+    () => starterXmlForBoss(leccion.codigoInicial, leccion.bossCodigoRoto),
+    [leccion.codigoInicial, leccion.bossCodigoRoto],
+  );
 
   const go = (p: Paso) => {
     if (p > max) return;
@@ -263,6 +273,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             onChange={setGen}
             showFiles={false}
             previewTitle={leccion.id}
+            starterXml={starterMision}
             instruccion={<>Misión: {leccion.mision}</>}
             estado={
               missionOk ? (
@@ -319,6 +330,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             onChange={setGen}
             showFiles
             previewTitle={leccion.id}
+            starterXml={starterMision}
             instruccion="Lab: decide tu tema, sube archivos y arma tu página"
             estado={
               labOk ? (
@@ -413,6 +425,13 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
                 <li key={c}>{c}</li>
               ))}
             </ul>
+            <p className="mt-1 flex items-start gap-1.5 text-xs rounded-xl bg-[#a855f7]/10 p-2">
+              <Icon name="brush" size={14} className="mt-0.5 shrink-0" />
+              <span>
+                El editor ya viene con un <b>proyecto roto</b>: arregla y añade
+                bloques hasta cumplir todos los objetivos.
+              </span>
+            </p>
             <div className="mt-2">
               <Objetivos checks={full.checks} showHints />
             </div>
@@ -481,7 +500,9 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             onChange={setGen}
             showFiles
             previewTitle={leccion.id}
-            instruccion="Boss: usa bloques + 1 imagen/video, prueba y publica"
+            starterXml={starterBoss}
+            storageSuffix="boss"
+            instruccion="Boss: arregla el proyecto roto con bloques + 1 imagen/video, prueba y publica"
             estado={
               <>
                 {bossOk ? (

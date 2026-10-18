@@ -44,12 +44,14 @@ Todo verificado con `npm run build` + `npm run lint` verdes (0 errores).
 - **Nube:** Supabase Auth email+Google (login obligatorio vía middleware; `/login`, callback, sesión global, merge local→nube); publish con `user_id` + assets a Storage; RLS + trigger `handle_new_user`; `supabase/schema.sql` re-ejecutable. Bucket `assets` público. Conexión, tablas, RPC y bucket verificados por script.
 - ⏳ **Último pendiente operativo:** probar login Google end-to-end en navegador (`/login` → Google → dashboard + fila en `profiles`).
 
-### v2.0 — ROADMAP (próximo)
-1. **Iconos únicos, fuera emojis:** set de iconos propios consistente (reemplaza emojis de UI).
-2. **Personajes:** Bloqui + amigos como tutores que enseñan a programar (diálogos, reacciones, acompañamiento por lección).
-3. **Más bloques:** ampliar el catálogo por lenguaje.
-4. **Lecciones más largas y claras:** expandir contenido paso a paso.
-5. **Mejor verificador de lecciones:** endurecer `verification.ts` (chequeos semánticos por objetivo).
+### v2.0 — EN CURSO
+- **Fase 1 — Iconos únicos (HECHA):** `src/components/Icon.tsx` (`<Icon name size>`) + `blockIcons.ts` (SVG data-URI en bloques). Emoji de UI/content limpiados; se mantienen los ilustrativos aprobados (grupos 5-7). Bloqui conserva su cara original. Commits `179eb7f`, `01d8982`, `cd08da3`.
+- **Fase A — Motor de bloques (HECHA, `8c6f805`):** `generators.ts` recursivo (anida `input_statement`), `generateFromBlocks(getTopBlocks(true))`, `BASE_CSS` en `combineSrcDoc` (sin estilos inline), 16 bloques nuevos. Pestaña "Código generado" (`CodeView`+`hl`) en `MiniEditor`.
+- **Fase B — Verificador declarativo (HECHA, `6bb0fce`):** `src/lib/lessonRules.ts` (motor data-only, 2-4 objetivos por lección sobre tags/props JS/CSS); `validateLesson` devuelve `checks`; checklist "Objetivos" en `LessonEditor`. Bloques añadidos para cerrar huecos: `bw_head`, `bw_progress`, `bw_css_sticky`, `bw_js_obj`.
+- **Fase C — Starter en bloques (HECHA):** `src/lib/blockly/starter.ts` convierte `codigoInicial`/`bossCodigoRoto` (HTML) a XML de bloques; MiniEditor/BlocklyReal aceptan `starterXml` + `storageSuffix`; el Boss arranca con su propio workspace "roto".
+- **Pendiente:** Fase de contenido (lecciones más largas/claras, diálogos de Bloqui y amigos), y refinar ids en starters de JS.
+- **Operativo:** probar login Google end-to-end en navegador (`/login` → Google → dashboard + fila en `profiles`).
+- **Roadmap restante:** personajes tutores (Bloqui + amigos), lecciones más largas, ampliar catálogo de bloques.
 
 ## Comandos
 
