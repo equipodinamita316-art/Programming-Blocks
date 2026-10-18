@@ -16,21 +16,28 @@ export function CodeView({
   js,
   editable = false,
   onChange,
+  hideEmpty = false,
 }: {
   html: string;
   css: string;
   js: string;
   editable?: boolean;
   onChange?: (lang: Lang, text: string) => void;
+  hideEmpty?: boolean;
 }) {
-  const [which, setWhich] = useState<Lang>("html");
-  const code = which === "html" ? html : which === "css" ? css : js;
+  const contents: Record<Lang, string> = { html, css, js };
+  const langs = hideEmpty
+    ? LANGS.filter((l) => contents[l.id].trim())
+    : LANGS;
+  const visible = langs.length ? langs : LANGS;
+  const [which, setWhich] = useState<Lang>(visible[0].id);
+  const code = contents[which];
   const preRef = useRef<HTMLPreElement>(null);
 
   return (
     <div className="rounded-2xl overflow-hidden border-4 border-[#1a1523] bg-[#0d0b12]">
       <div className="flex gap-1 px-2 py-1 bg-[#1e1e2e] text-xs">
-        {LANGS.map((l) => (
+        {visible.map((l) => (
           <button
             key={l.id}
             onClick={() => setWhich(l.id)}

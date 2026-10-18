@@ -20,6 +20,8 @@ export type Leccion = {
   quiz: { q: string; opciones: string[]; correcta: number }[];
   // Paso 0 Aprende (opcional: se deriva de concepto/mision si falta)
   intro?: { parrafos: string[]; tips: string[] };
+  pasos?: string[]; // pasos numerados "cómo se hace"
+  ejemplo?: string; // snippet autocontenido para preview + código de ejemplo
   labDecision?: string;
   bossChecklist?: string[];
 };
@@ -97,6 +99,27 @@ export const LECCIONES: Leccion[] = [
     xp: 50,
     mision: "Bloqui perdió su nombre. Ayúdalo creando un <h1> con tu nickname de gamer.",
     concepto: "Las etiquetas <h1> a <h6> son títulos. <h1> es el más importante.",
+    intro: {
+      parrafos: [
+        "Cuando entras a una web, lo primero que ves es un título grande. En HTML ese título se crea con la etiqueta <h1>, la más importante de la página.",
+        "Hay 6 niveles de títulos: de <h1> (el principal) hasta <h6> (el más pequeño). Sirven para ordenar la información, como los títulos de un cuaderno.",
+        "Toda etiqueta que abre se cierra: <h1>texto</h1>. El texto va en medio y la barra / marca el final.",
+      ],
+      tips: [
+        "Usa solo un <h1> por página: es tu título principal",
+        "Baja de nivel con orden: los h2 son subtítulos de un h1",
+        "Si ves < y > sueltos, es que falta abrir o cerrar una etiqueta",
+      ],
+    },
+    pasos: [
+      "Elige tu nickname de gamer (por ejemplo, BloquiMaster).",
+      "Arrastra el bloque de título y ponlo en tamaño h1.",
+      "Escribe tu nickname dentro del bloque.",
+      "Prueba y revisa que se vea como un título grande.",
+    ],
+    ejemplo: "<h1>👾 Soy BloquiMaster</h1>",
+    labDecision: "Tu tema: inventa el título de tu web soñada (un juego, un canal, una tienda…). Prueba también h2 y h3 para los subtítulos.",
+    bossChecklist: ["Un bloque de título h1 con tu texto", "Etiqueta cerrada correctamente </h1>", "Quiz 100%", "Publicar URL"],
     codigoInicial: "<!-- Crea aquí tu h1 -->\n",
     solucion: "<h1>Soy BloquiMaster</h1>",
     labLibre: ["Cambia el texto por lo que más te guste", "Prueba h2 y h3 para subtítulos", "Extra: añade un emoji a tu título"],
@@ -117,6 +140,27 @@ export const LECCIONES: Leccion[] = [
     xp: 50,
     mision: "Crea tu tarjeta de perfil: un párrafo sobre ti + un enlace a tu juego favorito + tu avatar con <img>.",
     concepto: "<p> para texto, <a href> para enlaces, <img src alt> para imágenes.",
+    intro: {
+      parrafos: [
+        "Ya tienes un título; ahora toca el cuerpo de la página. Con <p> escribes párrafos de texto.",
+        "<a href='...'> crea un enlace que lleva a otra web, y <img src='...' alt='...'> muestra una imagen. El texto alt describe la imagen.",
+        "Estos tres bloques son la base de casi toda página: texto, enlaces e imágenes.",
+      ],
+      tips: [
+        "href necesita la URL completa: empieza por https://",
+        "El alt del img ayuda a quien no ve la imagen (y a Google)",
+        "Las imágenes se ajustan solas al ancho de la página",
+      ],
+    },
+    pasos: [
+      "Escribe uno o dos párrafos presentándote.",
+      "Añade un enlace a tu juego o canal favorito.",
+      "Inserta una imagen y escribe su texto alternativo.",
+      "Prueba que el enlace abra y la imagen se vea.",
+    ],
+    ejemplo: "<h1>Mi tarjeta</h1>\n<p>Amo los videojuegos y crear páginas.</p>\n<a href=\"https://example.com\">🎮 Mi juego favorito</a>\n<img src=\"https://placehold.co/240x140/FF6B35/ffffff?text=mi+avatar\" alt=\"Mi avatar\" />",
+    labDecision: "Tu tema: la tarjeta de tu perfil (foto, pasatiempos, red social). Cambia el enlace por tu canal o web real.",
+    bossChecklist: ["1 bloque de párrafo <p>", "1 enlace <a> con href válido", "1 imagen <img> con alt", "Publicar URL"],
     codigoInicial: "<h1>Mi tarjeta</h1>\n<p>Escribe algo sobre ti...</p>\n",
     solucion: '<h1>Mi tarjeta</h1>\n<p>Amo los videojuegos</p>\n<a href="https://example.com">Mi juego</a>\n<img src="https://placehold.co/200" alt="mi avatar" />',
     labLibre: ["Pon tu comida y juego favoritos", "Cambia el enlace a tu canal o red", "Extra: añade 3 imágenes de lo que amas"],
@@ -137,6 +181,27 @@ export const LECCIONES: Leccion[] = [
     xp: 80,
     mision: "Crea tu inventario gamer: lista <ul> + tabla de puntajes + formulario con tu nombre.",
     concepto: "<ul><li>, <table><tr><td>, <form><input><button>.",
+    intro: {
+      parrafos: [
+        "Las listas ordenan cosas: <ul> es una lista con puntos y cada elemento va en un <li>.",
+        "Las tablas muestran datos en filas y columnas: <table>, <tr> (fila) y <td> (celda). El <form> recoge datos del usuario con <input> y <button>.",
+        "Juntas, lista + tabla + formulario forman el inventario y el registro de tu web.",
+      ],
+      tips: [
+        "Cada <li> va dentro de su <ul> y cierra con </li>",
+        "Una tabla es table > tr > td (fila con celdas)",
+        "El form necesita un <button> para poder enviar",
+      ],
+    },
+    pasos: [
+      "Crea una lista <ul> con 3 objetos de tu inventario.",
+      "Añade una tabla con 2 columnas: nombre y puntaje.",
+      "Añade un formulario con un input y un botón.",
+      "Prueba y revisa que la lista y la tabla se vean ordenadas.",
+    ],
+    ejemplo: "<h2>Mi inventario</h2>\n<ul><li>🗡️ Espada</li><li>🛡️ Escudo</li><li>🧪 Poción</li></ul>\n<table><caption>Puntajes</caption><thead><tr><th scope=\"col\">Jugador</th><th scope=\"col\">Puntos</th></tr></thead><tbody><tr><td>Alex</td><td>100</td></tr></tbody></table>\n<form><input placeholder=\"tu nombre\" /><button>Guardar</button></form>",
+    labDecision: "Tu tema: el inventario de tu mundo ideal (juegos, ropa, mascotas…). Inventa 5 objetos y dales su puntaje.",
+    bossChecklist: ["Lista con 2+ <li> cerrados", "Tabla con fila de encabezado", "Formulario con input + botón", "Publicar URL"],
     codigoInicial: "<h2>Mi inventario</h2>\n<ul>\n  <li>Espada</li>\n</ul>\n",
     solucion: "<h2>Mi inventario</h2>\n<ul><li>Espada</li><li>Escudo</li></ul>\n<table><caption>Puntajes</caption><thead><tr><th scope=\"col\">Jugador</th><th scope=\"col\">Puntos</th></tr></thead><tbody><tr><td>Alex</td><td>100</td></tr></tbody></table>\n<form><input placeholder=\"tu nombre\" /><button>Guardar</button></form>",
     labLibre: ["Inventa 5 objetos de tu mundo ideal", "Crea tabla con tus top 3 juegos y puntaje", "Extra: formulario de contacto real"],
@@ -157,6 +222,27 @@ export const LECCIONES: Leccion[] = [
     xp: 80,
     mision: "Bloqui quiere un blog de verdad. Estrúcturalo con bloques 🧱 sección: cabecera, navegación, contenido y pie.",
     concepto: "Semántica = significado. Usa el bloque sección y elige header/nav/main/section/article/footer.",
+    intro: {
+      parrafos: [
+        "Hasta ahora usabas contenedores genéricos (<div>), pero HTML tiene etiquetas con significado propio: la semántica.",
+        "<header> es la cabecera, <nav> los enlaces, <main> el contenido principal, <footer> el pie y <article> cada entrada o post.",
+        "La semántica ayuda a que Google entienda tu web y a que sea accesible (por ejemplo, para lectores de pantalla).",
+      ],
+      tips: [
+        "header arriba, footer abajo y main en medio",
+        "nav agrupa los enlaces de navegación",
+        "article es para cada post o noticia independiente",
+      ],
+    },
+    pasos: [
+      "Envuelve el título y los enlaces en header + nav.",
+      "Mete el contenido en main y usa section para agrupar.",
+      "Crea un article para tu primer post.",
+      "Cierra con un footer y su texto.",
+    ],
+    ejemplo: "<header><h1>🎮 Mi blog gamer</h1><nav><a href='#'>Inicio</a> · <a href='#'>Posts</a></nav></header>\n<main><section><article><h2>Post 1</h2><p>Hoy aprendí semántica.</p></article></section></main>\n<footer>Hecho con 💜 por mí</footer>",
+    labDecision: "Tu tema: el blog de lo que más te gusta (anime, fútbol, música). Añade 3 articles con tus 3 posts soñados.",
+    bossChecklist: ["header + nav + main + footer", "1 article con contenido real", "Estructura sin <div> genéricos", "Publicar URL"],
     codigoInicial: "<div>Mi blog</div>\n<div>Post 1</div>\n<div>Pie</div>\n",
     solucion: "<header><h1>Mi blog gamer</h1><nav><a href='#'>Inicio</a></nav></header>\n<main><section><article><h2>Post 1</h2><p>Hoy aprendí semántica</p></article></section></main>\n<footer>Hecho con 💜 por mí</footer>",
     labLibre: ["Haz el blog de tu tema favorito: música, anime, fútbol", "Añade 3 articles con tus posts soñados", "Extra: nav con 4 enlaces reales"],
@@ -177,6 +263,27 @@ export const LECCIONES: Leccion[] = [
     xp: 80,
     mision: "Crea tu videoteca: un video, un audio y un iframe de YouTube de lo que más amas.",
     concepto: "<video controls src>, <audio controls src>, <iframe src> para incrustar.",
+    intro: {
+      parrafos: [
+        "Además de imágenes, una web puede tener video, audio y contenido incrustado de otras plataformas.",
+        "<video controls> y <audio controls> reproducen archivos; el atributo controls muestra los botones de play y pausa.",
+        "<iframe> incrusta otra página dentro de la tuya, como un video de YouTube. Con esto ya puedes montar tu videoteca.",
+      ],
+      tips: [
+        "Sin controls no aparece ningún botón de play",
+        "El iframe necesita la URL completa en src",
+        "Puedes ajustar el tamaño con width y height",
+      ],
+    },
+    pasos: [
+      "Añade un <video> con controls y su src.",
+      "Añade un <audio> con controls.",
+      "Incrusta un video de YouTube con <iframe>.",
+      "Prueba: dale play al video y al audio.",
+    ],
+    ejemplo: "<h2>Mi videoteca</h2>\n<video controls width='320' src='https://www.w3schools.com/html/mov_bbb.mp4'></video>\n<audio controls src='https://www.w3schools.com/html/horse.mp3'></audio>\n<iframe width='320' height='180' src='https://www.youtube.com/embed/dQw4w9WgXcQ'></iframe>",
+    labDecision: "Tu tema: la videoteca de tu artista o juego favorito. Ponle un título y una descripción a cada medio.",
+    bossChecklist: ["1 video con controls", "1 audio o 1 iframe", "Título para la videoteca", "Publicar URL"],
     codigoInicial: "<h2>Mi videoteca</h2>\n<!-- añade video, audio e iframe -->\n",
     solucion: "<h2>Mi videoteca</h2>\n<video controls width='300' src='https://www.w3schools.com/html/mov_bbb.mp4'></video>\n<audio controls src='https://www.w3schools.com/html/horse.mp3'></audio>\n<iframe width='300' height='170' src='https://www.youtube.com/embed/dQw4w9WgXcQ'></iframe>",
     labLibre: ["Arma la videoteca de tu artista o juego favorito", "Añade títulos y descripciones a cada medio", "Extra: atributo poster en el video"],
@@ -197,6 +304,27 @@ export const LECCIONES: Leccion[] = [
     xp: 120,
     mision: "Crea un registro gamer con label, required, type email/password, select de nivel y checkbox de términos.",
     concepto: "label for=id conecta con input id. required, type, minlength validan gratis sin JS.",
+    intro: {
+      parrafos: [
+        "Los formularios recogen datos, pero deben validarse para que no lleguen vacíos o incorrectos. Y HTML puede validar solo, sin JavaScript.",
+        "type='email' obliga a un email válido, required hace el campo obligatorio y minlength exige un mínimo de letras.",
+        "<label for='id'> se conecta con el id del campo: al hacer clic en el texto se activa el campo (accesibilidad).",
+      ],
+      tips: [
+        "Cada input debería tener su <label for> y un id igual",
+        "type='email' + required = validación gratis",
+        "El <select> crea un menú desplegable de opciones",
+      ],
+    },
+    pasos: [
+      "Añade un label + input de nombre con required.",
+      "Añade email con type='email' y una contraseña.",
+      "Añade un select de nivel y un checkbox de términos.",
+      "Prueba a enviar vacío: el navegador debe avisarte.",
+    ],
+    ejemplo: "<form>\n  <label for='n'>Nombre:</label>\n  <input id='n' required minlength='3' placeholder='Tu nick' />\n  <label for='e'>Email:</label>\n  <input id='e' type='email' required placeholder='tu@mail.com' />\n  <label for='lvl'>Nivel:</label>\n  <select id='lvl'><option>Novato</option><option>Pro</option></select>\n  <label><input type='checkbox' required /> Acepto términos</label>\n  <button>Registrarme</button>\n</form>",
+    labDecision: "Tu tema: el formulario de tu negocio soñado (pedidos, reservas, contacto). Prueba también los types number, date y color.",
+    bossChecklist: ["label for conectado a cada input", "type='email' + required", "1 select o checkbox", "Publicar URL"],
     codigoInicial: "<form>\n  <input placeholder='nombre' />\n  <button>Enviar</button>\n</form>\n",
     solucion: "<form>\n  <label for='n'>Nombre:</label>\n  <input id='n' required minlength='3' placeholder='Tu nick' />\n  <label for='e'>Email:</label>\n  <input id='e' type='email' required placeholder='tu@mail.com' />\n  <label for='lvl'>Nivel:</label>\n  <select id='lvl'><option>Novato</option><option>Pro</option></select>\n  <label><input type='checkbox' required /> Acepto términos</label>\n  <button>Registrarme</button>\n</form>",
     labLibre: ["Haz el formulario de tu negocio soñado: pedidos, reservas, contacto", "Prueba types: number, date, color", "Extra: fieldset + legend para agrupar"],
@@ -218,6 +346,27 @@ export const LECCIONES: Leccion[] = [
     xp: 120,
     mision: "Crea la tabla de clasificación de tu torneo: thead, tbody, th scope y caption.",
     concepto: "caption describe, thead/tbody ordenan, th scope='col/row' ayuda a lectores de pantalla.",
+    intro: {
+      parrafos: [
+        "Una tabla presenta datos en filas y columnas. Para que sea clara y accesible se divide en tres zonas.",
+        "<caption> describe la tabla, <thead> es la fila de encabezados y <tbody> los datos. Las celdas de encabezado usan <th scope='col/row'>.",
+        "scope dice si el encabezado pertenece a una columna o a una fila; así los lectores de pantalla leen bien la tabla.",
+      ],
+      tips: [
+        "caption va justo después de abrir <table>",
+        "La primera fila suele ser <th scope='col'>",
+        "th scope='row' encabeza cada fila de datos",
+      ],
+    },
+    pasos: [
+      "Pon un caption que describa tu tabla.",
+      "Crea thead con th scope='col'.",
+      "Rellena tbody con tus datos.",
+      "Prueba y revisa que las celdas se alineen.",
+    ],
+    ejemplo: "<table>\n  <caption>🏆 Torneo Bloqui</caption>\n  <thead><tr><th scope='col'>Jugador</th><th scope='col'>Puntos</th></tr></thead>\n  <tbody>\n    <tr><th scope='row'>Alex</th><td>100</td></tr>\n    <tr><th scope='row'>Bloqui</th><td>95</td></tr>\n  </tbody>\n</table>",
+    labDecision: "Tu tema: la clasificación de tu torneo (top 5 juegos, canciones o jugadores) con su puntaje.",
+    bossChecklist: ["caption descriptivo", "thead con th scope='col'", "2+ filas de datos en tbody", "Publicar URL"],
     codigoInicial: "<table border='1'>\n  <tr><td>Nombre</td><td>Puntos</td></tr>\n  <tr><td>Alex</td><td>100</td></tr>\n</table>\n",
     solucion: "<table border='1'>\n  <caption>🏆 Torneo Bloqui</caption>\n  <thead><tr><th scope='col'>Jugador</th><th scope='col'>Puntos</th></tr></thead>\n  <tbody><tr><th scope='row'>Alex</th><td>100</td></tr><tr><th scope='row'>Bloqui</th><td>95</td></tr></tbody>\n</table>",
     labLibre: ["Tabla de tus top 5 juegos/películas/canciones con puntaje", "Añade tfoot con promedio", "Extra: combina celdas con colspan"],
@@ -238,6 +387,27 @@ export const LECCIONES: Leccion[] = [
     xp: 80,
     mision: "Haz que Google ame tu página: title, meta description, lang='es', viewport y favicon.",
     concepto: "Lo invisible posiciona. <head> lleva title + metas. lang y viewport son obligatorios.",
+    intro: {
+      parrafos: [
+        "Hay partes de la página que no ves pero que son clave: todo lo que va dentro del <head>.",
+        "El <title> es el texto que aparece en la pestaña y en Google; <meta name='description'> es el resumen que se muestra en las búsquedas.",
+        "<html lang='es'> indica el idioma y <meta name='viewport'> hace que la web se vea bien en el móvil.",
+      ],
+      tips: [
+        "El title debe resumir tu página en pocas palabras",
+        "La description, de ~150 caracteres, para enganchar",
+        "El viewport es obligatorio para que se vea en móvil",
+      ],
+    },
+    pasos: [
+      "Pon lang='es' en la etiqueta <html>.",
+      "Escribe un title que describa tu página.",
+      "Añade charset, viewport y description.",
+      "Prueba y mira cómo cambia el título de la pestaña.",
+    ],
+    ejemplo: "<html lang='es'>\n<head>\n  <meta charset='UTF-8' />\n  <meta name='viewport' content='width=device-width, initial-scale=1' />\n  <title>Mi tienda gamer | Skins y pociones</title>\n  <meta name='description' content='La mejor tienda gamer hecha por mí' />\n</head>\n<body><h1>Mi tienda</h1></body>\n</html>",
+    labDecision: "Tu tema: optimiza la página de tu proyecto soñado. Escribe un title y una description que den ganas de clicar.",
+    bossChecklist: ["html con lang='es'", "title descriptivo", "meta viewport + description", "Publicar URL"],
     codigoInicial: "<html>\n<head><title>sin optimizar</title></head>\n<body><h1>Mi página</h1></body>\n</html>\n",
     solucion: "<html lang='es'>\n<head>\n<meta charset='UTF-8' />\n<meta name='viewport' content='width=device-width, initial-scale=1' />\n<title>Mi tienda gamer | Skins y pociones</title>\n<meta name='description' content='La mejor tienda gamer hecha por mí' />\n</head>\n<body><h1>Mi tienda</h1></body>\n</html>",
     labLibre: ["Optimiza la página de tu proyecto soñado con su título real", "Escribe una description que te den ganas de clickear", "Extra: meta og:title para compartir en redes"],
@@ -258,6 +428,27 @@ export const LECCIONES: Leccion[] = [
     xp: 50,
     mision: "Dale personalidad: emojis, details/summary desplegable, progress y favicon con emoji.",
     concepto: "<details><summary> crea acordeones sin JS. <progress value max> muestra avance.",
+    intro: {
+      parrafos: [
+        "Los detalles pequeños hacen que una página se sienta viva y útil.",
+        "<details> con <summary> crea un acordeón que se abre y se cierra al hacer clic, sin JavaScript. <progress> muestra una barra de avance.",
+        "Los emojis son gratis y dan personalidad; también puedes usarlos en el favicon (el icono de la pestaña).",
+      ],
+      tips: [
+        "summary es lo que se ve; el resto es el contenido oculto",
+        "progress necesita value y max",
+        "details funciona sin ningún código extra",
+      ],
+    },
+    pasos: [
+      "Crea un details con su summary.",
+      "Añade contenido dentro que se despliegue.",
+      "Agrega una barra progress con tu avance.",
+      "Prueba: haz clic para abrir el acordeón.",
+    ],
+    ejemplo: "<h2>Mis gustos 🎮🍕🎵</h2>\n<details><summary>Ver mis favoritos</summary><p>Juego: Zelda · Comida: tacos · Música: chiptune</p></details>\n<label>Mi nivel de HTML:</label>\n<progress value='70' max='100'>70%</progress>",
+    labDecision: "Tu tema: tu perfil con 3 details (juegos, comida, música) y una barra de progreso de tus habilidades.",
+    bossChecklist: ["1 details con summary", "1 barra progress con value y max", "Contenido desplegable real", "Publicar URL"],
     codigoInicial: "<h2>Mis gustos</h2>\n<p>Me gusta...</p>\n",
     solucion: "<h2>Mis gustos 🎮🍕🎵</h2>\n<details><summary>Ver mis favoritos</summary><p>Juego: Zelda, Comida: tacos</p></details>\n<label>Mi nivel HTML:</label>\n<progress value='70' max='100'>70%</progress>",
     labLibre: ["Haz tu perfil con 3 details: juegos, comida, música", "Barra de progreso de tus habilidades", "Extra: favicon con tu emoji favorito"],
@@ -275,6 +466,27 @@ export const LECCIONES: Leccion[] = [
     xp: 200,
     mision: "Proyecto final HTML: tarjeta personal + inventario en lista/tabla + formulario contacto + estructura semántica. ¡Publícala!",
     concepto: "Integra todo HTML. Debe tener header/nav/main/footer, img, a, ul, table y form válido.",
+    intro: {
+      parrafos: [
+        "¡Llegó el jefe final de HTML! Vas a unir todo lo aprendido en una página personal publicable.",
+        "Debe tener estructura semántica (header/nav/main/footer), tu foto con alt, un inventario en lista o tabla y un formulario de contacto que valide.",
+        "Cuando esté lista, publícala y comparte la URL: será tu primera web de verdad.",
+      ],
+      tips: [
+        "Reutiliza lo mejor de html-3, html-4 y html-6",
+        "Revisa que toda etiqueta abra y cierre",
+        "El formulario necesita label + required",
+      ],
+    },
+    pasos: [
+      "Monta header + nav con enlaces internos.",
+      "Añade tus secciones en main (yo, top, inventario).",
+      "Cierra con un footer.",
+      "Añade el formulario de contacto y publica.",
+    ],
+    ejemplo: "<header><h1>🎮 Soy Bloqui</h1><nav><a href='#yo'>Yo</a> · <a href='#inv'>Inventario</a></nav></header>\n<main>\n  <section id='yo'><h2>Sobre mí</h2><img src='https://placehold.co/200/FF6B35/ffffff?text=foto' alt='mi foto' /><p>Amo crear webs.</p></section>\n  <section id='inv'><h2>Mi inventario</h2><ul><li>Espada</li><li>Escudo</li><li>Poción</li></ul></section>\n  <section><h2>Escríbeme</h2><form><label for='nom'>Nombre:</label><input id='nom' required /><button>Enviar</button></form></section>\n</main>\n<footer>Hecho con 💜 en BLOCKWEB</footer>",
+    labDecision: "Tu tema: hazla 100% tuya con tus fotos, tus juegos y tus colores. Pide a alguien que la use y mejora lo que no entienda.",
+    bossChecklist: ["header/nav/main/footer", "img con alt + lista o tabla", "form con label + required", "Publicar URL"],
     codigoInicial: "<!-- Tu proyecto final aquí. Mínimo: header, h1, img, ul, table, form -->\n<header><h1>Mi página</h1></header>\n",
     solucion: "<header><h1>🎮 Soy [tu nombre]</h1><nav><a href='#yo'>Yo</a> <a href='#top'>Top</a> <a href='#inv'>Inventario</a> <a href='#contacto'>Contacto</a></nav></header>\n<main><section id='yo'><h2>Sobre mí</h2><img src='https://placehold.co/200' alt='mi foto' /><p>Amo crear webs</p></section>\n<section id='top'><h2>Mi top 3</h2><table border='1'><thead><tr><th>Juego</th><th>Puntos</th></tr></thead><tbody><tr><td>Zelda</td><td>100</td></tr></tbody></table></section>\n<section id='inv'><h2>Mi inventario</h2><ul><li>Espada</li><li>Escudo</li><li>Poción</li></ul></section>\n<section id='contacto'><h2>Escríbeme</h2><form><label>Nombre:<input required /></label><button>Enviar</button></form></section></main>\n<footer>Hecho con 💜 en BLOCKWEB</footer>",
     labLibre: ["Hazla 100% tuya: tus fotos, tus juegos, tus colores de texto", "Pide a alguien que la use y mejora lo que no entienda", "Extra: añade tu videoteca de html-5"],

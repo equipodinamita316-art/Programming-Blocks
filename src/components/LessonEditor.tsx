@@ -25,7 +25,27 @@ import {
   type Paso,
 } from "./StepWizard";
 import { MiniEditor } from "./MiniEditor";
+import { CodeView } from "./CodeView";
+import { combineSrcDoc } from "@/lib/blockly/generators";
 import type { Generated } from "./BlocklyReal";
+
+// Separa un snippet de ejemplo en html/css/js para la vista de código.
+function splitExample(code: string): { html: string; css: string; js: string } {
+  const css: string[] = [];
+  const js: string[] = [];
+  const html = code
+    .replace(/<!doctype[^>]*>/gi, "")
+    .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_m, c: string) => {
+      css.push(c.trim());
+      return "";
+    })
+    .replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, (_m, c: string) => {
+      js.push(c.trim());
+      return "";
+    })
+    .trim();
+  return { html, css: css.join("\n"), js: js.join("\n") };
+}
 
 export function LessonEditor({ leccion }: { leccion: Leccion }) {
   // SSR-safe: primer render siempre paso 0 / seed fijo; el avance real se hidrata en cliente.
@@ -63,6 +83,19 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
   );
   const meta = DIFICULTAD_META[leccion.dificultad];
   const intro = getIntro(leccion);
+  const ejemplo = useMemo(() => {
+    if (!leccion.ejemplo) return null;
+    const parts = splitExample(leccion.ejemplo);
+    // Para la preview quitamos los envoltorios html/head/body (combineSrcDoc ya los
+    // aporta), conservando title/meta para que se suban al <head> real.
+    const cleanHtml = parts.html
+      .replace(/<\/?(?:html|head|body)\b[^>]*>/gi, "")
+      .trim();
+    return {
+      ...parts,
+      preview: combineSrcDoc(cleanHtml, parts.css, parts.js),
+    };
+  }, [leccion.ejemplo]);
   // Proyecto inicial en bloques (codigoInicial) y proyecto roto del Boss.
   const starterMision = useMemo(
     () => starterXmlFromCode(leccion.codigoInicial),
@@ -191,34 +224,76 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
         <section className="rounded-3xl border-4 border-[#1a1523] bg-white p-5 block-shadow">
           <h2 className="flex items-center gap-2 font-display text-xl font-extrabold">
             <Icon name="book" size={20} />
-            Lo que verás en este curso
+            Lo que verás en esta lección
           </h2>
           {intro.parrafos.map((p) => (
             <p key={p} className="mt-2">
               {p}
             </p>
           ))}
-          <div className="grid md:grid-cols-2 gap-3 mt-3">
+
+          {leccion.pasos && leccion.pasos.length > 0 && (
+            <div className="mt-4">
+              <h3 className="flex items-center gap-1.5 font-display font-extrabold text-sm">
+                <Icon name="clipboardList" size={15} />
+                Cómo se hace, paso a paso
+              </h3>
+              <ol className="mt-1.5 flex flex-col gap-1 text-sm">
+                {leccion.pasos.map((s, i) => (
+                  <li key={s} className="flex items-start gap-2">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#1a1523] text-white text-[11px] font-bold">
+                      {i + 1}
+                    </span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-3 mt-4">
             <div className="rounded-2xl border-2 overflow-hidden bg-[var(--background)]">
               <div className="flex items-center gap-1.5 text-xs font-bold px-2 py-1 bg-black/5">
-                <Icon name="image" size={13} />
-                Ejemplo visual
+                <Icon name="play" size={13} />
+                Resultado del ejemplo
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`https://placehold.co/600x220/1a1523/FFC700?text=${encodeURIComponent(leccion.titulo.slice(0, 24))}`}
-                alt={`Ejemplo ${leccion.titulo}`}
-                className="w-full"
-              />
+              {ejemplo ? (
+                <iframe
+                  title={`Ejemplo ${leccion.titulo}`}
+                  sandbox="allow-scripts"
+                  srcDoc={ejemplo.preview}
+                  className="w-full h-[300px] bg-white"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={`https://placehold.co/600x220/1a1523/FFC700?text=${encodeURIComponent(leccion.titulo.slice(0, 24))}`}
+                  alt={`Ejemplo ${leccion.titulo}`}
+                  className="w-full"
+                />
+              )}
             </div>
-            <div className="rounded-2xl border-2 p-3 bg-[var(--background)]">
+            <div className="flex flex-col">
               <div className="mb-1 flex items-center gap-1.5 text-xs font-bold">
-                <Icon name="chart" size={13} />
-                Diagrama
+                <Icon name="keyboard" size={13} />
+                Código del ejemplo
               </div>
-              <Diagrama curso={leccion.curso} />
+              {ejemplo ? (
+                <CodeView
+                  key={leccion.id}
+                  html={ejemplo.html}
+                  css={ejemplo.css}
+                  js={ejemplo.js}
+                  hideEmpty
+                />
+              ) : (
+                <p className="text-sm opacity-70">
+                  En esta lección aprenderás con bloques, sin código todavía.
+                </p>
+              )}
             </div>
           </div>
+
           <ul className="mt-3 text-sm list-disc ml-5 opacity-80">
             {intro.tips.map((t) => (
               <li key={t}>{t}</li>
@@ -564,116 +639,6 @@ function Objetivos({
         ))}
       </ul>
     </section>
-  );
-}
-
-function Diagrama({ curso }: { curso: string }) {
-  if (curso === "css")
-    return (
-      <svg viewBox="0 0 200 90" className="w-full h-24">
-        <rect
-          x="10"
-          y="10"
-          width="180"
-          height="70"
-          rx="10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        <rect
-          x="25"
-          y="25"
-          width="150"
-          height="40"
-          rx="8"
-          fill="#2563EB"
-          opacity="0.8"
-        />
-        <text
-          x="100"
-          y="50"
-          textAnchor="middle"
-          fill="white"
-          fontSize="12"
-          fontWeight="bold"
-        >
-          padding + border
-        </text>
-      </svg>
-    );
-  if (curso === "js")
-    return (
-      <svg viewBox="0 0 200 90" className="w-full h-24">
-        <rect
-          x="10"
-          y="30"
-          width="70"
-          height="30"
-          rx="8"
-          fill="#FFC700"
-          stroke="black"
-          strokeWidth="3"
-        />
-        <text x="45" y="50" textAnchor="middle" fontSize="11" fontWeight="bold">
-          click
-        </text>
-        <line
-          x1="80"
-          y1="45"
-          x2="110"
-          y2="45"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        <rect
-          x="110"
-          y="30"
-          width="80"
-          height="30"
-          rx="8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        <text
-          x="150"
-          y="50"
-          textAnchor="middle"
-          fontSize="11"
-          fontWeight="bold"
-        >
-          cambia
-        </text>
-      </svg>
-    );
-  return (
-    <svg viewBox="0 0 200 90" className="w-full h-24">
-      <rect x="10" y="10" width="60" height="30" rx="6" fill="#FF6B35" />
-      <text
-        x="40"
-        y="30"
-        textAnchor="middle"
-        fill="white"
-        fontSize="11"
-        fontWeight="bold"
-      >
-        h1
-      </text>
-      <rect
-        x="10"
-        y="48"
-        width="120"
-        height="24"
-        rx="6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-      />
-      <text x="70" y="65" textAnchor="middle" fontSize="11">
-        p + img
-      </text>
-    </svg>
   );
 }
 
