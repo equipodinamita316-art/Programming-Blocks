@@ -12,7 +12,7 @@ import {
   getBossChecklist,
   type Leccion,
 } from "@/data/cursos";
-import { validateLesson, proofHash } from "@/lib/verification";
+import { validateLesson, proofHash, type CheckResult } from "@/lib/verification";
 import { shuffleQuiz } from "@/lib/quiz";
 import { ALLOW } from "@/lib/blockly/scope";
 import {
@@ -255,6 +255,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
               </button>
             </div>
           </section>
+          <Objetivos checks={full.checks} />
           <MiniEditor
             lessonId={leccion.id}
             curso={leccion.curso}
@@ -412,6 +413,9 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
                 <li key={c}>{c}</li>
               ))}
             </ul>
+            <div className="mt-2">
+              <Objetivos checks={full.checks} showHints />
+            </div>
             <div className="mt-1 text-xs">
               {!quizPassed && (
                 <p className="flex items-center gap-1.5 font-bold text-red-600">
@@ -499,6 +503,46 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
         </div>
       )}
     </div>
+  );
+}
+
+function Objetivos({
+  checks,
+  showHints = false,
+}: {
+  checks: CheckResult[];
+  showHints?: boolean;
+}) {
+  if (!checks.length) return null;
+  const done = checks.filter((c) => c.ok).length;
+  const allDone = done === checks.length;
+  return (
+    <section
+      className={`rounded-2xl border-2 p-3 ${allDone ? "border-green-500 bg-green-50" : "border-[#1a1523]/20 bg-white"}`}
+    >
+      <h3 className="flex items-center gap-2 font-display font-extrabold text-sm">
+        <Icon name="target" size={16} />
+        Objetivos {done}/{checks.length}
+        {allDone && <Icon name="check" size={15} className="text-green-600" />}
+      </h3>
+      <ul className="mt-1.5 flex flex-col gap-1 text-sm">
+        {checks.map((c) => (
+          <li key={c.id} className="flex items-start gap-1.5">
+            <Icon
+              name={c.ok ? "check" : "circle"}
+              size={14}
+              className={`mt-0.5 shrink-0 ${c.ok ? "text-green-600" : "opacity-30"}`}
+            />
+            <span className={c.ok ? "opacity-60 line-through" : ""}>
+              {c.label}
+              {!c.ok && showHints && (
+                <span className="block text-xs opacity-70">{c.hint}</span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

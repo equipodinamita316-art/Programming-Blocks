@@ -85,6 +85,8 @@ function blockFrag(b: Block): Frag {
       const h = f(b, "H", "170");
       return { ...empty(), html: `<iframe width="${w}" height="${h}" src="${f(b, "URL", "")}" title="video incrustado" loading="lazy" allowfullscreen></iframe>\n` };
     }
+    case "bw_head": return { ...empty(), html: `<title>${escapeHtml(f(b, "TITLE", "Mi página"))}</title>\n<meta name="description" content="${escapeHtml(f(b, "DESC", ""))}" />\n` };
+    case "bw_progress": return { ...empty(), html: `<progress value="${f(b, "VAL", "70")}" max="${f(b, "MAX", "100")}"></progress>\n` };
     case "bw_img_asset": return { ...empty(), html: `<img data-asset="${escapeHtml(f(b, "ASSET", ""))}" src="${resolveAsset(f(b, "ASSET", ""))}" alt="${escapeHtml(f(b, "ALT", "mi foto"))}" />\n` };
     case "bw_video_asset": return { ...empty(), html: `<video controls width="300" data-asset="${escapeHtml(f(b, "ASSET", ""))}" src="${resolveAsset(f(b, "ASSET", ""))}"></video>\n` };
 
@@ -111,6 +113,7 @@ function blockFrag(b: Block): Frag {
       const body = inner(b, "DO");
       return { ...body, css: `@media(max-width:${f(b, "W", "768")}px){\n${body.css}}\n` };
     }
+    case "bw_css_sticky": return { ...empty(), css: `${f(b, "SEL", "nav")}{position:sticky;top:${f(b, "TOP", "0")}px;z-index:10;}\n` };
 
     // ===== JS =====
     case "bw_js_var": return { ...empty(), js: `let ${sanitizeId(f(b, "NAME", "x"))} = ${JSON.stringify(f(b, "VAL", "0"))};\n` };
@@ -153,6 +156,7 @@ function blockFrag(b: Block): Frag {
       const body = inner(b, "DO").js;
       return { ...empty(), js: `setTimeout(function(){\n${body}}, ${Number(f(b, "MS", "1000")) || 1000});\n` };
     }
+    case "bw_js_obj": return { ...empty(), js: `const ${sanitizeId(f(b, "NAME", "heroe"))} = {${f(b, "PROPS", "nombre:'Bloqui',poder:10")}};\n` };
     default:
       return empty();
   }
@@ -215,5 +219,9 @@ th,td{border:2px solid #1a1523;padding:6px 10px}
 a{color:#2563EB}`;
 
 export function combineSrcDoc(html: string, css: string, js: string): string {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${BASE_CSS}\n${css}</style></head><body>${html || "<p style='opacity:.6'>Arrastra bloques</p>"}<script>${js}<\/script></body></html>`;
+  // Los bloques de <head> (título/meta) se generan dentro del flujo; los subimos
+  // al <head> real para que sean válidos y Google los lea.
+  const headTags = (html.match(/<title[\s\S]*?<\/title>|<meta\b[^>]*>/gi) || []).join("\n");
+  const bodyHtml = html.replace(/<title[\s\S]*?<\/title>|<meta\b[^>]*>/gi, "");
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${headTags}<style>${BASE_CSS}\n${css}</style></head><body>${bodyHtml || "<p style='opacity:.6'>Arrastra bloques</p>"}<script>${js}<\/script></body></html>`;
 }

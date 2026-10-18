@@ -4,7 +4,7 @@
 import { BW_ICONS, fieldImage } from "./blockIcons";
 
 const RAW_DEFS: Array<Record<string, unknown>> = [
-  // ===== HTML 20 =====
+  // ===== HTML 22 =====
   { type: "bw_h", message0: "título %1 texto %2", args0: [{ type: "field_dropdown", name: "LEVEL", options: [["h1", "h1"], ["h2", "h2"], ["h3", "h3"]] }, { type: "field_input", name: "TEXT", text: "Mi página gamer" }], previousStatement: "Html", nextStatement: "Html", colour: 16, tooltip: "Título" },
   { type: "bw_p", message0: "párrafo %1", args0: [{ type: "field_input", name: "TEXT", text: "Amo crear webs" }], previousStatement: "Html", nextStatement: "Html", colour: 16 },
   { type: "bw_a", message0: "enlace texto %1 url %2", args0: [{ type: "field_input", name: "TEXT", text: "Mi juego" }, { type: "field_input", name: "URL", text: "https://example.com" }], previousStatement: "Html", nextStatement: "Html", colour: 16 },
@@ -23,11 +23,13 @@ const RAW_DEFS: Array<Record<string, unknown>> = [
   { type: "bw_hr", message0: "línea separadora", previousStatement: "Html", nextStatement: "Html", colour: 16 },
   { type: "bw_audio", message0: "audio url %1", args0: [{ type: "field_input", name: "URL", text: "https://www.w3schools.com/html/horse.mp3" }], previousStatement: "Html", nextStatement: "Html", colour: 16 },
   { type: "bw_iframe", message0: "iframe url %1 ancho %2 alto %3", args0: [{ type: "field_input", name: "URL", text: "https://www.youtube.com/embed/dQw4w9WgXcQ" }, { type: "field_dropdown", name: "W", options: [["300", "300"], ["480", "480"], ["560", "560"]] }, { type: "field_dropdown", name: "H", options: [["170", "170"], ["270", "270"], ["315", "315"]] }], previousStatement: "Html", nextStatement: "Html", colour: 16 },
+  { type: "bw_head", message0: "página título %1 descripción %2", args0: [{ type: "field_input", name: "TITLE", text: "Mi tienda gamer" }, { type: "field_input", name: "DESC", text: "La mejor tienda hecha por mí" }], previousStatement: "Html", nextStatement: "Html", colour: 16, tooltip: "Título y descripción que lee Google" },
+  { type: "bw_progress", message0: "barra de progreso %1 de %2", args0: [{ type: "field_input", name: "VAL", text: "70" }, { type: "field_dropdown", name: "MAX", options: [["100", "100"], ["10", "10"], ["5", "5"]] }], previousStatement: "Html", nextStatement: "Html", colour: 16, tooltip: "Barra de progreso" },
   // ===== 📁 Assets (subidos por el jugador) =====
   { type: "bw_img_asset", message0: "imagen mía id %1 alt %2", args0: [{ type: "field_input", name: "ASSET", text: "sube en Archivos" }, { type: "field_input", name: "ALT", text: "mi foto" }], previousStatement: "Html", nextStatement: "Html", colour: 16, tooltip: "Usa una imagen subida en Mis archivos" },
   { type: "bw_video_asset", message0: "video mío id %1", args0: [{ type: "field_input", name: "ASSET", text: "sube en Archivos" }], previousStatement: "Html", nextStatement: "Html", colour: 16, tooltip: "Usa un video subido en Mis archivos" },
 
-  // ===== CSS 19 =====
+  // ===== CSS 20 =====
   { type: "bw_css_color", message0: "color selector %1 texto %2 fondo %3", args0: [{ type: "field_input", name: "SEL", text: "h1" }, { type: "field_colour", name: "C", colour: "#ff6b35" }, { type: "field_colour", name: "BG", colour: "#1a1523" }], previousStatement: "Css", nextStatement: "Css", colour: 210 },
   { type: "bw_css_font", message0: "fuente selector %1 tamaño %2", args0: [{ type: "field_input", name: "SEL", text: "h1" }, { type: "field_dropdown", name: "SIZE", options: [["16", "16"], ["24", "24"], ["32", "32"], ["48", "48"], ["64", "64"]] }], previousStatement: "Css", nextStatement: "Css", colour: 210 },
   { type: "bw_css_box", message0: "caja selector %1 relleno %2 radio %3", args0: [{ type: "field_input", name: "SEL", text: ".card" }, { type: "field_dropdown", name: "PAD", options: [["8", "8"], ["16", "16"], ["24", "24"], ["32", "32"]] }, { type: "field_dropdown", name: "RAD", options: [["8", "8"], ["12", "12"], ["20", "20"]] }], previousStatement: "Css", nextStatement: "Css", colour: 210 },
@@ -47,8 +49,9 @@ const RAW_DEFS: Array<Record<string, unknown>> = [
   { type: "bw_css_transition", message0: "transición selector %1 propiedad %2 tiempo %3", args0: [{ type: "field_input", name: "SEL", text: ".card" }, { type: "field_dropdown", name: "PROP", options: [["todo", "all"], ["transformar", "transform"], ["color", "color"], ["fondo", "background"]] }, { type: "field_dropdown", name: "TIME", options: [["0.2s", ".2s"], ["0.3s", ".3s"], ["0.5s", ".5s"]] }], previousStatement: "Css", nextStatement: "Css", colour: 210, tooltip: "Suaviza los cambios" },
   { type: "bw_css_transform", message0: "transformar selector %1 efecto %2", args0: [{ type: "field_input", name: "SEL", text: ".card" }, { type: "field_dropdown", name: "HOW", options: [["agrandar 1.05", "scale(1.05)"], ["agrandar 1.2", "scale(1.2)"], ["rotar -3°", "rotate(-3deg)"], ["subir", "translateY(-6px)"], ["mover a la derecha", "translateX(8px)"]] }], previousStatement: "Css", nextStatement: "Css", colour: 210, tooltip: "Transforma el elemento" },
   { type: "bw_css_media", message0: "media móvil hasta %1 px %2", args0: [{ type: "field_input", name: "W", text: "768" }, { type: "input_statement", name: "DO", check: "Css" }], previousStatement: "Css", nextStatement: "Css", colour: 210, tooltip: "Reglas que solo aplican en pantallas pequeñas" },
+  { type: "bw_css_sticky", message0: "menú fijo al hacer scroll selector %1 desde %2 px", args0: [{ type: "field_input", name: "SEL", text: "nav" }, { type: "field_dropdown", name: "TOP", options: [["0", "0"], ["8", "8"], ["16", "16"]] }], previousStatement: "Css", nextStatement: "Css", colour: 210, tooltip: "Se pega arriba al hacer scroll" },
 
-  // ===== JS 20 =====
+  // ===== JS 21 =====
   { type: "bw_js_var", message0: "variable %1 = %2", args0: [{ type: "field_input", name: "NAME", text: "puntos" }, { type: "field_input", name: "VAL", text: "0" }], previousStatement: "Js", nextStatement: "Js", colour: 50 },
   { type: "bw_js_counter", message0: "contador botón %1 muestra %2", args0: [{ type: "field_input", name: "BTN", text: "btn" }, { type: "field_input", name: "SPAN", text: "n" }], previousStatement: "Js", nextStatement: "Js", colour: 50 },
   { type: "bw_js_text", message0: "cambiar texto id %1 a %2", args0: [{ type: "field_input", name: "ID", text: "titulo" }, { type: "field_input", name: "TEXT", text: "¡Nivel!" }], previousStatement: "Js", nextStatement: "Js", colour: 50 },
@@ -69,6 +72,7 @@ const RAW_DEFS: Array<Record<string, unknown>> = [
   { type: "bw_js_call", message0: "llamar función %1", args0: [{ type: "field_input", name: "NAME", text: "saludar" }], previousStatement: "Js", nextStatement: "Js", colour: 50, tooltip: "Ejecuta la función" },
   { type: "bw_js_onclick", message0: "al hacer clic en %1 %2", args0: [{ type: "field_input", name: "ID", text: "btn" }, { type: "input_statement", name: "DO", check: "Js" }], previousStatement: "Js", nextStatement: "Js", colour: 50, tooltip: "Haz cosas al hacer clic" },
   { type: "bw_js_settimeout", message0: "después de %1 ms %2", args0: [{ type: "field_input", name: "MS", text: "1000" }, { type: "input_statement", name: "DO", check: "Js" }], previousStatement: "Js", nextStatement: "Js", colour: 50, tooltip: "Espera y luego ejecuta" },
+  { type: "bw_js_obj", message0: "personaje %1 datos %2", args0: [{ type: "field_input", name: "NAME", text: "heroe" }, { type: "field_input", name: "PROPS", text: "nombre:'Bloqui',poder:10" }], previousStatement: "Js", nextStatement: "Js", colour: 50, tooltip: "Objeto con datos del personaje" },
 ];
 
 // Icono por bloque: lenguajes por defecto según colour; casos especiales aparte.

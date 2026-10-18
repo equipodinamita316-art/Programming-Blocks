@@ -1,4 +1,5 @@
 import { ALLOW, MIN_BLOCKS, findForbidden } from "./blockly/scope";
+import { evaluarRegla, reglasDe, type CheckCtx } from "./lessonRules";
 import type { Dificultad, Leccion } from "@/data/cursos";
 
 export type ValidationInput = {
@@ -9,17 +10,22 @@ export type ValidationInput = {
   quizPassed: boolean;
 };
 
-// Lecciones que exigen estructura semántica construible
-const SEM_REQUIRED = new Set(["html-4", "html-10"]);
 // Bloques JS que cuentan como lógica funcional (var/log solos no bastan)
 export const FUNCTIONAL_JS = new Set([
   "bw_js_counter", "bw_js_text", "bw_js_click", "bw_js_if", "bw_js_greet",
   "bw_js_list", "bw_js_validate", "bw_js_save", "bw_js_fetch", "bw_js_level",
   "bw_js_win", "bw_js_timer",
-  "bw_js_ifelse", "bw_js_repeat", "bw_js_func", "bw_js_call", "bw_js_onclick", "bw_js_settimeout",
+  "bw_js_ifelse", "bw_js_repeat", "bw_js_func", "bw_js_call", "bw_js_onclick",
+  "bw_js_settimeout", "bw_js_obj",
 ]);
 
-export type ValidationResult = { ok: boolean; errors: string[]; xp: number };
+export type CheckResult = { id: string; label: string; ok: boolean; hint: string };
+export type ValidationResult = {
+  ok: boolean;
+  errors: string[];
+  xp: number;
+  checks: CheckResult[];
+};
 
 export function validateLesson(leccion: Leccion, input: ValidationInput): ValidationResult {
   const errors: string[] = [];
@@ -43,7 +49,7 @@ export function validateLesson(leccion: Leccion, input: ValidationInput): Valida
   const hasCss = input.css.replace(/\s/g, "").length > 5;
   const hasJs = input.js.replace(/\s/g, "").length > 5;
   if (leccion.curso === "html") {
-    if (!hasHtml) errors.push("Tu proyecto HTML está vacío. Arrastra al menos 2 bloques de HTML.");
+    if (!hasHtml) errors.push("Tu proyecto HTML está vacío. Arrastra bloques de HTML.");
     if (hasCss || hasJs) errors.push("En HTML no debe haber CSS ni JS generados. Revisa tus bloques.");
   } else if (leccion.curso === "css") {
     if (!hasHtml) errors.push("Falta base HTML. Añade al menos 1 bloque de HTML.");
@@ -51,26 +57,23 @@ export function validateLesson(leccion: Leccion, input: ValidationInput): Valida
     if (hasJs) errors.push("En CSS no debe haber JS. Quita los bloques de JS.");
   } else {
     if (!hasHtml) errors.push("Falta HTML base.");
-    // JS exige lógica funcional (no basta con HTML o un log)
     const functionalJs = input.blockTypes.filter((t) => FUNCTIONAL_JS.has(t));
     if (functionalJs.length === 0) {
       errors.push("Esta lección JS exige lógica: añade un bloque de JS que use tus elementos (contador, click, condición, guardar, fetch...).");
     }
-    if (leccion.dificultad === "Boss" && !hasJs) errors.push("El Boss JS exige lógica: añade bloques de JS.");
   }
 
   // 3b. Boss exige 1 imagen o video (subido o URL) para publicar con URL
-  if (leccion.dificultad === "Boss") {    const hasAssetBlock = input.blockTypes.some((t) => t === "bw_img_asset" || t === "bw_video_asset" || t === "bw_img" || t === "bw_video");
+  if (leccion.dificultad === "Boss") {
+    const hasAssetBlock = input.blockTypes.some(
+      (t) => t === "bw_img_asset" || t === "bw_video_asset" || t === "bw_img" || t === "bw_video",
+    );
     const hasMediaTag = /<img|<video/i.test(input.html);
     if (!hasAssetBlock || !hasMediaTag) {
       errors.push("El Boss exige 1 imagen o video: súbelo en Mis archivos y úsalo con el bloque de archivos.");
     }
   }
 
-  // 3c. Semántica exigible con bloques construibles
-  if (SEM_REQUIRED.has(leccion.id) && !input.blockTypes.includes("bw_sem")) {
-    errors.push("Usa al menos 1 bloque de sección (header/nav/main/section/article/footer).");
-  }
   // 4. Calidad: URLs e IDs
   const badUrl = /javascript\s*:|data\s*:\s*text\/html/i.test(input.html + input.css + input.js);
   if (badUrl) errors.push("URL peligrosa detectada (javascript:/data:). Cámbiala por https://.");
@@ -80,11 +83,28 @@ export function validateLesson(leccion: Leccion, input: ValidationInput): Valida
   const badIds = ids.filter((id) => !/^[A-Za-z][A-Za-z0-9_-]*$/.test(id));
   if (badIds.length > 0) errors.push(`IDs inválidos: ${badIds.join(", ")}. Empieza con letra, sin espacios.`);
 
-  // 5. Quiz obligatorio
+  // 5. Objetivos declarativos de la lección
+  const ctx: CheckCtx = {
+    types: input.blockTypes,
+    typeSet: new Set(input.blockTypes),
+    html: input.html,
+    css: input.css,
+    js: input.js,
+    count: input.blockTypes.length,
+  };
+  const checks: CheckResult[] = reglasDe(leccion.id).map((r) => {
+    const ok = evaluarRegla(r, ctx);
+    return { id: r.id, label: r.label, ok, hint: r.hint };
+  });
+  for (const c of checks) {
+    if (!c.ok) errors.push(c.hint);
+  }
+
+  // 6. Quiz obligatorio
   if (!input.quizPassed) errors.push("Aprueba el mini-quiz (100%) para completar.");
 
   const ok = errors.length === 0;
-  return { ok, errors, xp: ok ? leccion.xp : 0 };
+  return { ok, errors, xp: ok ? leccion.xp : 0, checks };
 }
 
 // Proof ligado a contenido real: id + tipos ordenados + seed + xp de la lección.
