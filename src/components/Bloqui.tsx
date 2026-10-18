@@ -1,24 +1,19 @@
 "use client";
 
-import { Icon, type IconName } from "./Icon";
-
-type Mood = "happy" | "think" | "wow" | "sleep";
-
-const FACE: Record<Mood, IconName> = {
-  happy: "bloqui-happy",
-  think: "bloqui-think",
-  wow: "bloqui-wow",
-  sleep: "bloqui-sleep",
-};
-
-export function Bloqui({ mood = "happy", size = 64 }: { mood?: Mood; size?: number }) {
+export function Bloqui({ mood = "happy", size = 64 }: { mood?: "happy" | "think" | "wow" | "sleep"; size?: number }) {
+  const faces: Record<string, string> = {
+    happy: "◕‿◕",
+    think: "🤔",
+    wow: "✨",
+    sleep: "😴",
+  };
   return (
     <div
-      className="font-display flex items-center justify-center rounded-2xl border-4 border-[#1a1523] bg-[#FFC700] block-shadow select-none text-[#1a1523]"
-      style={{ width: size, height: size }}
+      className="font-display flex items-center justify-center rounded-2xl border-4 border-[#1a1523] bg-[#FFC700] block-shadow select-none"
+      style={{ width: size, height: size, fontSize: size * 0.4 }}
       title={`Bloqui ${mood}`}
     >
-      <Icon name={FACE[mood]} size={Math.round(size * 0.6)} strokeWidth={2.5} />
+      {faces[mood]}
     </div>
   );
 }
