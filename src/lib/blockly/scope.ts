@@ -10,6 +10,7 @@ function allCategories(): ToolboxCategory[] {
 
 export const HTML_TYPES = [
   "bw_h", "bw_p", "bw_a", "bw_img", "bw_button", "bw_input",
+  "bw_select", "bw_checkbox",
   "bw_list", "bw_table", "bw_form", "bw_video", "bw_details", "bw_counter_html",
   "bw_img_asset", "bw_video_asset", "bw_sem",
   "bw_div", "bw_br", "bw_hr", "bw_audio", "bw_iframe",
@@ -58,6 +59,14 @@ export function getDisplayToolbox(curso: CursoSlug, family: Family | null): Tool
   const cursoCats = getToolboxForCurso(curso).contents.length;
   const wanted = family === "html" ? 1 : family === "css" ? 2 : 3;
   if (wanted > cursoCats && family !== "html") return getToolboxForCurso(curso);
+  return { kind: "categoryToolbox", contents: pick };
+}
+
+// Toolbox visible sin curso (Playground): filtra por familia directamente.
+export function getDisplayToolboxAny(family: Family | null): Toolbox {
+  const all = allCategories();
+  if (!family) return { kind: "categoryToolbox", contents: all };
+  const pick = family === "html" ? [all[0]] : family === "css" ? [all[1]] : [all[2]];
   return { kind: "categoryToolbox", contents: pick };
 }
 

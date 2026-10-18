@@ -7,7 +7,7 @@ certificado PDF con QR verificable.
 ## Stack
 
 - Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4
-- Blockly 13 (editor de bloques real, 42 bloques custom ES)
+- Blockly 13 (editor de bloques real, 65 bloques custom ES)
 - Supabase (Postgres + Auth + Storage) vía `@supabase/supabase-js` + `@supabase/ssr`
 - Certificados: `qrcode` + verificación por RPC `verify_cert`
 
@@ -49,9 +49,12 @@ Todo verificado con `npm run build` + `npm run lint` verdes (0 errores).
 - **Fase A — Motor de bloques (HECHA, `8c6f805`):** `generators.ts` recursivo (anida `input_statement`), `generateFromBlocks(getTopBlocks(true))`, `BASE_CSS` en `combineSrcDoc` (sin estilos inline), 16 bloques nuevos. Pestaña "Código generado" (`CodeView`+`hl`) en `MiniEditor`.
 - **Fase B — Verificador declarativo (HECHA, `6bb0fce`):** `src/lib/lessonRules.ts` (motor data-only, 2-4 objetivos por lección sobre tags/props JS/CSS); `validateLesson` devuelve `checks`; checklist "Objetivos" en `LessonEditor`. Bloques añadidos para cerrar huecos: `bw_head`, `bw_progress`, `bw_css_sticky`, `bw_js_obj`.
 - **Fase C — Starter en bloques (HECHA):** `src/lib/blockly/starter.ts` convierte `codigoInicial`/`bossCodigoRoto` (HTML) a XML de bloques; MiniEditor/BlocklyReal aceptan `starterXml` + `storageSuffix`; el Boss arranca con su propio workspace "roto".
-- **Pendiente:** Fase de contenido (lecciones más largas/claras, diálogos de Bloqui y amigos), y refinar ids en starters de JS.
+- **Fase D — Cobertura total de bloques (HECHA):** cerrados los huecos que impedían completar misiones. `bw_form` ahora es **contenedor** (`input_statement`); `bw_input` gana `label`+`tipo`(tel/date/color)+`obligatorio` y emite `<label for>`; nuevos `bw_select` y `bw_checkbox`; `id` opcional en `bw_h`/`bw_p`/`bw_div` (js-2/4/5/7/8/9); `bw_table` emite `<th scope="col">`; `bw_head` gana favicon. `starter.ts` convierte formularios a contenedor, asocia `<label for>` a su control y conserva ids. Reglas `html-6`/`html-7` endurecidas; soluciones incompletas corregidas (html-3 tabla, html-10 lista, css-5 sticky, css-10 hover). Verificado con script (reglas de las 30 + XML de starters + round-trip bloques→código) y `build`/`lint` verdes.
+- **Fase E — Editor de código unificado (HECHA):** `CodeView` (`src/components/CodeView.tsx`) extraído de `MiniEditor` y compartido. Acepta `editable` + `onChange` (textarea transparente superpuesta al `<pre>` resaltado, scroll sincronizado) para el Playground; `MiniEditor` lo usa en solo-lectura. Playground (pestaña Código) ahora usa las mismas 3 pestañas (`index.html`/`estilos.css`/`logica.js`) con resaltado en vivo y edición; estado `{html,css,js}` en lugar de un `<textarea>` único.
+- **Fase F — UI del Playground = lecciones (HECHA):** nueva `src/components/EditorTabBar.tsx` (barra VS Code con pestañas + botón Archivos + contador) compartida por `MiniEditor` y Playground. El Playground ahora usa pestañas `index / estilos / lógica / código` (bloques filtrados por lenguaje con un workspace único persistente; `código` = `CodeView` editable). `scope.ts` gana `getDisplayToolboxAny(family)` y `BlocklyReal` aplica `displayFamily` también sin `curso` (y al inyectar, así el toolbox inicial coincide con la pestaña activa). Se conserva el aviso "código manual" y el diálogo de descarte al salir de `código`.
+- **Pendiente:** Fase de contenido (lecciones más largas/claras, diálogos de Bloqui y amigos).
 - **Operativo:** probar login Google end-to-end en navegador (`/login` → Google → dashboard + fila en `profiles`).
-- **Roadmap restante:** personajes tutores (Bloqui + amigos), lecciones más largas, ampliar catálogo de bloques.
+- **Roadmap restante:** personajes tutores (Bloqui + amigos), lecciones más largas, ampliar catálogo de bloques (features solo en "Extra": flex-wrap, nth-child, colspan/tfoot, radial-gradient, push/filter, class, querySelector, fieldset/legend, og:title, poster).
 
 ## Comandos
 

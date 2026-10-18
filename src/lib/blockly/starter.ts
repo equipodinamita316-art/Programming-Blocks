@@ -19,10 +19,25 @@ const PASS_THROUGH = new Set(["html", "head", "body"]);
 
 function parseAttrs(s: string): Record<string, string> {
   const out: Record<string, string> = {};
-  const re = /([\w-]+)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/g;
+  const re = /([\w:-]+)(?:\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(s))) out[m[1].toLowerCase()] = m[3] ?? m[4] ?? m[5] ?? "";
+  while ((m = re.exec(s))) {
+    if (!m[1]) continue;
+    const key = m[1].toLowerCase();
+    out[key] = m[2] === undefined ? "" : m[3] ?? m[4] ?? m[5] ?? "";
+  }
   return out;
+}
+
+// Texto de los <label for="id"> para asociarlos a su control.
+function gatherLabels(nodes: Node[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  const walk = (n: Node) => {
+    if (n.tag === "label" && n.attrs.for) map[n.attrs.for] = n.text.trim();
+    n.children.forEach(walk);
+  };
+  nodes.forEach(walk);
+  return map;
 }
 
 function parseHtml(input: string): Node[] {
@@ -75,7 +90,7 @@ function tableRows(n: Node): string {
     .join(", ");
 }
 
-function nodeToSpec(n: Node): BlockSpec | null {
+function nodeToSpec(n: Node, labels: Record<string, string>, wrapLabel?: string): BlockSpec | null {
   const a = n.attrs;
   const text = n.text.trim();
   switch (n.tag) {
@@ -86,25 +101,40 @@ function nodeToSpec(n: Node): BlockSpec | null {
     case "h5":
     case "h6": {
       const lvl = ["h1", "h2", "h3"].includes(n.tag) ? n.tag : "h3";
-      return { type: "bw_h", fields: { LEVEL: lvl, TEXT: text || "Título" } };
+      return { type: "bw_h", fields: { LEVEL: lvl, ID: a.id || "", TEXT: text || "Título" } };
     }
     case "p":
-      return { type: "bw_p", fields: { TEXT: text || "Texto" } };
+      return { type: "bw_p", fields: { TEXT: text || "Texto", ID: a.id || "" } };
     case "a":
       return { type: "bw_a", fields: { TEXT: text || "Link", URL: a.href || "https://example.com" } };
     case "img":
       return { type: "bw_img", fields: { URL: a.src || "https://placehold.co/300x150", ALT: a.alt || "mi obra" } };
     case "button":
       return { type: "bw_button", fields: { ID: a.id || "magia", TEXT: text || "Click" } };
-    case "input":
+    case "input": {
+      const isCheckbox = a.type === "checkbox";
+      const type = ["text", "email", "password", "number", "tel", "date", "color"].includes(a.type) ? a.type : "text";
+      const label = wrapLabel || labels[a.id] || a["aria-label"] || "";
+      const req = a.required !== undefined ? "TRUE" : "FALSE";
+      if (isCheckbox) {
+        return { type: "bw_checkbox", fields: { ID: a.id || "acepto", LABEL: label || "Acepto", REQUIRED: req } };
+      }
       return {
         type: "bw_input",
-        fields: {
-          ID: a.id || "x",
-          TYPE: ["text", "email", "password", "number"].includes(a.type) ? a.type : "text",
-          PH: a.placeholder || "Escribe aquí",
-        },
+        fields: { ID: a.id || "x", LABEL: label || "Campo", TYPE: type, REQUIRED: req, PH: a.placeholder || "Escribe aquí" },
       };
+    }
+    case "select": {
+      const opts = n.children
+        .filter((c) => c.tag === "option")
+        .map((c) => c.text.trim())
+        .filter(Boolean)
+        .join(", ");
+      return {
+        type: "bw_select",
+        fields: { ID: a.id || "lvl", LABEL: wrapLabel || labels[a.id] || "Elige", OPTS: opts || "Novato, Pro" },
+      };
+    }
     case "ul":
     case "ol": {
       const items = n.children
@@ -116,8 +146,6 @@ function nodeToSpec(n: Node): BlockSpec | null {
     }
     case "table":
       return { type: "bw_table", fields: { CAP: n.text.trim() || "Torneo", ROWS: tableRows(n) || "Alex:100, Bloqui:95" } };
-    case "form":
-      return { type: "bw_form", fields: { ID: a.id || "f", BTN: "Enviar" } };
     case "video":
       return { type: "bw_video", fields: { URL: a.src || "https://www.w3schools.com/html/mov_bbb.mp4" } };
     case "audio":
@@ -146,44 +174,69 @@ function nodeToSpec(n: Node): BlockSpec | null {
       };
     case "title": {
       const desc = "";
-      return { type: "bw_head", fields: { TITLE: text || "Mi página", DESC: desc } };
+      return { type: "bw_head", fields: { TITLE: text || "Mi página", DESC: desc, ICON: "" } };
     }
     default:
       return null;
   }
 }
 
-function nodeToSpecs(nodes: Node[]): BlockSpec[] {
+function nodeToSpecs(nodes: Node[], labels: Record<string, string>): BlockSpec[] {
   const out: BlockSpec[] = [];
   for (const n of nodes) {
     if (PASS_THROUGH.has(n.tag)) {
-      out.push(...nodeToSpecs(n.children));
+      out.push(...nodeToSpecs(n.children, labels));
+      continue;
+    }
+    if (n.tag === "label") {
+      if (n.attrs.for) continue;
+      const ctrl = n.children.find((c) => c.tag === "input" || c.tag === "select");
+      if (ctrl) {
+        const spec = nodeToSpec(ctrl, labels, n.text.trim());
+        if (spec) out.push(spec);
+        out.push(...nodeToSpecs(n.children.filter((c) => c !== ctrl), labels));
+      } else {
+        out.push(...nodeToSpecs(n.children, labels));
+      }
+      continue;
+    }
+    if (n.tag === "form") {
+      const btn = n.children.find((c) => c.tag === "button");
+      const kids = n.children.filter((c) => c !== btn);
+      out.push({
+        type: "bw_form",
+        fields: { ID: n.attrs.id || "f", BTN: btn?.text.trim() || "Enviar" },
+        inputs: { DO: nodeToSpecs(kids, labels) },
+      });
       continue;
     }
     if (SEM.has(n.tag)) {
-      out.push({ type: "bw_sem", fields: { TAG: n.tag }, inputs: { DO: nodeToSpecs(n.children) } });
+      out.push({ type: "bw_sem", fields: { TAG: n.tag }, inputs: { DO: nodeToSpecs(n.children, labels) } });
       continue;
     }
     if (n.tag === "div") {
-      out.push({ type: "bw_div", inputs: { DO: nodeToSpecs(n.children) } });
+      out.push({ type: "bw_div", fields: { ID: n.attrs.id || "" }, inputs: { DO: nodeToSpecs(n.children, labels) } });
       continue;
     }
-    const spec = nodeToSpec(n);
+    const spec = nodeToSpec(n, labels);
     if (spec) out.push(spec);
     // Etiquetas no soportadas pero con hijos: no perder la estructura interna.
-    if (n.children.length && !spec) out.push(...nodeToSpecs(n.children));
+    if (n.children.length && !spec) out.push(...nodeToSpecs(n.children, labels));
   }
   return out;
 }
 
 export function codeToBlocks(code: string): BlockSpec[] {
   if (!code) return [];
-  const specs = nodeToSpecs(parseHtml(code));
+  const tree = parseHtml(code);
+  const specs = nodeToSpecs(tree, gatherLabels(tree));
   // Descripción de la página: si hay <meta name="description">, adjúntala al bw_head.
   const desc = code.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i)?.[1];
-  if (desc) {
+  const iconTag = code.match(/<link\b[^>]*rel=["']icon["'][^>]*>/i)?.[0];
+  const icon = iconTag?.match(/href=["']([^"']*)["']/i)?.[1];
+  if (desc || icon) {
     const head = specs.find((s) => s.type === "bw_head");
-    if (head) head.fields = { ...head.fields, DESC: desc };
+    if (head) head.fields = { ...head.fields, ...(desc ? { DESC: desc } : {}), ...(icon ? { ICON: icon } : {}) };
   }
   return specs;
 }

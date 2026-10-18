@@ -14,6 +14,8 @@ export const TOOLBOX = {
         { kind: "block", type: "bw_video_asset" },
         { kind: "block", type: "bw_button" },
         { kind: "block", type: "bw_input" },
+        { kind: "block", type: "bw_select" },
+        { kind: "block", type: "bw_checkbox" },
         { kind: "block", type: "bw_list" },
         { kind: "block", type: "bw_table" },
         { kind: "block", type: "bw_form" },

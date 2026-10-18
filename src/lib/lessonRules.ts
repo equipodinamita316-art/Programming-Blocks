@@ -75,13 +75,16 @@ export const REGLAS: Record<string, Regla[]> = {
     { id: "iframe", label: "Un iframe de YouTube", hint: "Usa el bloque iframe con URL https://.", tags: ["iframe"], html: [HAS_SRC] },
   ],
   "html-6": [
-    { id: "form", label: "Formulario con campos obligatorios", hint: "Usa el bloque formulario (incluye required).", tags: ["form"], html: ["required"] },
+    { id: "form", label: "Formulario con campos dentro", hint: "Usa el bloque formulario y mete campos dentro.", tags: ["form"] },
+    { id: "label", label: "Cada campo con su <label for>", hint: "Los bloques campo/desplegable/casilla traen label conectado.", tags: ["label"], html: ["for="] },
     { id: "email", label: "Un campo de email", hint: "Usa el bloque campo con tipo email.", html: ['type="email"'] },
-    { id: "label", label: "Cada campo con su <label>", hint: "Usa bloques campo (traen label).", tags: ["label"] },
+    { id: "required", label: "Campos obligatorios (required)", hint: "Activa 'obligatorio' en el campo o casilla.", html: ["required"] },
+    { id: "select", label: "Un desplegable <select>", hint: "Usa el bloque desplegable.", tags: ["select", "option"] },
+    { id: "checkbox", label: "Una casilla de términos", hint: "Usa el bloque casilla.", html: ['type="checkbox"'] },
   ],
   "html-7": [
     { id: "caption", label: "Tabla con <caption>", hint: "Usa el bloque tabla (trae caption).", tags: ["table", "caption"] },
-    { id: "th", label: "Encabezados con <th>", hint: "La tabla ya trae una fila de encabezados <th>.", tags: ["th"] },
+    { id: "th", label: "Encabezados con <th scope>", hint: "La tabla ya trae encabezados <th scope='col'>.", tags: ["th"], html: ["scope="] },
     { id: "sections", label: "thead y tbody", hint: "Usa el bloque tabla completo.", tags: ["thead", "tbody"] },
   ],
   "html-8": [
@@ -96,7 +99,7 @@ export const REGLAS: Record<string, Regla[]> = {
     { id: "img", label: "Imagen con alt", hint: "Usa el bloque imagen (o imagen mía) con alt.", tags: ["img"], html: ['alt="'] },
     { id: "list", label: "Una lista <ul>", hint: "Usa el bloque lista.", tags: ["ul"] },
     { id: "table", label: "Tabla con encabezados <th>", hint: "Usa el bloque tabla.", tags: ["table", "th"] },
-    { id: "form", label: "Formulario con required", hint: "Usa el bloque formulario.", tags: ["form"], html: ["required"] },
+    { id: "form", label: "Formulario con required", hint: "Mete un campo obligatorio dentro del formulario.", tags: ["form"], html: ["required"] },
   ],
 
   // ================= CSS =================

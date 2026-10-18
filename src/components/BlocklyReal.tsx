@@ -8,6 +8,7 @@ import {
   ALLOW,
   getToolboxForCurso,
   getDisplayToolbox,
+  getDisplayToolboxAny,
   type Family,
 } from "@/lib/blockly/scope";
 import type { CursoSlug } from "@/lib/store";
@@ -69,8 +70,12 @@ export function BlocklyReal({
         }
 
         const toolbox = curso
-          ? getToolboxForCurso(curso)
-          : (await import("@/lib/blockly/toolbox")).TOOLBOX;
+          ? displayFamily != null
+            ? getDisplayToolbox(curso, displayFamily)
+            : getToolboxForCurso(curso)
+          : displayFamily != null
+            ? getDisplayToolboxAny(displayFamily)
+            : (await import("@/lib/blockly/toolbox")).TOOLBOX;
         const allow = curso ? ALLOW[curso] : null;
 
         // Anti-zombie: si quedó una inyección previa en el contenedor, eliminarla
@@ -250,11 +255,11 @@ export function BlocklyReal({
   // Las tabs del MiniEditor filtran lo visible (no borran nada ya construido)
   useEffect(() => {
     try {
-      if (wsRef.current && curso) {
-        wsRef.current.updateToolbox(
-          getDisplayToolbox(curso, displayFamily ?? null) as unknown as Element,
-        );
-      }
+      if (!wsRef.current) return;
+      const tb = curso
+        ? getDisplayToolbox(curso, displayFamily ?? null)
+        : getDisplayToolboxAny(displayFamily ?? null);
+      wsRef.current.updateToolbox(tb as unknown as Element);
     } catch {}
   }, [displayFamily, curso]);
 

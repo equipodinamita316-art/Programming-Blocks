@@ -44,13 +44,27 @@ function blockFrag(b: Block): Frag {
     // ===== HTML =====
     case "bw_h": {
       const lvl = f(b, "LEVEL", "h1");
-      return { ...empty(), html: `<${lvl}>${escapeHtml(f(b, "TEXT", "Título"))}</${lvl}>\n` };
+      return { ...empty(), html: `<${lvl}${idAttr(f(b, "ID"))}>${escapeHtml(f(b, "TEXT", "Título"))}</${lvl}>\n` };
     }
-    case "bw_p": return { ...empty(), html: `<p>${escapeHtml(f(b, "TEXT", "Texto"))}</p>\n` };
+    case "bw_p": return { ...empty(), html: `<p${idAttr(f(b, "ID"))}>${escapeHtml(f(b, "TEXT", "Texto"))}</p>\n` };
     case "bw_a": return { ...empty(), html: `<a href="${f(b, "URL", "#")}">${escapeHtml(f(b, "TEXT", "Link"))}</a>\n` };
     case "bw_img": return { ...empty(), html: `<img src="${f(b, "URL", "")}" alt="${escapeHtml(f(b, "ALT", ""))}" />\n` };
     case "bw_button": return { ...empty(), html: `<button id="${f(b, "ID", "magia")}">${escapeHtml(f(b, "TEXT", "Click"))}</button>\n` };
-    case "bw_input": return { ...empty(), html: `<label>${escapeHtml(f(b, "PH", ""))}<input id="${f(b, "ID", "x")}" type="${f(b, "TYPE", "text")}" placeholder="${escapeHtml(f(b, "PH", ""))}" /></label>\n` };
+    case "bw_input": {
+      const id = f(b, "ID", "x");
+      const req = f(b, "REQUIRED", "TRUE") === "TRUE" ? " required" : "";
+      return { ...empty(), html: `<label for="${id}">${escapeHtml(f(b, "LABEL", "Campo"))}</label>\n<input id="${id}" type="${f(b, "TYPE", "text")}"${req} placeholder="${escapeHtml(f(b, "PH", ""))}" />\n` };
+    }
+    case "bw_select": {
+      const id = f(b, "ID", "lvl");
+      const opts = f(b, "OPTS", "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      return { ...empty(), html: `<label for="${id}">${escapeHtml(f(b, "LABEL", "Elige"))}</label>\n<select id="${id}">${opts.map((o: string) => `<option>${escapeHtml(o)}</option>`).join("")}</select>\n` };
+    }
+    case "bw_checkbox": {
+      const id = f(b, "ID", "acepto");
+      const req = f(b, "REQUIRED", "TRUE") === "TRUE" ? " required" : "";
+      return { ...empty(), html: `<label><input id="${id}" type="checkbox"${req} /> ${escapeHtml(f(b, "LABEL", "Acepto"))}</label>\n` };
+    }
     case "bw_list": {
       const items = f(b, "ITEMS", "").split(",").map((s: string) => s.trim()).filter(Boolean);
       const kind = f(b, "KIND", "ul");
@@ -62,9 +76,12 @@ function blockFrag(b: Block): Frag {
         const [n, p] = r.split(":");
         return `<tr><td>${escapeHtml(n || "")}</td><td>${escapeHtml(p || "")}</td></tr>`;
       }).join("");
-      return { ...empty(), html: `<table><caption>${escapeHtml(f(b, "CAP", ""))}</caption><thead><tr><th>Nombre</th><th>Puntos</th></tr></thead><tbody>${body}</tbody></table>\n` };
+      return { ...empty(), html: `<table><caption>${escapeHtml(f(b, "CAP", ""))}</caption><thead><tr><th scope="col">Nombre</th><th scope="col">Puntos</th></tr></thead><tbody>${body}</tbody></table>\n` };
     }
-    case "bw_form": return { ...empty(), html: `<form id="${f(b, "ID", "f")}"><input placeholder="tu nombre" required /><button>${escapeHtml(f(b, "BTN", "Enviar"))}</button></form>\n` };
+    case "bw_form": {
+      const body = inner(b, "DO");
+      return { ...body, html: `<form id="${f(b, "ID", "f")}">\n${body.html}<button>${escapeHtml(f(b, "BTN", "Enviar"))}</button>\n</form>\n` };
+    }
     case "bw_video": return { ...empty(), html: `<video controls width="300" src="${f(b, "URL", "")}"></video>\n` };
     case "bw_details": return { ...empty(), html: `<details><summary>${escapeHtml(f(b, "SUM", "Ver"))}</summary><p>${escapeHtml(f(b, "TEXT", ""))}</p></details>\n` };
     case "bw_counter_html": return { ...empty(), html: `<h2>Puntos: <span id="${f(b, "SPAN", "n")}">0</span></h2><button id="${f(b, "BTN", "btn")}">+1</button>\n` };
@@ -75,7 +92,7 @@ function blockFrag(b: Block): Frag {
     }
     case "bw_div": {
       const body = inner(b, "DO");
-      return { ...body, html: `<div>\n${body.html}</div>\n` };
+      return { ...body, html: `<div${idAttr(f(b, "ID"))}>\n${body.html}</div>\n` };
     }
     case "bw_br": return { ...empty(), html: "<br>\n" };
     case "bw_hr": return { ...empty(), html: "<hr>\n" };
@@ -85,7 +102,11 @@ function blockFrag(b: Block): Frag {
       const h = f(b, "H", "170");
       return { ...empty(), html: `<iframe width="${w}" height="${h}" src="${f(b, "URL", "")}" title="video incrustado" loading="lazy" allowfullscreen></iframe>\n` };
     }
-    case "bw_head": return { ...empty(), html: `<title>${escapeHtml(f(b, "TITLE", "Mi página"))}</title>\n<meta name="description" content="${escapeHtml(f(b, "DESC", ""))}" />\n` };
+    case "bw_head": {
+      const icon = f(b, "ICON", "").trim();
+      const link = icon ? `<link rel="icon" href="${escapeHtml(icon)}" />\n` : "";
+      return { ...empty(), html: `<title>${escapeHtml(f(b, "TITLE", "Mi página"))}</title>\n<meta name="description" content="${escapeHtml(f(b, "DESC", ""))}" />\n${link}` };
+    }
     case "bw_progress": return { ...empty(), html: `<progress value="${f(b, "VAL", "70")}" max="${f(b, "MAX", "100")}"></progress>\n` };
     case "bw_img_asset": return { ...empty(), html: `<img data-asset="${escapeHtml(f(b, "ASSET", ""))}" src="${resolveAsset(f(b, "ASSET", ""))}" alt="${escapeHtml(f(b, "ALT", "mi foto"))}" />\n` };
     case "bw_video_asset": return { ...empty(), html: `<video controls width="300" data-asset="${escapeHtml(f(b, "ASSET", ""))}" src="${resolveAsset(f(b, "ASSET", ""))}"></video>\n` };
@@ -175,6 +196,12 @@ function escapeHtml(s: string): string {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Atributo id opcional: vacío => sin atributo.
+function idAttr(raw: string): string {
+  const id = String(raw || "").trim();
+  return id ? ` id="${escapeHtml(id)}"` : "";
+}
+
 function sanitizeId(s: string): string {
   return String(s).replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 30) || "x";
 }
@@ -221,7 +248,7 @@ a{color:#2563EB}`;
 export function combineSrcDoc(html: string, css: string, js: string): string {
   // Los bloques de <head> (título/meta) se generan dentro del flujo; los subimos
   // al <head> real para que sean válidos y Google los lea.
-  const headTags = (html.match(/<title[\s\S]*?<\/title>|<meta\b[^>]*>/gi) || []).join("\n");
-  const bodyHtml = html.replace(/<title[\s\S]*?<\/title>|<meta\b[^>]*>/gi, "");
+  const headTags = (html.match(/<title[\s\S]*?<\/title>|<meta\b[^>]*>|<link\b[^>]*>/gi) || []).join("\n");
+  const bodyHtml = html.replace(/<title[\s\S]*?<\/title>|<meta\b[^>]*>|<link\b[^>]*>/gi, "");
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${headTags}<style>${BASE_CSS}\n${css}</style></head><body>${bodyHtml || "<p style='opacity:.6'>Arrastra bloques</p>"}<script>${js}<\/script></body></html>`;
 }

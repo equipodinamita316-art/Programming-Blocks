@@ -6,6 +6,8 @@ import Link from "next/link";
 import { BLOCK_COUNT } from "@/lib/blockly/blocks";
 import { FilesModal, useAssetCount } from "@/components/FilesModal";
 import { PreviewModal } from "@/components/PreviewModal";
+import { CodeView } from "@/components/CodeView";
+import { EditorTabBar, type EditorTab } from "@/components/EditorTabBar";
 import { useNotice } from "@/lib/notice";
 import { Icon } from "@/components/Icon";
 import type { Generated } from "@/components/BlocklyReal";
@@ -33,6 +35,15 @@ const EMPTY_GEN: Generated = {
   purged: [],
 };
 
+type TabId = "index" | "estilos" | "logica" | "codigo";
+
+const TABS: EditorTab[] = [
+  { id: "index", text: "index", icon: "file", family: "html" },
+  { id: "estilos", text: "estilos", icon: "palette", family: "css" },
+  { id: "logica", text: "lógica", icon: "bolt", family: "js" },
+  { id: "codigo", text: "código", icon: "keyboard", family: "html" },
+];
+
 // Envuelve código escrito a mano en un documento válido (si no lo es ya).
 function wrapCode(code: string): string {
   if (/<html[\s>]/i.test(code)) return code;
@@ -40,42 +51,43 @@ function wrapCode(code: string): string {
 }
 
 export default function Playground() {
-  const [modo, setModo] = useState<"bloques" | "codigo">("bloques");
+  const [tab, setTab] = useState<TabId>("index");
   const [gen, setGen] = useState<Generated>(EMPTY_GEN);
-  const [code, setCode] = useState("");
+  const [codigo, setCodigo] = useState({ html: "", css: "", js: "" });
   const [dirty, setDirty] = useState(false);
   const [preview, setPreview] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
   const [nombre, setNombre] = useState("Mi primera página");
   const fileCount = useAssetCount("playground");
 
+  const activeFamily = TABS.find((t) => t.id === tab)?.family ?? "html";
+  const enCodigo = tab === "codigo";
+
   const fullCode = `<!-- HTML -->\n${gen.html}\n<!-- CSS -->\n<style>\n${gen.css}</style>\n<!-- JS -->\n<script>\n${gen.js}</script>`;
+  const manualCode = `<!-- HTML -->\n${codigo.html}\n<!-- CSS -->\n<style>\n${codigo.css}</style>\n<!-- JS -->\n<script>\n${codigo.js}</script>`;
 
   const { notify, celebrate, askDanger } = useNotice();
 
-  const goBloques = async () => {
-    if (modo === "bloques") return;
-    if (dirty) {
+  const selectTab = async (next: string) => {
+    if (next === tab) return;
+    if (enCodigo && dirty) {
       const ok = await askDanger({
         title: "¿Descartar tu código?",
-        body: "Volver a bloques borrará lo que escribiste a mano.",
+        body: "Volver a los bloques borrará lo que escribiste a mano.",
         confirmLabel: "Sí, descartar",
       });
       if (!ok) return;
+      setDirty(false);
     }
-    setDirty(false);
-    setModo("bloques");
+    if (next === "codigo") {
+      setCodigo({ html: gen.html, css: gen.css, js: gen.js });
+      setDirty(false);
+    }
+    setTab(next as TabId);
   };
 
-  const goCodigo = () => {
-    if (modo === "codigo") return;
-    setCode(fullCode);
-    setDirty(false);
-    setModo("codigo");
-  };
-
-  // El preview y publicar usan el modo activo. Bloques mandan al volver.
-  const activeSrcDoc = modo === "bloques" ? gen.srcDoc : wrapCode(code);
+  // El preview y publicar usan la pestaña activa.
+  const activeSrcDoc = enCodigo ? wrapCode(manualCode) : gen.srcDoc;
 
   const publish = async () => {
     const slug = `${nombre
@@ -87,7 +99,7 @@ export default function Playground() {
       slug,
       nombre,
       html: activeSrcDoc,
-      bloques: modo === "bloques" ? gen.types : [],
+      bloques: enCodigo ? [] : gen.types,
     });
     celebrate({
       title: "¡Publicado!",
@@ -106,7 +118,7 @@ export default function Playground() {
         <span className="text-xs font-bold rounded-full bg-green-500 text-white px-2 py-1">
           {BLOCK_COUNT} bloques
         </span>
-        {modo === "codigo" && dirty && (
+        {enCodigo && dirty && (
           <span className="flex items-center gap-1.5 text-xs font-bold rounded-full bg-[#FFC700] px-2 py-1 border">
             <Icon name="pencil" size={13} />
             Código manual — los bloques ya no coinciden
@@ -114,7 +126,7 @@ export default function Playground() {
         )}
       </div>
 
-      {/* Barra única: proyecto + toggle + acciones */}
+      {/* Barra única: proyecto + acciones */}
       <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
         <input
           value={nombre}
@@ -122,41 +134,15 @@ export default function Playground() {
           className="rounded-xl border-2 border-[#1a1523] px-3 py-2 font-bold bg-white min-w-[180px] flex-1 sm:flex-none"
           placeholder="Nombre proyecto"
         />
-        <div className="flex rounded-xl overflow-hidden border-2 border-[#1a1523]">
-          <button
-            onClick={goBloques}
-            className={`flex items-center gap-1.5 px-4 py-2 ${modo === "bloques" ? "bg-[#1a1523] text-white" : ""}`}
-          >
-            <Icon name="blocks" size={16} />
-            Bloques
-          </button>
-          <button
-            onClick={goCodigo}
-            className={`flex items-center gap-1.5 px-4 py-2 ${modo === "codigo" ? "bg-[#1a1523] text-white" : ""}`}
-          >
-            <Icon name="keyboard" size={16} />
-            Código
-          </button>
-        </div>
         <button
           onClick={() => {
-            navigator.clipboard?.writeText(
-              modo === "bloques" ? fullCode : code,
-            );
+            navigator.clipboard?.writeText(enCodigo ? manualCode : fullCode);
             notify("Código copiado", "exito");
           }}
           className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2"
         >
           <Icon name="clipboard" size={15} />
           Copiar
-        </button>
-        <button
-          onClick={() => setFilesOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl border-2 px-3 py-2"
-          title="Abrir mis archivos"
-        >
-          <Icon name="folder" size={15} />
-          ({fileCount})
         </button>
         <button
           onClick={() => setPreview(true)}
@@ -174,37 +160,47 @@ export default function Playground() {
         </button>
       </div>
 
-      {/* Editor único a máximo espacio (sin lateral) */}
-      {modo === "bloques" ? (
-        <div className="min-w-0">
-          <BlocklyReal lessonId="playground" onChange={setGen} />
-          <p className="mt-1 flex items-center gap-1.5 text-xs opacity-60">
-            <Icon name="folder" size={13} />
-            Abre Archivos para subir imágenes/videos y úsalos con el bloque de
-            archivos. El workspace se guarda solo.
-          </p>
-        </div>
-      ) : (
-        <div className="min-w-0 rounded-2xl overflow-hidden border-4 border-[#1a1523]">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-green-300 text-xs font-bold font-mono">
-            <Icon name="keyboard" size={13} />
-            index.html — editable (al volver a bloques se descarta)
+      {/* Editor con la misma barra de pestañas que las lecciones */}
+      <div className="rounded-3xl overflow-hidden border-4 border-[#1a1523] bg-[#1e1e2e] text-white block-shadow">
+        <EditorTabBar
+          tabs={TABS}
+          active={tab}
+          onSelect={selectTab}
+          fileCount={fileCount}
+          showFiles
+          onOpenFiles={() => setFilesOpen(true)}
+          blockCount={gen.count}
+        />
+        <div className="p-2 bg-white min-h-[420px] md:min-h-[520px]">
+          <div className={enCodigo ? "hidden" : ""}>
+            <BlocklyReal
+              lessonId="playground"
+              displayFamily={activeFamily}
+              onChange={setGen}
+            />
+            <p className="mt-1 flex items-center gap-1.5 text-xs opacity-60">
+              <Icon name="folder" size={13} />
+              Abre Archivos para subir imágenes/videos y úsalos con el bloque de
+              archivos. El workspace se guarda solo.
+            </p>
           </div>
-          <textarea
-            value={code}
-            onChange={(e) => {
-              setCode(e.target.value);
-              setDirty(true);
-            }}
-            spellCheck={false}
-            className="w-full h-[62vh] min-h-[380px] bg-black text-green-200 font-mono text-sm p-4 outline-none resize-y"
-            placeholder="Escribe tu HTML + <style> + <script>..."
-          />
+          {enCodigo && (
+            <CodeView
+              editable
+              html={codigo.html}
+              css={codigo.css}
+              js={codigo.js}
+              onChange={(lang, text) => {
+                setCodigo((c) => ({ ...c, [lang]: text }));
+                setDirty(true);
+              }}
+            />
+          )}
         </div>
-      )}
+      </div>
 
       <p className="text-xs opacity-60">
-        Un solo editor: bloques con drag & drop o código a mano. Lo que ves en
+        Un solo editor: bloques con drag &amp; drop o código a mano. Lo que ves en
         Probar es lo que se publica.{" "}
         <Link href="/proyectos" className="inline-flex items-center gap-1 underline">
           Ver plantillas
@@ -216,7 +212,7 @@ export default function Playground() {
         open={filesOpen}
         onClose={() => setFilesOpen(false)}
         lessonId="playground"
-        copyMode={modo === "codigo" ? "url" : "id"}
+        copyMode={enCodigo ? "url" : "id"}
       />
 
       <PreviewModal
@@ -224,7 +220,7 @@ export default function Playground() {
         onClose={() => setPreview(false)}
         srcDoc={activeSrcDoc}
         title={nombre}
-        count={modo === "bloques" ? gen.count : code.length}
+        count={enCodigo ? manualCode.length : gen.count}
         onPublish={publish}
         publishLabel="Publicar"
       />
