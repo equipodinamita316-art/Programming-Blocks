@@ -79,6 +79,13 @@ export function MiniEditor({
           },
         ]
       : []),
+    {
+      id: "codigo",
+      text: "código",
+      icon: "keyboard" as const,
+      desc: "HTML/CSS/JS reales",
+      family: "html" as const,
+    },
   ];
   const activeFamily = tabs.find((t) => t.id === tab)?.family ?? null;
 
@@ -147,20 +154,30 @@ export function MiniEditor({
               Editando estilos (solo bloques
               <Icon name="palette" size={12} />)
             </>
-          ) : (
+          ) : tab === "logica" ? (
             <>
               <Icon name="bolt" size={12} />
               Editando lógica (solo bloques
               <Icon name="bolt" size={12} />)
             </>
+          ) : (
+            <>
+              <Icon name="keyboard" size={12} />
+              Código generado por tus bloques (solo lectura)
+            </>
           )}
         </p>
-        <BlocklyReal
-          curso={curso}
-          lessonId={lessonId}
-          displayFamily={activeFamily}
-          onChange={onChange}
-        />
+        <div className={tab === "codigo" ? "hidden" : ""}>
+          <BlocklyReal
+            curso={curso}
+            lessonId={lessonId}
+            displayFamily={activeFamily}
+            onChange={onChange}
+          />
+        </div>
+        {tab === "codigo" && (
+          <CodeView html={gen.html} css={gen.css} js={gen.js} />
+        )}
       </div>
 
       <FilesModal
@@ -188,6 +205,84 @@ export function MiniEditor({
         onPublish={onPublish}
         publishLabel={publishLabel}
       />
+    </div>
+  );
+}
+
+function hl(code: string, lang: "html" | "css" | "js"): string {
+  let s = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const marks: string[] = [];
+  const keep = (cls: string, text: string) => {
+    marks.push(`<span class="${cls}">${text}</span>`);
+    return `\u0000${marks.length - 1}\u0000`;
+  };
+  if (lang === "html") {
+    s = s.replace(
+      /(&lt;!--[\s\S]*?--&gt;)|(&lt;\/?)([a-zA-Z][\w-]*)|(&gt;)|("[^"]*")|('[^']*')/g,
+      (m, cm: string, nm: string, tag: string, gt: string, dq: string, sq: string) => {
+        if (cm) return keep("text-white/40", cm);
+        if (tag) return nm + keep("text-[#FF6B35]", tag);
+        if (gt) return keep("text-[#FF6B35]", gt);
+        if (dq) return keep("text-[#FFC700]", dq);
+        if (sq) return keep("text-[#FFC700]", sq);
+        return m;
+      },
+    );
+  } else if (lang === "css") {
+    s = s.replace(
+      /(\/\*[\s\S]*?\*\/)|([^{}\n;]+)(\{)|([\w-]+)(\s*:)|("[^"]*")|('[^']*')/g,
+      (m, cm: string, sel: string, br: string, prop: string, col: string, dq: string, sq: string) => {
+        if (cm) return keep("text-white/40", cm);
+        if (sel) return keep("text-[#FF6B35]", sel) + br;
+        if (prop) return keep("text-[#FFC700]", prop) + col;
+        if (dq) return keep("text-[#4ade80]", dq);
+        if (sq) return keep("text-[#4ade80]", sq);
+        return m;
+      },
+    );
+  } else {
+    s = s.replace(
+      /(\/\/[^\n]*)|('[^']*')|("[^"]*")|(`[^`]*`)|\b(let|const|var|function|if|else|for|return|try|catch|await|async|new|document|window|localStorage)\b|\b(\d+)\b/g,
+      (m, cm: string, sq: string, dq: string, bt: string, kw: string, num: string) => {
+        if (cm) return keep("text-white/40", cm);
+        if (sq) return keep("text-[#4ade80]", sq);
+        if (dq) return keep("text-[#4ade80]", dq);
+        if (bt) return keep("text-[#4ade80]", bt);
+        if (kw) return keep("text-[#a855f7]", kw);
+        if (num) return keep("text-[#60a5fa]", num);
+        return m;
+      },
+    );
+  }
+  return s.replace(/\u0000(\d+)\u0000/g, (_, i: string) => marks[Number(i)]);
+}
+
+function CodeView({ html, css, js }: { html: string; css: string; js: string }) {
+  const [which, setWhich] = useState<"html" | "css" | "js">("html");
+  const code = which === "html" ? html : which === "css" ? css : js;
+  const langs: { id: "html" | "css" | "js"; label: string }[] = [
+    { id: "html", label: "index.html" },
+    { id: "css", label: "estilos.css" },
+    { id: "js", label: "logica.js" },
+  ];
+  return (
+    <div className="rounded-2xl overflow-hidden border-4 border-[#1a1523] bg-[#0d0b12]">
+      <div className="flex gap-1 px-2 py-1 bg-[#1e1e2e] text-xs">
+        {langs.map((l) => (
+          <button
+            key={l.id}
+            onClick={() => setWhich(l.id)}
+            className={`rounded-t-lg px-3 py-1.5 font-bold ${which === l.id ? "bg-[#0d0b12] text-[#FFC700]" : "text-white/60 hover:bg-white/10"}`}
+          >
+            {l.label}
+          </button>
+        ))}
+      </div>
+      <pre className="p-3 text-xs md:text-sm overflow-auto max-h-[520px] text-[#e5e7eb] font-mono leading-relaxed">
+        <code
+          dangerouslySetInnerHTML={{ __html: hl(code || "/* vacío */", which) }}
+        />
+      </pre>
     </div>
   );
 }

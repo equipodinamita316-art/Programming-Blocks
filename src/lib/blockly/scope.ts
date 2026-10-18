@@ -12,18 +12,21 @@ export const HTML_TYPES = [
   "bw_h", "bw_p", "bw_a", "bw_img", "bw_button", "bw_input",
   "bw_list", "bw_table", "bw_form", "bw_video", "bw_details", "bw_counter_html",
   "bw_img_asset", "bw_video_asset", "bw_sem",
+  "bw_div", "bw_br", "bw_hr", "bw_audio", "bw_iframe",
 ];
 
 export const CSS_TYPES = [
   "bw_css_color", "bw_css_font", "bw_css_box", "bw_css_card", "bw_css_flex",
   "bw_css_grid3", "bw_css_shadow", "bw_css_gradient", "bw_css_badge",
   "bw_css_hover", "bw_css_center", "bw_css_animate", "bw_css_responsive", "bw_css_dark",
+  "bw_css_flex2", "bw_css_grid", "bw_css_transition", "bw_css_transform", "bw_css_media",
 ];
 
 export const JS_TYPES = [
   "bw_js_var", "bw_js_counter", "bw_js_text", "bw_js_click", "bw_js_if",
   "bw_js_greet", "bw_js_list", "bw_js_validate", "bw_js_save", "bw_js_fetch",
   "bw_js_log", "bw_js_level", "bw_js_win", "bw_js_timer",
+  "bw_js_ifelse", "bw_js_repeat", "bw_js_func", "bw_js_call", "bw_js_onclick", "bw_js_settimeout",
 ];
 
 export const ALLOW: Record<CursoSlug, Set<string>> = {

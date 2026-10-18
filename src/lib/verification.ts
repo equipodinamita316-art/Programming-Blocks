@@ -16,6 +16,7 @@ export const FUNCTIONAL_JS = new Set([
   "bw_js_counter", "bw_js_text", "bw_js_click", "bw_js_if", "bw_js_greet",
   "bw_js_list", "bw_js_validate", "bw_js_save", "bw_js_fetch", "bw_js_level",
   "bw_js_win", "bw_js_timer",
+  "bw_js_ifelse", "bw_js_repeat", "bw_js_func", "bw_js_call", "bw_js_onclick", "bw_js_settimeout",
 ]);
 
 export type ValidationResult = { ok: boolean; errors: string[]; xp: number };

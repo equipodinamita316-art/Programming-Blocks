@@ -137,7 +137,7 @@ export function BlocklyReal({
           sweepStaleScrollbars();
           const blocks = workspace.getAllBlocks(false);
           const types = blocks.map((b) => b.type);
-          const { html, css, js } = generateFromBlocks(blocks);
+          const { html, css, js } = generateFromBlocks(workspace.getTopBlocks(true));
           // hidrata assets: reemplaza CUALQUIER src del data-asset con la URL fresca
           // (data: tras primeDataUrls; blob: solo como fallback transitorio)
           let htmlH = html;
