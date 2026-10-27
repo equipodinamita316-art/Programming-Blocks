@@ -24,6 +24,8 @@ export type Leccion = {
   ejemplo?: string; // snippet autocontenido para preview + código de ejemplo
   labDecision?: string;
   bossChecklist?: string[];
+  // Textos propios de los tutores (si faltan se generan desde curso/título/pistas)
+  tutor?: { intro?: string; pista?: string; boss?: string };
 };
 
 // Deriva intro/decision/checklist sin reescribir las 30 lecciones

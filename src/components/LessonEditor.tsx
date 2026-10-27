@@ -4,7 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { markDoneVerified, isDone } from "@/lib/store";
 import { useNotice } from "@/lib/notice";
 import { Bloqui } from "./Bloqui";
+import { TutorBubble } from "./TutorBubble";
 import { Icon } from "./Icon";
+import {
+  TUTOR_BOSS,
+  TUTOR_POR_CURSO,
+  textoBoss,
+  textoIntro,
+  textoPista,
+} from "@/lib/tutores";
 import {
   DIFICULTAD_META,
   getIntro,
@@ -83,6 +91,7 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
   );
   const meta = DIFICULTAD_META[leccion.dificultad];
   const intro = getIntro(leccion);
+  const tutorCurso = TUTOR_POR_CURSO[leccion.curso];
   const ejemplo = useMemo(() => {
     if (!leccion.ejemplo) return null;
     const parts = splitExample(leccion.ejemplo);
@@ -226,6 +235,12 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
             <Icon name="book" size={20} />
             Lo que verás en esta lección
           </h2>
+          <TutorBubble
+            who={tutorCurso}
+            label="Te acompaña"
+            text={textoIntro(leccion)}
+            className="mt-3"
+          />
           {intro.parrafos.map((p) => (
             <p key={p} className="mt-2">
               {p}
@@ -380,6 +395,12 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
                 <li key={l}>{l}</li>
               ))}
             </ul>
+            <TutorBubble
+              who={tutorCurso}
+              label="Pista"
+              text={textoPista(leccion)}
+              className="mt-3"
+            />
             <div className="flex gap-2 mt-2">
               <button
                 onClick={() => go(1)}
@@ -494,6 +515,12 @@ export function LessonEditor({ leccion }: { leccion: Leccion }) {
               Boss final — publica tu página
               <Icon name="globe" size={18} />
             </h2>
+            <TutorBubble
+              who={TUTOR_BOSS}
+              label="Ánimo"
+              text={textoBoss(leccion)}
+              className="mt-3"
+            />
             <p className="text-sm mt-1">{leccion.boss}</p>
             <ul className="mt-1 text-xs list-disc ml-5">
               {getBossChecklist(leccion).map((c) => (
