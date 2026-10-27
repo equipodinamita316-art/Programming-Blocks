@@ -7,7 +7,7 @@ certificado PDF con QR verificable.
 ## Stack
 
 - Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4
-- Blockly 13 (editor de bloques real, 65 bloques custom ES)
+- Blockly 13 (editor de bloques real, 75 bloques custom ES)
 - Supabase (Postgres + Auth + Storage) vía `@supabase/supabase-js` + `@supabase/ssr`
 - Certificados: `qrcode` + verificación por RPC `verify_cert`
 
@@ -15,7 +15,7 @@ certificado PDF con QR verificable.
 
 - `src/app/` — `page.tsx` (landing), `dashboard/` (mapa juego), `aprender/[curso]/[leccionId]/` (wizard 5 pasos), `playground/` (Blockly libre), `proyectos/`, `examen/final`, `verify/[code]`, `p/[slug]`, `login/`, `auth/callback/`
 - `src/components/` — `LessonEditor.tsx` (wizard), `LessonGate.tsx` (candado secuencia), `MiniEditor.tsx` (VS Code-like), `BlocklyReal.tsx`, `AssetPanel.tsx`, `FilesModal.tsx`, `PreviewModal.tsx`, `StepWizard.tsx`, `AppShell.tsx`
-- `src/lib/` — `store.ts` (progreso/XP local + nube), `verification.ts`, `quiz.ts`, `exam.ts` (retos y notas del examen), `assets.ts` (IndexedDB + data URLs), `projects.ts` (publicar), `notice.tsx` (toasts/celebración/peligro), `supabase/` (client/server/session), `blockly/` (blocks, generators, scope, toolbox); `src/middleware.ts` (login obligatorio)
+- `src/lib/` — `store.ts` (progreso/XP local + nube), `verification.ts`, `quiz.ts`, `exam.ts` (retos y notas del examen), `assets.ts` (IndexedDB + data URLs), `projects.ts` (publicar), `notice.tsx` (toasts/celebración/peligro), `supabase/` (client/server/session), `blockly/` (blocks, generators, scope, toolbox); `src/proxy.ts` (login obligatorio)
 - `src/data/cursos.ts` — 30 lecciones (10 HTML + 10 CSS + 10 JS) con dificultad Facil/Media/Dificil/Boss
 - `supabase/schema.sql` — fuente de verdad del schema (re-ejecutable: usa `drop policy if exists`)
 
@@ -41,7 +41,7 @@ Todo verificado con `npm run build` + `npm run lint` verdes (0 errores).
 - **Certificado:** PDF/impresión + QR a `/verify/[code]` (RPC `verify_cert` en nube, fallback local); examen exige sesión + elegibilidad.
 - **Diseño:** SOLO modo claro (fondo crema `#fff8ec`, sin toggle ni clases `dark` — grep `dark` = 0 en `src`); mundo neobrutalista (bordes gruesos + `block-shadow`, detector impeccable limpio salvo borde estructural aceptado).
 - **UI shell:** sidebar fijo independiente (fixed + scroll propio + margen compensado, cierre manual/Esc, botón Entrar para invitados); modo enfoque en lecciones/examen (tira mínima + salir); avisos con diseño (`lib/notice.tsx`: toasts + celebración + peligro; regla eslint `no-alert`).
-- **Nube:** Supabase Auth email+Google (login obligatorio vía middleware; `/login`, callback, sesión global, merge local→nube); publish con `user_id` + assets a Storage; RLS + trigger `handle_new_user`; `supabase/schema.sql` re-ejecutable. Bucket `assets` público. Conexión, tablas, RPC y bucket verificados por script.
+- **Nube:** Supabase Auth email+Google (login obligatorio vía proxy; `/login`, callback, sesión global, merge local→nube); publish con `user_id` + assets a Storage; RLS + trigger `handle_new_user`; `supabase/schema.sql` re-ejecutable. Bucket `assets` público. Conexión, tablas, RPC y bucket verificados por script.
 - ⏳ **Último pendiente operativo:** probar login Google end-to-end en navegador (`/login` → Google → dashboard + fila en `profiles`).
 
 ### v2.0 — EN CURSO
@@ -56,9 +56,11 @@ Todo verificado con `npm run build` + `npm run lint` verdes (0 errores).
 - **Fase H — Identidad visual: assets + favicon (HECHA, corregida):** los PNG de `/home/edrowina/Imágenes/BLOKIS` traen perfil ICC **HDR Rec.2020 / PQ (ST 2084)**; al reprocesarlos se perdía el perfil y los colores salían apagados. Regla: **copiar los originales tal cual** (bytes, ICC y resolución intactos) a `public/blokis/` → `bloqui.png`, `blady.png`, `rocket.png`, `baggy.png`, `blilie.png`, `beny.png` (fuente de los tutores). **No** se usan como logo/mascota de la app: `Bloqui` y `AppShell` se revirtieron a la caja amarilla `◕‿◕`; `BloquiMark.tsx` eliminado. El favicon es **solo para la pestaña del navegador** (`src/app/favicon.ico` + `src/app/icon.png`), generado desde `favicon.png` con **conversión real ICC→sRGB** (Rec.2020/PQ → dorado `#E1B815`); sin `apple-icon`, sin `public/icon-*.png` y `manifest` con `icons: []`.
 - **Fase I — Tutores con diálogos (HECHA):** `src/lib/tutores.ts` define los 6 personajes (Bloqui, Blady, Rocket, Baggy, Blilie, Beny) con nombre, color, rol y avatar; `src/components/TutorBubble.tsx` muestra avatar + bocadillo neobrutalista. Reparto por curso: **Blady=HTML, Baggy=CSS, Rocket=JS**, **Beny=Boss** y **Bloqui=guía general**. Aparecen en **Aprende** (intro), **Lab** (pista = `pistas[0]`) y **Boss** (ánimo); se pueden sobreescribir por lección con `Leccion.tutor {intro,pista,boss}`. Assets web optimizados (sRGB, ~50 KB c/u) en `public/blokis/web/`; los originales siguen intactos en `public/blokis/`.
 - **Fase J — Starter de JS en bloques (HECHA):** `starter.ts` ahora convierte también `<script>` (y JS suelto sin etiqueta, como en algunos Boss) a bloques de lógica: `let/const/var` literales → `bw_js_var`, objetos → `bw_js_obj`, `function` → `bw_js_func`, `id.onclick` → `bw_js_onclick`, `if(...)` → `bw_js_ifelse`, `textContent='literal'` → `bw_js_text`, `console.log` → `bw_js_log`. Los bugs del Boss quedan visibles en los campos (`p>100`, `puntos=10`, `boton`). Arrays/`forEach`/`onsubmit`/`fetch` se ignoran a propósito (no hay bloque fiel y no queremos regalar la solución). `starterXmlForBoss` combina el HTML de `codigoInicial` + el JS roto cuando el Boss solo trae script. `bw_js_var` genera números/booleanos sin comillas.
-- **Pendiente:** bloques "Extra"; migrar `middleware`→`proxy`; despliegue; prueba manual de login Google.
+- **Fase K — Bloques "Extra" (HECHA):** el catálogo pasa de 65 a 75 bloques. HTML: `bw_table_pro` (colspan + tfoot en una tabla configurable) y `bw_fieldset` (fieldset + legend contenedor); `bw_video` gana `poster` y `bw_head` gana `og:title`. CSS: `bw_css_wrap` (flex-wrap), `bw_css_nth` (nth-child) y `bw_css_radial` (radial-gradient). JS: `bw_js_arr` (crear array), `bw_js_push` (push), `bw_js_filter` (filter), `bw_js_class` (classList add/remove/toggle) y `bw_js_qs` (querySelector). Todos con entradas en `toolbox.ts` y `scope.ts`. Verificado con workspace headless de Blockly (HTML/CSS/JS generados correctos) + `build`/`lint` verdes.
+- **Fase L — `middleware`→`proxy` (HECHA):** `src/middleware.ts` renombrado a `src/proxy.ts` y función `middleware`→`proxy` (Next 16). Sin warning de deprecación en build. Verificado: `/`, `/login` y `/verify/*` dan 200; `/dashboard` sin sesión redirige 307 a `/login?next=%2Fdashboard`.
+- **Pendiente:** despliegue; prueba manual de login Google.
 - **Operativo:** probar login Google end-to-end en navegador (`/login` → Google → dashboard + fila en `profiles`).
-- **Roadmap restante:** ampliar catálogo de bloques (features solo en "Extra": flex-wrap, nth-child, colspan/tfoot, radial-gradient, push/filter, class, querySelector, fieldset/legend, og:title, poster), migrar `middleware`→`proxy`, despliegue.
+- **Roadmap restante:** despliegue.
 
 ## Comandos
 

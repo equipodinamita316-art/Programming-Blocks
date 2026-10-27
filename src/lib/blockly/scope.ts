@@ -11,7 +11,7 @@ function allCategories(): ToolboxCategory[] {
 export const HTML_TYPES = [
   "bw_h", "bw_p", "bw_a", "bw_img", "bw_button", "bw_input",
   "bw_select", "bw_checkbox",
-  "bw_list", "bw_table", "bw_form", "bw_video", "bw_details", "bw_counter_html",
+  "bw_list", "bw_table", "bw_table_pro", "bw_form", "bw_fieldset", "bw_video", "bw_details", "bw_counter_html",
   "bw_img_asset", "bw_video_asset", "bw_sem",
   "bw_div", "bw_br", "bw_hr", "bw_audio", "bw_iframe",
   "bw_head", "bw_progress",
@@ -23,6 +23,7 @@ export const CSS_TYPES = [
   "bw_css_hover", "bw_css_center", "bw_css_animate", "bw_css_responsive", "bw_css_dark",
   "bw_css_flex2", "bw_css_grid", "bw_css_transition", "bw_css_transform", "bw_css_media",
   "bw_css_sticky",
+  "bw_css_wrap", "bw_css_nth", "bw_css_radial",
 ];
 
 export const JS_TYPES = [
@@ -31,6 +32,7 @@ export const JS_TYPES = [
   "bw_js_log", "bw_js_level", "bw_js_win", "bw_js_timer",
   "bw_js_ifelse", "bw_js_repeat", "bw_js_func", "bw_js_call", "bw_js_onclick", "bw_js_settimeout",
   "bw_js_obj",
+  "bw_js_arr", "bw_js_push", "bw_js_filter", "bw_js_class", "bw_js_qs",
 ];
 
 export const ALLOW: Record<CursoSlug, Set<string>> = {

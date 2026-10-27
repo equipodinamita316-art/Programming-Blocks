@@ -78,11 +78,32 @@ function blockFrag(b: Block): Frag {
       }).join("");
       return { ...empty(), html: `<table><caption>${escapeHtml(f(b, "CAP", ""))}</caption><thead><tr><th scope="col">Nombre</th><th scope="col">Puntos</th></tr></thead><tbody>${body}</tbody></table>\n` };
     }
+    case "bw_table_pro": {
+      const cols = f(b, "COLS", "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const headers = cols.length ? cols : ["Nombre", "Puntos"];
+      const rows = f(b, "ROWS", "").split(",").map((s: string) => s.trim()).filter(Boolean).map((r: string) => {
+        const cells = r.split(":");
+        return `<tr>${headers.map((_: string, i: number) => `<td>${escapeHtml(cells[i] || "")}</td>`).join("")}</tr>`;
+      }).join("");
+      const span = f(b, "SPAN", "").trim();
+      const foot = f(b, "FOOT", "").trim();
+      const spanRow = span ? `<tr><th colspan="${headers.length}">${escapeHtml(span)}</th></tr>` : "";
+      const footHtml = foot ? `<tfoot><tr><td colspan="${headers.length}">${escapeHtml(foot)}</td></tr></tfoot>` : "";
+      return { ...empty(), html: `<table><caption>${escapeHtml(f(b, "CAP", ""))}</caption><thead><tr>${headers.map((h: string) => `<th scope="col">${escapeHtml(h)}</th>`).join("")}</tr></thead><tbody>${rows}${spanRow}</tbody>${footHtml}</table>\n` };
+    }
     case "bw_form": {
       const body = inner(b, "DO");
       return { ...body, html: `<form id="${f(b, "ID", "f")}">\n${body.html}<button>${escapeHtml(f(b, "BTN", "Enviar"))}</button>\n</form>\n` };
     }
-    case "bw_video": return { ...empty(), html: `<video controls width="300" src="${f(b, "URL", "")}"></video>\n` };
+    case "bw_fieldset": {
+      const body = inner(b, "DO");
+      return { ...body, html: `<fieldset>\n<legend>${escapeHtml(f(b, "LEGEND", "Datos"))}</legend>\n${body.html}</fieldset>\n` };
+    }
+    case "bw_video": {
+      const poster = f(b, "POSTER", "").trim();
+      const p = poster ? ` poster="${escapeHtml(poster)}"` : "";
+      return { ...empty(), html: `<video controls width="300" src="${f(b, "URL", "")}"${p}></video>\n` };
+    }
     case "bw_details": return { ...empty(), html: `<details><summary>${escapeHtml(f(b, "SUM", "Ver"))}</summary><p>${escapeHtml(f(b, "TEXT", ""))}</p></details>\n` };
     case "bw_counter_html": return { ...empty(), html: `<h2>Puntos: <span id="${f(b, "SPAN", "n")}">0</span></h2><button id="${f(b, "BTN", "btn")}">+1</button>\n` };
     case "bw_sem": {
@@ -104,8 +125,10 @@ function blockFrag(b: Block): Frag {
     }
     case "bw_head": {
       const icon = f(b, "ICON", "").trim();
+      const og = f(b, "OG", "").trim();
       const link = icon ? `<link rel="icon" href="${escapeHtml(icon)}" />\n` : "";
-      return { ...empty(), html: `<title>${escapeHtml(f(b, "TITLE", "Mi página"))}</title>\n<meta name="description" content="${escapeHtml(f(b, "DESC", ""))}" />\n${link}` };
+      const ogTag = og ? `<meta property="og:title" content="${escapeHtml(og)}" />\n` : "";
+      return { ...empty(), html: `<title>${escapeHtml(f(b, "TITLE", "Mi página"))}</title>\n<meta name="description" content="${escapeHtml(f(b, "DESC", ""))}" />\n${ogTag}${link}` };
     }
     case "bw_progress": return { ...empty(), html: `<progress value="${f(b, "VAL", "70")}" max="${f(b, "MAX", "100")}"></progress>\n` };
     case "bw_img_asset": return { ...empty(), html: `<img data-asset="${escapeHtml(f(b, "ASSET", ""))}" src="${resolveAsset(f(b, "ASSET", ""))}" alt="${escapeHtml(f(b, "ALT", "mi foto"))}" />\n` };
@@ -135,6 +158,9 @@ function blockFrag(b: Block): Frag {
       return { ...body, css: `@media(max-width:${f(b, "W", "768")}px){\n${body.css}}\n` };
     }
     case "bw_css_sticky": return { ...empty(), css: `${f(b, "SEL", "nav")}{position:sticky;top:${f(b, "TOP", "0")}px;z-index:10;}\n` };
+    case "bw_css_wrap": return { ...empty(), css: `${f(b, "SEL", ".galeria")}{display:flex;flex-wrap:${f(b, "MODE", "wrap")};gap:12px;}\n` };
+    case "bw_css_nth": return { ...empty(), css: `${f(b, "SEL", "li")}:nth-child(${f(b, "N", "odd")}){background:${f(b, "BG", "#FFC700")};}\n` };
+    case "bw_css_radial": return { ...empty(), css: `body{background:radial-gradient(circle,${f(b, "C1", "#FFC700")},${f(b, "C2", "#FF6B35")});}\n` };
 
     // ===== JS =====
     case "bw_js_var": {
@@ -184,6 +210,20 @@ function blockFrag(b: Block): Frag {
       return { ...empty(), js: `setTimeout(function(){\n${body}}, ${Number(f(b, "MS", "1000")) || 1000});\n` };
     }
     case "bw_js_obj": return { ...empty(), js: `const ${sanitizeId(f(b, "NAME", "heroe"))} = {${f(b, "PROPS", "nombre:'Bloqui',poder:10")}};\n` };
+    case "bw_js_arr": {
+      const items = f(b, "ITEMS", "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      return { ...empty(), js: `let ${sanitizeId(f(b, "NAME", "lista"))} = [${items.map((i: string) => JSON.stringify(i)).join(",")}];\n` };
+    }
+    case "bw_js_push": return { ...empty(), js: `${sanitizeId(f(b, "ARR", "lista"))}.push(${JSON.stringify(f(b, "VAL", ""))});\n` };
+    case "bw_js_filter": {
+      const arr = sanitizeId(f(b, "ARR", "lista"));
+      return { ...empty(), js: `${arr} = ${arr}.filter(x => x !== ${JSON.stringify(f(b, "VAL", ""))});\n` };
+    }
+    case "bw_js_class": {
+      const action = ["add", "remove", "toggle"].includes(f(b, "ACTION", "add")) ? f(b, "ACTION", "add") : "add";
+      return { ...empty(), js: `document.getElementById('${f(b, "ID", "btn")}').classList.${action}(${JSON.stringify(f(b, "CLASE", "activo"))});\n` };
+    }
+    case "bw_js_qs": return { ...empty(), js: `(function(){const el=document.querySelector(${JSON.stringify(f(b, "SEL", ""))});if(el)el.textContent=${JSON.stringify(f(b, "TEXT", ""))};})();\n` };
     default:
       return empty();
   }
