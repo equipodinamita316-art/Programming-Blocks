@@ -226,6 +226,268 @@ function nodeToSpecs(nodes: Node[], labels: Record<string, string>): BlockSpec[]
   return out;
 }
 
+// ===== JS: <script> → bloques de lógica =====
+// Best-effort: declaraciones, funciones, onclick, if, textContent literal y
+// console.log. Lo que no encaja se ignora (el HTML ya se convierte aparte).
+
+function stripJsComments(src: string): string {
+  let out = "";
+  let i = 0;
+  let quote: string | null = null;
+  while (i < src.length) {
+    const c = src[i];
+    if (quote) {
+      out += c;
+      if (c === "\\") {
+        out += src[i + 1] ?? "";
+        i += 2;
+        continue;
+      }
+      if (c === quote) quote = null;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      out += c;
+      i++;
+      continue;
+    }
+    if (c === "/" && src[i + 1] === "/") {
+      while (i < src.length && src[i] !== "\n") i++;
+      continue;
+    }
+    if (c === "/" && src[i + 1] === "*") {
+      i += 2;
+      while (i < src.length && !(src[i] === "*" && src[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
+function takeBalanced(
+  s: string,
+  openIdx: number,
+  open: string,
+  close: string,
+): { inner: string; end: number } | null {
+  if (s[openIdx] !== open) return null;
+  let depth = 0;
+  let quote: string | null = null;
+  for (let i = openIdx; i < s.length; i++) {
+    const c = s[i];
+    if (quote) {
+      if (c === "\\") {
+        i++;
+        continue;
+      }
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      continue;
+    }
+    if (c === open) depth++;
+    else if (c === close) {
+      depth--;
+      if (depth === 0) return { inner: s.slice(openIdx + 1, i), end: i };
+    }
+  }
+  return null;
+}
+
+function splitTopLevel(src: string): string[] {
+  const out: string[] = [];
+  let buf = "";
+  let depth = 0;
+  let quote: string | null = null;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (quote) {
+      buf += c;
+      if (c === "\\") {
+        buf += src[i + 1] ?? "";
+        i++;
+        continue;
+      }
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      buf += c;
+      continue;
+    }
+    if (c === "{") {
+      depth++;
+      buf += c;
+      continue;
+    }
+    if (c === "}") {
+      depth--;
+      buf += c;
+      if (depth === 0) {
+        out.push(buf.trim());
+        buf = "";
+      }
+      continue;
+    }
+    if (c === ";" && depth === 0) {
+      out.push(buf.trim());
+      buf = "";
+      continue;
+    }
+    buf += c;
+  }
+  if (buf.trim()) out.push(buf.trim());
+  return out.filter(Boolean);
+}
+
+function jsStatement(stmt: string): BlockSpec | null {
+  let m: RegExpMatchArray | null;
+
+  // if (cond) { ... }
+  if ((m = stmt.match(/^if\s*\(/))) {
+    const par = takeBalanced(stmt, m[0].length - 1, "(", ")");
+    if (par) {
+      const brace = stmt.indexOf("{", par.end + 1);
+      if (brace >= 0) {
+        const body = takeBalanced(stmt, brace, "{", "}");
+        if (body) {
+          return {
+            type: "bw_js_ifelse",
+            fields: { COND: par.inner.trim() },
+            inputs: { DO: parseJs(body.inner) },
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  // function nombre() { ... }
+  if ((m = stmt.match(/^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/))) {
+    const par = takeBalanced(stmt, m[0].length - 1, "(", ")");
+    if (par) {
+      const brace = stmt.indexOf("{", par.end + 1);
+      if (brace >= 0) {
+        const body = takeBalanced(stmt, brace, "{", "}");
+        if (body) {
+          return {
+            type: "bw_js_func",
+            fields: { NAME: m[1] },
+            inputs: { DO: parseJs(body.inner) },
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  // id.onclick = ... { ... } (onsubmit se ignora: no hay bloque fiel)
+  if (
+    (m = stmt.match(
+      /^(?:document\.getElementById\(\s*['"]([\w-]+)['"]\s*\)|([A-Za-z_$][\w$]*))\s*\.\s*(onclick|onsubmit)\s*=/,
+    ))
+  ) {
+    const id = m[1] ?? m[2] ?? "";
+    const brace = stmt.indexOf("{", m[0].length);
+    if (brace >= 0 && m[3] === "onclick") {
+      const body = takeBalanced(stmt, brace, "{", "}");
+      if (body) {
+        return {
+          type: "bw_js_onclick",
+          fields: { ID: id },
+          inputs: { DO: parseJs(body.inner) },
+        };
+      }
+    }
+    return null;
+  }
+
+  // id.textContent = 'texto'
+  if (
+    (m = stmt.match(
+      /^(?:document\.getElementById\(\s*['"]([\w-]+)['"]\s*\)|([A-Za-z_$][\w$]*))\s*\.\s*textContent\s*=\s*(['"])([\s\S]*)\3$/,
+    ))
+  ) {
+    return {
+      type: "bw_js_text",
+      fields: { ID: m[1] ?? m[2] ?? "", TEXT: m[4] },
+    };
+  }
+
+  // console.log(...)
+  if ((m = stmt.match(/^console\.log\s*\(([\s\S]*)\)$/))) {
+    let what = m[1].trim();
+    const lit = what.match(/^(['"])([\s\S]*)\1$/);
+    if (lit) what = lit[2];
+    return { type: "bw_js_log", fields: { WHAT: what } };
+  }
+
+  // let/const/var nombre = valor;
+  if ((m = stmt.match(/^(?:let|const|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([\s\S]+)$/))) {
+    const name = m[1];
+    const val = m[2].trim();
+    if (/^\{[\s\S]*\}$/.test(val)) {
+      return {
+        type: "bw_js_obj",
+        fields: { NAME: name, PROPS: val.slice(1, -1).trim() },
+      };
+    }
+    const str = val.match(/^(['"])([\s\S]*)\1$/);
+    if (str) return { type: "bw_js_var", fields: { NAME: name, VAL: str[2] } };
+    if (/^-?\d+(?:\.\d+)?$/.test(val) || /^(true|false)$/.test(val)) {
+      return { type: "bw_js_var", fields: { NAME: name, VAL: val } };
+    }
+    return null;
+  }
+
+  return null;
+}
+
+function parseJs(js: string): BlockSpec[] {
+  const clean = stripJsComments(js).trim();
+  if (!clean) return [];
+  const out: BlockSpec[] = [];
+  for (const stmt of splitTopLevel(clean)) {
+    const spec = jsStatement(stmt);
+    if (spec) out.push(spec);
+  }
+  return out;
+}
+
+function extractScripts(code: string): string {
+  const out: string[] = [];
+  const re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(code))) out.push(m[1]);
+  return out.join("\n");
+}
+
+// Algunos Boss traen solo el JS suelto (sin <script>).
+function jsSource(code: string): string {
+  const scripts = extractScripts(code);
+  if (scripts.trim()) return scripts;
+  const hasHtmlTag = /<\/?[a-zA-Z][\w-]*(?:\s[^>]*)?\/?>/.test(code);
+  if (
+    !hasHtmlTag &&
+    /(^|[^\w$])(?:let|const|var|function|if|console)(?:[^\w$]|$)|\.onclick\s*=|=>/.test(code)
+  ) {
+    return code;
+  }
+  return "";
+}
+
+function isJsSpec(s: BlockSpec): boolean {
+  return s.type.startsWith("bw_js_");
+}
+
 export function codeToBlocks(code: string): BlockSpec[] {
   if (!code) return [];
   const tree = parseHtml(code);
@@ -238,7 +500,7 @@ export function codeToBlocks(code: string): BlockSpec[] {
     const head = specs.find((s) => s.type === "bw_head");
     if (head) head.fields = { ...head.fields, ...(desc ? { DESC: desc } : {}), ...(icon ? { ICON: icon } : {}) };
   }
-  return specs;
+  return [...specs, ...parseJs(jsSource(code))];
 }
 
 function esc(s: string): string {
@@ -284,6 +546,15 @@ export function starterXmlFromCode(code: string): string {
 }
 
 export function starterXmlForBoss(codigoInicial: string, bossCodigoRoto?: string): string {
-  const boss = bossCodigoRoto ? starterXmlFromCode(bossCodigoRoto) : "";
-  return boss || starterXmlFromCode(codigoInicial);
+  const base = codeToBlocks(codigoInicial);
+  if (!bossCodigoRoto) return specsToXml(base);
+  const boss = codeToBlocks(bossCodigoRoto);
+  if (!boss.length) return specsToXml(base);
+  // Boss con HTML propio → úsalo tal cual. Boss solo con JS → conserva el HTML
+  // del proyecto inicial y añade la lógica rota encima.
+  const bossHasNonJs = boss.some((s) => !isJsSpec(s));
+  const specs = bossHasNonJs
+    ? boss
+    : [...base.filter((s) => !isJsSpec(s)), ...boss];
+  return specsToXml(specs);
 }

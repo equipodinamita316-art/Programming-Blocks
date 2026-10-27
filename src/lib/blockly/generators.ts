@@ -137,7 +137,13 @@ function blockFrag(b: Block): Frag {
     case "bw_css_sticky": return { ...empty(), css: `${f(b, "SEL", "nav")}{position:sticky;top:${f(b, "TOP", "0")}px;z-index:10;}\n` };
 
     // ===== JS =====
-    case "bw_js_var": return { ...empty(), js: `let ${sanitizeId(f(b, "NAME", "x"))} = ${JSON.stringify(f(b, "VAL", "0"))};\n` };
+    case "bw_js_var": {
+      const val = f(b, "VAL", "0");
+      const lit = /^-?\d+(?:\.\d+)?$/.test(val) || /^(?:true|false|null)$/.test(val)
+        ? val
+        : JSON.stringify(val);
+      return { ...empty(), js: `let ${sanitizeId(f(b, "NAME", "x"))} = ${lit};\n` };
+    }
     case "bw_js_counter": return { ...empty(), js: `(function(){window._p=window._p||0;const b=document.getElementById('${f(b, "BTN", "btn")}'),s=document.getElementById('${f(b, "SPAN", "n")}');if(s)s.textContent=window._p;if(b)b.onclick=()=>{window._p++;if(s)s.textContent=window._p;window.dispatchEvent(new CustomEvent('bw-puntos',{detail:window._p}));};})();\n` };
     case "bw_js_text": return { ...empty(), js: `document.getElementById('${f(b, "ID", "x")}').textContent=${JSON.stringify(f(b, "TEXT", ""))};\n` };
     case "bw_js_click": return { ...empty(), js: `document.getElementById('${f(b, "ID", "magia")}').onclick=function(){this.textContent=${JSON.stringify(f(b, "MSG", "¡Lo lograste!"))};};\n` };
